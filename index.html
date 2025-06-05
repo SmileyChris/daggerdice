@@ -13,8 +13,15 @@
         <div class="logo-container" :class="{ 'has-result': result }">
           <img
             alt="Dagger Dice"
-            :src="result ? '/src/assets/daggerdice-logo.png' : '/src/assets/daggerdice-logo-text.png'"
-            :class="result ? 'logo-only' : 'logo-text'"
+            src="/src/assets/daggerdice-logo-text.png"
+            class="logo-text"
+            x-show="!result"
+          />
+          <img
+            alt="Dagger Dice"
+            src="/src/assets/daggerdice-logo.png"
+            class="logo-only"
+            x-show="result"
           />
         </div>
 
