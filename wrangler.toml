@@ -7,14 +7,14 @@ compatibility_date = "2024-01-01"
 name = "SESSION_DO"
 class_name = "SessionDurableObject"
 
-# Durable Objects migrations for free plan
+# Durable Objects migrations
 [[migrations]]
 tag = "v1"
-new_sqlite_classes = ["SessionDurableObject"]
+new_classes = ["SessionDurableObject"]
 
 # Assets configuration for serving static files
 [assets]
-directory = "./dist"
+directory = "./dist/client"
 binding = "ASSETS"
 
 # Routes for the unified worker (serves both API and static assets)
@@ -31,5 +31,5 @@ name = "SESSION_DO"
 class_name = "SessionDurableObject"
 
 [env.production.assets]
-directory = "./dist"
+directory = "./dist/client"
 binding = "ASSETS"

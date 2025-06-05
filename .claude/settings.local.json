@@ -6,7 +6,9 @@
       "Bash(npm install:*)",
       "Bash(npx wrangler deploy:*)",
       "Bash(npm run build:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npm run verify:*)",
+      "Bash(git add:*)"
     ]
   },
   "enableAllProjectMcpServers": false

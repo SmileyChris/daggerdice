@@ -28,9 +28,18 @@ export default {
     // For all other requests, serve static assets from the built application
     try {
       // Use the ASSETS binding to serve static files
-      return await env.ASSETS.fetch(request);
+      const response = await env.ASSETS.fetch(request);
+      
+      // If the response is a 404 and the request looks like a route (not a file),
+      // serve the index.html for SPA routing
+      if (response.status === 404 && !url.pathname.includes('.')) {
+        const indexRequest = new Request(new URL('/', request.url), request);
+        return await env.ASSETS.fetch(indexRequest);
+      }
+      
+      return response;
     } catch (error) {
-      // If asset serving fails, return a 404
+      // If asset serving fails completely, return a 404
       return new Response('File not found', { 
         status: 404,
         headers: {
