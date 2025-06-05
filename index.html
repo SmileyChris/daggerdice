@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/src/assets/favicon.png" />
+    <title>DaggerDice</title>
+  </head>
+  <body>
+    <div class="container" x-data="diceRoller()" x-cloak>
+      <div class="header">
+        <!-- Logo section - shows logo-text when no result, just logo when there's a result -->
+        <div class="logo-container" :class="{ 'has-result': result }">
+          <img
+            alt="Dagger Dice"
+            :src="result ? '/src/assets/daggerdice-logo.png' : '/src/assets/daggerdice-logo-text.png'"
+            :class="result ? 'logo-only' : 'logo-text'"
+          />
+        </div>
+
+        <!-- Result section -->
+        <div class="result-container" x-show="result">
+          <h1 x-html="result"></h1>
+        </div>
+      </div>
+
+      <div class="dice-container">
+        <div id="dice-box"></div>
+      </div>
+
+      <div class="controls">
+        <div class="modifiers">
+          <div class="advantage-controls">
+            <label>Roll Type:</label>
+            <div class="toggle-buttons">
+              <button
+                @click="setAdvantageType('none')"
+                :class="{ 'active': advantageType === 'none' }"
+                class="toggle-btn"
+                :disabled="isRolling"
+              >
+                Standard
+              </button>
+              <button
+                @click="setAdvantageType('advantage')"
+                :class="{ 'active': advantageType === 'advantage' }"
+                class="toggle-btn"
+                :disabled="isRolling"
+              >
+                Advantage
+              </button>
+              <button
+                @click="setAdvantageType('disadvantage')"
+                :class="{ 'active': advantageType === 'disadvantage' }"
+                class="toggle-btn"
+                :disabled="isRolling"
+              >
+                Disadvantage
+              </button>
+            </div>
+          </div>
+
+          <button
+            @click="modifier = 0; advantageType = 'none'"
+            class="modifier-clear-btn"
+            x-show="(modifier !== 0 || advantageType != 'none') && !isRolling"
+            title="Clear modifiers"
+          >
+            ×
+          </button>
+
+          <div class="modifier-controls">
+            <label>Modifier:</label>
+            <button
+              @click="modifier = Math.max(modifier - 1, -20)"
+              class="modifier-btn"
+            >
+              -
+            </button>
+            <span class="modifier-display" x-text="modifier"></span>
+            <button
+              @click="modifier = Math.min(modifier + 1, 20)"
+              class="modifier-btn"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        <button @click="rollDice()" :disabled="isRolling" class="roll-button">
+          <span x-text="isRolling ? 'Rolling...' : 'Roll Dice'"></span>
+        </button>
+      </div>
+
+      <button
+        class="history-toggle"
+        @click="toggleHistory()"
+        x-show="rollHistory.length || true"
+      >
+        <img src="/src/assets/history.svg" alt="History" class="history-icon" />
+      </button>
+
+      <div
+        class="roll-history-panel"
+        :class="{ 'visible': showHistory }"
+        x-show="rollHistory.length > 0"
+      >
+        <div class="roll-history">
+          <h3>Roll History</h3>
+          <template
+            x-for="(roll, index) in rollHistory.slice(0, 10)"
+            :key="index"
+          >
+            <div class="history-item">
+              <div class="dice-values">
+                <span class="hope" x-text="roll.hope"></span>
+                <span class="fear" x-text="roll.fear"></span>
+                <span
+                  x-show="roll.advantage !== 0"
+                  :class="roll.advantage > 0 ? 'advantage' : 'disadvantage'"
+                  x-text="(roll.advantage > 0 ? '+' : '') + roll.advantage"
+                ></span>
+                <span
+                  x-show="roll.modifier !== 0"
+                  x-text="(roll.modifier > 0 ? '+' : '') + roll.modifier"
+                ></span>
+              </div>
+              <div class="outcome">
+                <template x-if="!roll.result.includes('Critical')">
+                  <strong x-text="roll.total"></strong>
+                </template>
+                <small
+                  x-text="roll.result.includes('hope') ? 'hope' : roll.result.includes('fear') ? 'fear' : 'crit'"
+                ></small>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <!-- Import the built JavaScript module -->
+    <script type="module" src="/src/dice-roller-main.ts"></script>
+  </body>
+</html>

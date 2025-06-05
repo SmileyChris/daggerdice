@@ -1,0 +1,19 @@
+{
+  "name": "3d-dice-roller",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "@3d-dice/dice-box": "^1.1.4",
+    "alpinejs": "^3.14.9"
+  }
+}
