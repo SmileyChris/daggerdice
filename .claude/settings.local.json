@@ -1,8 +1,13 @@
 {
-  "enableAllProjectMcpServers": false,
   "permissions": {
     "allow": [
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "WebFetch(domain:developers.cloudflare.com)",
+      "Bash(npm install:*)",
+      "Bash(npx wrangler deploy:*)",
+      "Bash(npm run build:*)",
+      "Bash(curl:*)"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": false
 }

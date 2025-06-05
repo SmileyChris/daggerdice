@@ -7,7 +7,7 @@
     <title>DaggerDice</title>
   </head>
   <body>
-    <div class="container" x-data="diceRoller()" x-cloak>
+    <div class="container" x-data="diceRoller()" x-init="init()" x-cloak>
       <div class="header">
         <!-- Logo section - shows logo-text when no result, just logo when there's a result -->
         <div class="logo-container" :class="{ 'has-result': result }">
@@ -99,6 +99,107 @@
         </button>
       </div>
 
+      <!-- ===== NEW: OPTIONAL SESSION PANEL ===== -->
+      <div x-show="sessionFeaturesAvailable" class="session-toggle-container">
+        <button @click="toggleSessionUI()" class="session-toggle-btn">
+          <span x-show="sessionMode === 'solo'">🎲 Play with Friends</span>
+          <span x-show="sessionMode === 'multiplayer'">👤 Solo Mode</span>
+        </button>
+      </div>
+
+      <div x-show="showSessionUI && sessionFeaturesAvailable" class="session-panel">
+        <!-- Solo mode: session creation/joining -->
+        <div x-show="sessionMode === 'solo'" class="session-join">
+          <h3>Multiplayer Session</h3>
+          
+          <div class="session-input">
+            <input 
+              x-model="playerName" 
+              placeholder="Your name" 
+              required 
+              maxlength="20"
+              class="player-name-input"
+            >
+          </div>
+          
+          <div class="create-session">
+            <button 
+              @click="createSession()" 
+              :disabled="!playerName.trim() || connectionStatus === 'connecting'"
+              class="session-btn create-btn"
+            >
+              <span x-show="connectionStatus !== 'connecting'">Create New Session</span>
+              <span x-show="connectionStatus === 'connecting'">Creating...</span>
+            </button>
+          </div>
+          
+          <div class="join-divider">or</div>
+          
+          <div class="join-session">
+            <input 
+              x-model="joinSessionId" 
+              placeholder="Session ID"
+              class="session-id-input"
+            >
+            <button 
+              @click="joinSession()" 
+              :disabled="!joinSessionId.trim() || !playerName.trim() || connectionStatus === 'connecting'"
+              class="session-btn join-btn"
+            >
+              <span x-show="connectionStatus !== 'connecting'">Join Session</span>
+              <span x-show="connectionStatus === 'connecting'">Joining...</span>
+            </button>
+          </div>
+          
+          <div x-show="connectionStatus === 'error'" class="session-error">
+            Connection failed. Please try again.
+          </div>
+        </div>
+
+        <!-- Multiplayer mode: session info -->
+        <div x-show="sessionMode === 'multiplayer'" class="session-info">
+          <div class="session-details">
+            <div class="session-id-display">
+              <strong>Session:</strong> 
+              <span x-text="sessionId" class="session-id"></span>
+              <button 
+                @click="copySessionLink()" 
+                class="copy-btn"
+                title="Copy session link"
+              >
+                📋
+              </button>
+            </div>
+            
+            <div class="connection-status" :class="connectionStatus">
+              <span x-show="connectionStatus === 'connected'">🟢 Connected</span>
+              <span x-show="connectionStatus === 'connecting'">🟡 Connecting...</span>
+              <span x-show="connectionStatus === 'disconnected'">🔴 Disconnected</span>
+              <span x-show="connectionStatus === 'error'">❌ Error</span>
+            </div>
+          </div>
+          
+          <div class="players-list">
+            <strong>Players (<span x-text="connectedPlayers.length + 1"></span>):</strong>
+            <div class="players-container">
+              <div class="player-item self">
+                <span x-text="playerName + ' (you)'"></span>
+              </div>
+              <template x-for="player in connectedPlayers" :key="player.id">
+                <div class="player-item">
+                  <span x-text="player.name"></span>
+                  <span x-show="!player.isActive" class="inactive">(away)</span>
+                </div>
+              </template>
+            </div>
+          </div>
+          
+          <button @click="leaveSession()" class="session-btn leave-btn">
+            Leave Session
+          </button>
+        </div>
+      </div>
+
       <button
         class="history-toggle"
         @click="toggleHistory()"
@@ -119,6 +220,11 @@
             :key="index"
           >
             <div class="history-item">
+              <!-- Show player name in multiplayer mode -->
+              <div x-show="sessionMode === 'multiplayer' && roll.playerName" class="player-name-tag">
+                <span x-text="roll.playerName"></span>
+              </div>
+              
               <div class="dice-values">
                 <span class="hope" x-text="roll.hope"></span>
                 <span class="fear" x-text="roll.fear"></span>

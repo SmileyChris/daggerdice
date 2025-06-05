@@ -1,0 +1,35 @@
+name = "daggerdice"
+main = "src/worker.ts"
+compatibility_date = "2024-01-01"
+
+# Durable Objects configuration for multiplayer sessions
+[[durable_objects.bindings]]
+name = "SESSION_DO"
+class_name = "SessionDurableObject"
+
+# Durable Objects migrations for free plan
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["SessionDurableObject"]
+
+# Assets configuration for serving static files
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+
+# Routes for the unified worker (serves both API and static assets)
+# routes = [
+#   { pattern = "*", zone_name = "daggerdice.com" }
+# ]
+
+[env.production]
+main = "src/worker.ts"
+compatibility_date = "2024-01-01"
+
+[[env.production.durable_objects.bindings]]
+name = "SESSION_DO"
+class_name = "SessionDurableObject"
+
+[env.production.assets]
+directory = "./dist"
+binding = "ASSETS"
