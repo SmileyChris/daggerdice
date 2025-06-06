@@ -7,26 +7,43 @@
     <title>DaggerDice</title>
   </head>
   <body>
+    <!-- Toast container -->
+    <div class="toast-container" x-data="toastManager()" x-init="init()">
+      <template x-for="toast in toasts" :key="toast.id">
+        <div 
+          class="toast" 
+          :class="toast.type"
+          x-show="toast.visible"
+          x-transition:enter="transition ease-out duration-300"
+          x-transition:enter-start="opacity-0 transform -translate-y-2 scale-95"
+          x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
+          x-transition:leave="transition ease-in duration-300"
+          x-transition:leave-start="opacity-100 transform translate-y-0 scale-100"
+          x-transition:leave-end="opacity-0 transform -translate-y-2 scale-95"
+        >
+          <div class="toast-content" x-html="toast.content"></div>
+        </div>
+      </template>
+    </div>
+
     <div class="container" x-data="diceRoller()" x-init="init()" x-cloak>
       <div class="header">
-        <!-- Logo section - shows logo-text when no result, just logo when there's a result -->
-        <div class="logo-container" :class="{ 'has-result': result }">
+        <!-- Logo section - shows logo-text when no result -->
+        <div class="logo-container" x-show="!result">
           <img
             alt="Dagger Dice"
             src="/src/assets/daggerdice-logo-text.png"
             class="logo-text"
-            x-show="!result"
           />
+        </div>
+
+        <!-- Result section with inline logo -->
+        <div class="result-container" x-show="result">
           <img
             alt="Dagger Dice"
             src="/src/assets/daggerdice-logo.png"
             class="logo-only"
-            x-show="result"
           />
-        </div>
-
-        <!-- Result section -->
-        <div class="result-container" x-show="result">
           <h1 x-html="result"></h1>
         </div>
       </div>
@@ -73,7 +90,7 @@
             x-show="(modifier !== 0 || advantageType != 'none') && !isRolling"
             title="Clear modifiers"
           >
-            ×
+            🔄 Clear
           </button>
 
           <div class="modifier-controls">
@@ -103,84 +120,109 @@
       <div x-show="sessionFeaturesAvailable" class="session-toggle-container">
         <button @click="toggleSessionUI()" class="session-toggle-btn">
           <span x-show="sessionMode === 'solo'">🎲 Play with Friends</span>
-          <span x-show="sessionMode === 'multiplayer'">👤 Solo Mode</span>
+          <span x-show="sessionMode === 'multiplayer'">
+            <span x-show="connectionStatus === 'connected'">🟢</span>
+            <span x-show="connectionStatus === 'connecting'">🟡</span>
+            <span
+              x-show="connectionStatus === 'disconnected' || connectionStatus === 'error'"
+              >🔴</span
+            >
+            <span
+              x-text="'Playing with Friends (' + (connectedPlayers.length + 1) + ')'"
+            ></span>
+          </span>
         </button>
       </div>
 
-      <div x-show="showSessionUI && sessionFeaturesAvailable" class="session-panel">
+      <div
+        x-show="showSessionUI && sessionFeaturesAvailable"
+        class="session-panel"
+      >
         <!-- Solo mode: session creation/joining -->
         <div x-show="sessionMode === 'solo'" class="session-join">
-          <h3>Multiplayer Session</h3>
-          
+          <h3>Multiplayer Room</h3>
+
           <div class="session-input">
-            <input 
-              x-model="playerName" 
-              placeholder="Your name" 
-              required 
+            <input
+              x-model="playerName"
+              placeholder="Your name"
+              required
               maxlength="20"
               class="player-name-input"
-            >
+              @keyup.enter="joinSessionId.trim() ? joinSession() : createSession()"
+            />
           </div>
-          
-          <div class="create-session">
-            <button 
-              @click="createSession()" 
-              :disabled="!playerName.trim() || connectionStatus === 'connecting'"
-              class="session-btn create-btn"
-            >
-              <span x-show="connectionStatus !== 'connecting'">Create New Session</span>
-              <span x-show="connectionStatus === 'connecting'">Creating...</span>
-            </button>
-          </div>
-          
-          <div class="join-divider">or</div>
-          
-          <div class="join-session">
-            <input 
-              x-model="joinSessionId" 
-              placeholder="Session ID"
+
+          <div class="session-input">
+            <input
+              x-model="joinSessionId"
+              placeholder="Room ID (optional)"
               class="session-id-input"
+              type="search"
+              maxlength="6"
+              @input="joinSessionId = joinSessionId.toUpperCase()"
+              @keyup.enter="joinSessionId.trim() ? joinSession() : createSession()"
+            />
+          </div>
+
+          <div class="session-action">
+            <button
+              @click="joinSessionId.trim() ? joinSession() : createSession()"
+              :disabled="!playerName.trim() || connectionStatus === 'connecting' || !isJoinSessionValid"
+              class="session-btn primary-btn"
             >
-            <button 
-              @click="joinSession()" 
-              :disabled="!joinSessionId.trim() || !playerName.trim() || connectionStatus === 'connecting'"
-              class="session-btn join-btn"
-            >
-              <span x-show="connectionStatus !== 'connecting'">Join Session</span>
-              <span x-show="connectionStatus === 'connecting'">Joining...</span>
+              <span x-show="connectionStatus === 'connecting'">
+                <span
+                  x-text="joinSessionId.trim() ? 'Joining...' : 'Creating...'"
+                ></span>
+              </span>
+              <span x-show="connectionStatus !== 'connecting'">
+                <span
+                  x-text="joinSessionId.trim() ? 'Join Room' : 'Create New Room'"
+                ></span>
+              </span>
             </button>
           </div>
-          
+
           <div x-show="connectionStatus === 'error'" class="session-error">
             Connection failed. Please try again.
           </div>
         </div>
 
-        <!-- Multiplayer mode: session info -->
+        <!-- Multiplayer mode: room info -->
         <div x-show="sessionMode === 'multiplayer'" class="session-info">
           <div class="session-details">
             <div class="session-id-display">
-              <strong>Session:</strong> 
+              <strong>Room:</strong>
               <span x-text="sessionId" class="session-id"></span>
-              <button 
-                @click="copySessionLink()" 
+              <button
+                @click="copySessionLink()"
                 class="copy-btn"
-                title="Copy session link"
+                title="Copy room link"
               >
                 📋
               </button>
             </div>
-            
+
             <div class="connection-status" :class="connectionStatus">
-              <span x-show="connectionStatus === 'connected'">🟢 Connected</span>
-              <span x-show="connectionStatus === 'connecting'">🟡 Connecting...</span>
-              <span x-show="connectionStatus === 'disconnected'">🔴 Disconnected</span>
+              <span x-show="connectionStatus === 'connected'"
+                >🟢 Connected</span
+              >
+              <span x-show="connectionStatus === 'connecting'"
+                >🟡 Connecting...</span
+              >
+              <span x-show="connectionStatus === 'disconnected'"
+                >🔴 Disconnected</span
+              >
               <span x-show="connectionStatus === 'error'">❌ Error</span>
             </div>
           </div>
-          
+
           <div class="players-list">
-            <strong>Players (<span x-text="connectedPlayers.length + 1"></span>):</strong>
+            <strong
+              >Players (<span x-text="connectedPlayers.length + 1"></span
+              >):</strong
+            >
             <div class="players-container">
               <div class="player-item self">
                 <span x-text="playerName + ' (you)'"></span>
@@ -193,9 +235,9 @@
               </template>
             </div>
           </div>
-          
+
           <button @click="leaveSession()" class="session-btn leave-btn">
-            Leave Session
+            Leave Room
           </button>
         </div>
       </div>
@@ -220,31 +262,36 @@
             :key="index"
           >
             <div class="history-item">
-              <!-- Show player name in multiplayer mode -->
-              <div x-show="sessionMode === 'multiplayer' && roll.playerName" class="player-name-tag">
+              <!-- Player name on separate line for cleaner look -->
+              <div
+                x-show="sessionMode === 'multiplayer' && roll.playerName"
+                class="player-name-line"
+              >
                 <span x-text="roll.playerName"></span>
               </div>
-              
-              <div class="dice-values">
-                <span class="hope" x-text="roll.hope"></span>
-                <span class="fear" x-text="roll.fear"></span>
-                <span
-                  x-show="roll.advantage !== 0"
-                  :class="roll.advantage > 0 ? 'advantage' : 'disadvantage'"
-                  x-text="(roll.advantage > 0 ? '+' : '') + roll.advantage"
-                ></span>
-                <span
-                  x-show="roll.modifier !== 0"
-                  x-text="(roll.modifier > 0 ? '+' : '') + roll.modifier"
-                ></span>
-              </div>
-              <div class="outcome">
-                <template x-if="!roll.result.includes('Critical')">
-                  <strong x-text="roll.total"></strong>
-                </template>
-                <small
-                  x-text="roll.result.includes('hope') ? 'hope' : roll.result.includes('fear') ? 'fear' : 'crit'"
-                ></small>
+
+              <div class="roll-details">
+                <div class="dice-values">
+                  <span class="hope" x-text="roll.hopeValue"></span>
+                  <span class="fear" x-text="roll.fearValue"></span>
+                  <span
+                    x-show="roll.advantageValue !== 0"
+                    :class="roll.advantageValue > 0 ? 'advantage' : 'disadvantage'"
+                    x-text="(roll.advantageValue > 0 ? '+' : '') + roll.advantageValue"
+                  ></span>
+                  <span
+                    x-show="roll.modifier !== 0"
+                    x-text="(roll.modifier > 0 ? '+' : '') + roll.modifier"
+                  ></span>
+                </div>
+                <div class="outcome">
+                  <template x-if="!roll.result.includes('Critical')">
+                    <strong x-text="roll.total"></strong>
+                  </template>
+                  <small
+                    x-text="roll.result.includes('hope') ? 'hope' : roll.result.includes('fear') ? 'fear' : 'crit'"
+                  ></small>
+                </div>
               </div>
             </div>
           </template>

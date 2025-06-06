@@ -10,9 +10,16 @@ import {
   generateSessionId, 
   sanitizePlayerName, 
   getSessionIdFromUrl, 
+  normalizeSessionId,
+  isValidSessionId,
   isSessionEnvironmentSupported,
   createSessionUrl,
-  copyToClipboard 
+  copyToClipboard,
+  getSavedPlayerName,
+  getLastSessionId,
+  clearSavedSessionData,
+  savePlayerName,
+  saveLastSessionId
 } from "./session/utils.js";
 
 // Type declarations for missing modules
@@ -20,23 +27,77 @@ declare global {
   interface Window {
     diceBox: any;
     diceRoller: () => any;
+    toastManager: () => any;
   }
 }
 
 // Global dice box instance
 let diceBox: any = null;
 
-interface RollHistoryItem {
-  hope: number;
-  fear: number;
-  advantage: number;
-  modifier: number;
-  total: number;
-  result: string;
-  // Optional fields for multiplayer
-  playerId?: string;
-  playerName?: string;
-  timestamp?: number;
+// Use SharedRollHistoryItem for all roll history (solo and multiplayer)
+// For solo mode, playerId/playerName/timestamp will be undefined
+type RollHistoryItem = SharedRollHistoryItem;
+
+// Global toast manager instance
+let globalToastManager: any = null;
+
+// Toast manager for notifications
+function toastManager() {
+  return {
+    toasts: [] as Array<{
+      id: number;
+      type: string;
+      content: string;
+      visible: boolean;
+    }>,
+    nextId: 1,
+
+    init() {
+      globalToastManager = this;
+    },
+
+    show(type: string, content: string, duration: number = 4000) {
+      const toast = {
+        id: this.nextId++,
+        type,
+        content,
+        visible: true
+      };
+
+      this.toasts.push(toast);
+
+      // Auto-remove after duration
+      setTimeout(() => {
+        this.remove(toast.id);
+      }, duration);
+    },
+
+    remove(id: number) {
+      const index = this.toasts.findIndex(t => t.id === id);
+      if (index !== -1) {
+        this.toasts[index].visible = false;
+        // Remove from array after animation
+        setTimeout(() => {
+          this.toasts.splice(index, 1);
+        }, 300);
+      }
+    },
+
+    showRollToast(roll: SharedRollHistoryItem) {
+      const resultText = roll.result.replace(/<[^>]*>/g, ''); // Strip HTML
+      const content = `
+        <div class="toast-player">${roll.playerName} rolled:</div>
+        <div class="toast-result">${resultText}</div>
+        <div class="toast-dice">
+          <span class="hope">Hope: ${roll.hopeValue}</span>
+          <span class="fear">Fear: ${roll.fearValue}</span>
+          ${roll.advantageValue !== 0 ? `<span class="${roll.advantageValue > 0 ? 'advantage' : 'disadvantage'}">${roll.advantageValue > 0 ? 'Adv' : 'Dis'}: ${Math.abs(roll.advantageValue)}</span>` : ''}
+          ${roll.modifier !== 0 ? `<span>Mod: ${roll.modifier > 0 ? '+' : ''}${roll.modifier}</span>` : ''}
+        </div>
+      `;
+      this.show('roll', content, 5000);
+    }
+  };
 }
 
 // Alpine.js component for UI
@@ -63,6 +124,7 @@ function diceRoller() {
     showSessionUI: false,
     sessionFeaturesAvailable: true,
     connectionStatus: "disconnected" as "disconnected" | "connecting" | "connected" | "error",
+    initialized: false,
 
     setAdvantageType(type: "none" | "advantage" | "disadvantage") {
       this.advantageType = type;
@@ -173,24 +235,37 @@ function diceRoller() {
           result: resultText,
         };
 
-        // Add to local roll history
-        this.rollHistory.unshift({
-          hope: this.hopeValue,
-          fear: this.fearValue,
-          advantage: this.advantageValue,
+        // ===== ROLL HISTORY HANDLING =====
+        // Create unified roll history item
+        const historyItem: RollHistoryItem = {
+          hopeValue: this.hopeValue,
+          fearValue: this.fearValue,
+          advantageValue: this.advantageValue,
+          advantageType: this.advantageType,
           modifier: this.modifier,
           total: finalTotal,
           result: resultText,
-        });
+          playerId: this.sessionMode === "multiplayer" && this.sessionClient ? this.sessionClient.getPlayerId() || '' : undefined,
+          playerName: this.sessionMode === "multiplayer" ? this.playerName : undefined,
+          timestamp: this.sessionMode === "multiplayer" ? Date.now() : undefined
+        };
 
-        // ===== NEW: BROADCAST IF IN SESSION =====
-        if (this.sessionMode === "multiplayer" && this.sessionClient) {
-          this.sessionClient.broadcastRoll(rollData);
+        console.log('Adding own roll to history:', historyItem);
+        this.rollHistory.unshift(historyItem);
+
+        // Limit history (20 for multiplayer, 10 for solo)
+        const maxHistory = this.sessionMode === "multiplayer" ? 20 : 10;
+        if (this.rollHistory.length > maxHistory) {
+          this.rollHistory = this.rollHistory.slice(0, maxHistory);
         }
 
-        // Limit history to 10 items
-        if (this.rollHistory.length > 10) {
-          this.rollHistory = this.rollHistory.slice(0, 10);
+        // In multiplayer: broadcast and sync with session client
+        if (this.sessionMode === "multiplayer" && this.sessionClient) {
+          // Session client uses same history reference
+          this.sessionClient.setRollHistory(this.rollHistory);
+          
+          // Broadcast to other players
+          this.sessionClient.broadcastRoll(rollData);
         }
       } catch (error) {
         console.error("Error rolling dice:", error);
@@ -253,10 +328,20 @@ function diceRoller() {
       this.showSessionUI = !this.showSessionUI;
     },
 
+    get isJoinSessionValid() {
+      return !this.joinSessionId.trim() || isValidSessionId(this.joinSessionId.trim());
+    },
+
     async createSession() {
       if (!this.playerName.trim()) {
         alert('Please enter your name');
         return;
+      }
+
+      // Prevent multiple session clients
+      if (this.sessionClient) {
+        console.warn('Session client already exists, disconnecting old one');
+        this.sessionClient.disconnect();
       }
 
       try {
@@ -275,6 +360,10 @@ function diceRoller() {
           this.playerName = sanitizedName;
           this.connectionStatus = "connected";
           
+          // Save player name and session ID
+          savePlayerName(sanitizedName);
+          saveLastSessionId(sessionId);
+          
           // Update URL without page reload
           history.pushState({}, '', `/session/${sessionId}`);
           
@@ -286,14 +375,27 @@ function diceRoller() {
       } catch (error) {
         console.error('Failed to create session:', error);
         this.connectionStatus = "error";
-        alert('Failed to create session. Please try again.');
+        alert('Failed to create room. Please try again.');
         this.leaveSession();
       }
     },
 
     async joinSession() {
       if (!this.playerName.trim() || !this.joinSessionId.trim()) {
-        alert('Please enter your name and session ID');
+        alert('Please enter your name and room ID');
+        return;
+      }
+
+      // Prevent multiple session clients
+      if (this.sessionClient) {
+        console.warn('Session client already exists, disconnecting old one');
+        this.sessionClient.disconnect();
+      }
+
+      // Normalize session ID to uppercase
+      const normalizedSessionId = normalizeSessionId(this.joinSessionId);
+      if (!normalizedSessionId) {
+        alert('Room ID must be exactly 6 characters (letters and numbers only)');
         return;
       }
 
@@ -304,16 +406,20 @@ function diceRoller() {
         this.sessionClient = new SessionClient();
         this.setupSessionEventHandlers();
         
-        const connected = await this.sessionClient.connect(this.joinSessionId, sanitizedName);
+        const connected = await this.sessionClient.connect(normalizedSessionId, sanitizedName);
         
         if (connected) {
           this.sessionMode = "multiplayer";
-          this.sessionId = this.joinSessionId;
+          this.sessionId = normalizedSessionId;
           this.playerName = sanitizedName;
           this.connectionStatus = "connected";
           
-          // Update URL without page reload
-          history.pushState({}, '', `/session/${this.joinSessionId}`);
+          // Save player name and session ID
+          savePlayerName(sanitizedName);
+          saveLastSessionId(normalizedSessionId);
+          
+          // Update URL without page reload and use normalized ID
+          history.pushState({}, '', `/session/${normalizedSessionId}`);
           
           // Start heartbeat
           this.sessionClient.startHeartbeat();
@@ -323,12 +429,12 @@ function diceRoller() {
       } catch (error) {
         console.error('Failed to join session:', error);
         this.connectionStatus = "error";
-        alert('Failed to join session. Please check the session ID and try again.');
+        alert('Failed to join room. Please check the room ID and try again.');
         this.leaveSession();
       }
     },
 
-    leaveSession() {
+    leaveSession(clearSavedData = false) {
       if (this.sessionClient) {
         this.sessionClient.disconnect();
         this.sessionClient = null;
@@ -338,6 +444,13 @@ function diceRoller() {
       this.sessionId = null;
       this.connectedPlayers = [];
       this.connectionStatus = "disconnected";
+      
+      // Clear saved session data if requested
+      if (clearSavedData) {
+        clearSavedSessionData();
+        this.playerName = "";
+        this.joinSessionId = "";
+      }
       
       // Return to solo URL
       history.pushState({}, '', '/');
@@ -351,7 +464,7 @@ function diceRoller() {
       
       if (success) {
         // You could show a toast notification here
-        console.log('Session link copied to clipboard');
+        console.log('Room link copied to clipboard');
       } else {
         alert('Failed to copy link. Please copy manually: ' + url);
       }
@@ -382,40 +495,37 @@ function diceRoller() {
         },
         
         onRollReceived: (roll: SharedRollHistoryItem) => {
-          console.log('Roll received:', roll);
-          // Add to roll history with player info
-          this.rollHistory.unshift({
-            hope: roll.hopeValue,
-            fear: roll.fearValue,
-            advantage: roll.advantageValue,
-            modifier: roll.modifier,
-            total: roll.total,
-            result: roll.result,
-            playerId: roll.playerId,
-            playerName: roll.playerName,
-            timestamp: roll.timestamp
-          });
-          
-          // Limit history to 20 items in multiplayer
-          if (this.rollHistory.length > 20) {
-            this.rollHistory = this.rollHistory.slice(0, 20);
+          console.log('Roll received from player:', roll.playerName, 'ID:', roll.playerId);
+          console.log('My player ID:', this.sessionClient?.getPlayerId());
+          // Only add incoming rolls from OTHER players to avoid duplicates of our own rolls
+          if (roll.playerId !== this.sessionClient?.getPlayerId()) {
+            console.log('Adding received roll to history:', roll);
+            this.rollHistory.unshift(roll);
+            console.log('Roll history after adding received roll:', this.rollHistory);
+            
+            // Show toast notification for the received roll
+            if (globalToastManager) {
+              globalToastManager.showRollToast(roll);
+            }
+            
+            // Sync with session client
+            if (this.sessionClient) {
+              this.sessionClient.setRollHistory(this.rollHistory);
+            }
+            
+            // Limit history to 20 items in multiplayer
+            if (this.rollHistory.length > 20) {
+              this.rollHistory = this.rollHistory.slice(0, 20);
+            }
+          } else {
+            console.log('Ignoring own roll (already added locally)');
           }
         },
         
         onHistoryReceived: (rolls: SharedRollHistoryItem[]) => {
           console.log('History received:', rolls.length, 'rolls');
           // Replace local history with session history
-          this.rollHistory = rolls.map(roll => ({
-            hope: roll.hopeValue,
-            fear: roll.fearValue,
-            advantage: roll.advantageValue,
-            modifier: roll.modifier,
-            total: roll.total,
-            result: roll.result,
-            playerId: roll.playerId,
-            playerName: roll.playerName,
-            timestamp: roll.timestamp
-          }));
+          this.rollHistory = [...rolls];
         },
         
         onError: (error: string) => {
@@ -431,15 +541,46 @@ function diceRoller() {
     },
 
     init() {
+      // Prevent multiple initializations
+      if (this.initialized) {
+        console.warn('Alpine component already initialized, skipping');
+        return;
+      }
+      this.initialized = true;
+      
+      console.log('Initializing Alpine component');
+      
       // Feature detection
       this.sessionFeaturesAvailable = isSessionEnvironmentSupported();
       
-      // Auto-join if URL contains session ID
+      // Load saved player name and last session ID
+      this.playerName = getSavedPlayerName();
+      const lastSessionId = getLastSessionId();
+      if (lastSessionId) {
+        this.joinSessionId = lastSessionId;
+      }
+      
+      // Auto-join if URL contains session ID and we have a saved name
       const urlSessionId = getSessionIdFromUrl();
       if (urlSessionId && this.sessionFeaturesAvailable) {
         this.joinSessionId = urlSessionId;
-        this.showSessionUI = true;
-        // Don't auto-join, just show the UI and pre-fill the session ID
+        
+        if (this.playerName.trim()) {
+          // Auto-join if we have a saved name
+          console.log('Auto-joining session with saved name');
+          this.joinSession();
+        } else {
+          // Show UI to get player name and focus the name field
+          this.showSessionUI = true;
+          
+          // Focus the player name input after a short delay to ensure DOM is ready
+          setTimeout(() => {
+            const nameInput = document.querySelector('.player-name-input') as HTMLInputElement;
+            if (nameInput) {
+              nameInput.focus();
+            }
+          }, 100);
+        }
       }
     },
   };
@@ -487,8 +628,9 @@ document.addEventListener("DOMContentLoaded", function () {
   window.diceBox = diceBox;
 });
 
-// Register Alpine.js component globally
+// Register Alpine.js components globally
 window.diceRoller = diceRoller;
+window.toastManager = toastManager;
 
 // Start Alpine.js
 Alpine.start();

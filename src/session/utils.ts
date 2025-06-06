@@ -1,19 +1,21 @@
 // Session utility functions for DaggerDice multiplayer
 
 /**
- * Generates a cryptographically random session ID
- * Uses 128-bit entropy for security
+ * Generates a simple 6-character session ID
+ * Case-insensitive, uses numbers and letters for easy sharing
  */
 export function generateSessionId(): string {
-  // Use crypto.getRandomValues for cryptographically secure randomness
-  const array = new Uint8Array(16); // 128 bits
+  // Use crypto.getRandomValues for randomness
+  const array = new Uint8Array(3); // 24 bits
   crypto.getRandomValues(array);
   
-  // Convert to base36 for URL-friendly format
-  return Array.from(array)
-    .map(byte => byte.toString(36))
-    .join('')
-    .substring(0, 12); // Trim to reasonable length
+  // Convert to base36 (0-9, a-z) and ensure 6 characters
+  let sessionId = '';
+  for (let i = 0; i < array.length; i++) {
+    sessionId += array[i].toString(36).padStart(2, '0');
+  }
+  
+  return sessionId.substring(0, 6).toUpperCase();
 }
 
 /**
@@ -37,8 +39,8 @@ export function isValidSessionId(sessionId: string): boolean {
     return false;
   }
   
-  // Session IDs should be 8-12 characters, alphanumeric only
-  return /^[a-z0-9]{8,12}$/i.test(sessionId);
+  // Session IDs should be exactly 6 characters, alphanumeric only
+  return /^[a-z0-9]{6}$/i.test(sessionId);
 }
 
 /**
@@ -82,20 +84,41 @@ export function formatTimestamp(timestamp: number): string {
 }
 
 /**
- * Extracts session ID from current URL path
+ * Extracts session ID from current URL path and normalizes it
  */
 export function getSessionIdFromUrl(): string | null {
   const match = window.location.pathname.match(/^\/session\/(.+)$/);
-  return match ? match[1] : null;
+  const sessionId = match ? match[1] : null;
+  return sessionId ? normalizeSessionId(sessionId) : null;
+}
+
+/**
+ * Normalizes a session ID to uppercase and validates length
+ */
+export function normalizeSessionId(sessionId: string): string | null {
+  if (!sessionId || typeof sessionId !== 'string') {
+    return null;
+  }
+  
+  const normalized = sessionId.trim().toUpperCase();
+  return isValidSessionId(normalized) ? normalized : null;
 }
 
 /**
  * Checks if the current environment supports session features
  */
 export function isSessionEnvironmentSupported(): boolean {
-  return typeof WebSocket !== 'undefined' && 
-         window.location.protocol === 'https:' &&
-         window.location.hostname !== 'localhost';
+  // Allow WebSocket support in any environment
+  if (typeof WebSocket === 'undefined') {
+    return false;
+  }
+  
+  // Allow any localhost development (Wrangler can use different ports)
+  const isLocalDevelopment = window.location.hostname === 'localhost' || 
+                             window.location.hostname === '127.0.0.1';
+  
+  // Allow HTTPS production or any local development
+  return window.location.protocol === 'https:' || isLocalDevelopment;
 }
 
 /**
@@ -155,4 +178,75 @@ export function debounce<T extends (...args: any[]) => any>(
  */
 export function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * localStorage utility functions for session persistence
+ */
+const STORAGE_KEYS = {
+  PLAYER_NAME: 'daggerdice_player_name',
+  LAST_SESSION_ID: 'daggerdice_last_session_id'
+} as const;
+
+/**
+ * Saves player name to localStorage
+ */
+export function savePlayerName(name: string): void {
+  try {
+    if (name && name.trim()) {
+      localStorage.setItem(STORAGE_KEYS.PLAYER_NAME, name.trim());
+    }
+  } catch (error) {
+    console.warn('Failed to save player name to localStorage:', error);
+  }
+}
+
+/**
+ * Retrieves saved player name from localStorage
+ */
+export function getSavedPlayerName(): string {
+  try {
+    return localStorage.getItem(STORAGE_KEYS.PLAYER_NAME) || '';
+  } catch (error) {
+    console.warn('Failed to retrieve player name from localStorage:', error);
+    return '';
+  }
+}
+
+/**
+ * Saves last session ID to localStorage
+ */
+export function saveLastSessionId(sessionId: string): void {
+  try {
+    if (sessionId && isValidSessionId(sessionId)) {
+      localStorage.setItem(STORAGE_KEYS.LAST_SESSION_ID, sessionId);
+    }
+  } catch (error) {
+    console.warn('Failed to save session ID to localStorage:', error);
+  }
+}
+
+/**
+ * Retrieves last session ID from localStorage
+ */
+export function getLastSessionId(): string {
+  try {
+    const sessionId = localStorage.getItem(STORAGE_KEYS.LAST_SESSION_ID) || '';
+    return isValidSessionId(sessionId) ? sessionId : '';
+  } catch (error) {
+    console.warn('Failed to retrieve session ID from localStorage:', error);
+    return '';
+  }
+}
+
+/**
+ * Clears all saved session data from localStorage
+ */
+export function clearSavedSessionData(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.PLAYER_NAME);
+    localStorage.removeItem(STORAGE_KEYS.LAST_SESSION_ID);
+  } catch (error) {
+    console.warn('Failed to clear session data from localStorage:', error);
+  }
 }

@@ -8,7 +8,9 @@
       "Bash(npm run build:*)",
       "Bash(curl:*)",
       "Bash(npm run verify:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(npx tsc:*)",
+      "Bash(grep:*)"
     ]
   },
   "enableAllProjectMcpServers": false

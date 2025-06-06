@@ -23,30 +23,38 @@ body {
   min-height: 40px;
 }
 
+.logo-container {
+  transition: all 0.4s ease;
+}
+
 .logo-text {
   position: absolute;
   top: 10px;
   left: 50%;
+  transform: translateX(-50%);
   max-height: 120px;
-  margin-bottom: -80px;
   width: auto;
   transition: all 0.4s ease;
   opacity: 1;
 }
 
 .logo-only {
-  position: absolute;
-  top: 10px;
-  left: 20px;
-  margin-left: 1rem;
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
   max-height: 60px;
   width: auto;
+  margin-right: 1rem;
   transition: all 0.4s ease;
   opacity: 1;
 }
 
 .result-container {
   transition: all 0.4s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 h1 {
@@ -54,6 +62,7 @@ h1 {
   font-size: 2.5rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
   transition: all 0.4s ease;
+  display: inline-block;
 }
 
 .dice-container {
@@ -129,23 +138,23 @@ h1 {
 }
 
 .modifier-clear-btn {
-  background-color: #dc3545;
+  background-color: #6c757d;
   color: white;
   border: none;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  border-radius: 50%;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 1.2rem;
+  font-size: 0.85rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.25rem;
   margin-left: 0.5rem;
+  transition: background-color 0.2s ease;
 }
 
 .modifier-clear-btn:hover {
-  background-color: #c82333;
+  background-color: #5a6268;
 }
 
 .modifier-display {
@@ -225,7 +234,7 @@ button:hover {
 }
 
 button:disabled {
-  background-color: #cccccc;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -295,8 +304,6 @@ button:disabled {
 }
 
 .history-item {
-  display: flex;
-  justify-content: space-between;
   padding: 0.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 0.9rem;
@@ -376,7 +383,7 @@ button:disabled {
   display: none !important;
 }
 
-/* ===== SESSION/MULTIPLAYER STYLES ===== */
+/* ===== ROOM/MULTIPLAYER STYLES ===== */
 
 .session-toggle-container {
   position: absolute;
@@ -493,9 +500,8 @@ button:disabled {
 }
 
 .session-btn:disabled {
-  background-color: #6c757d;
+  opacity: 0.5;
   cursor: not-allowed;
-  opacity: 0.7;
 }
 
 .join-divider {
@@ -603,14 +609,21 @@ button:disabled {
   font-size: 0.8rem;
 }
 
-.player-name-tag {
+.player-name-line {
   font-size: 0.8rem;
   color: #007bff;
   font-weight: 500;
   margin-bottom: 0.25rem;
+  padding-bottom: 0.125rem;
 }
 
-/* Mobile responsiveness for session panel */
+.roll-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Mobile responsiveness for room panel */
 @media (max-width: 768px) {
   .session-panel {
     left: 0.5rem;
@@ -622,11 +635,142 @@ button:disabled {
   .session-toggle-container {
     left: 0.5rem;
   }
+  
+  /* Adjust logo and result for mobile */
+  .logo-only {
+    max-height: 40px;
+    margin-right: 0.5rem;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  /* Toast positioning for mobile */
+  .toast-container {
+    top: 5rem;
+    left: 1rem;
+    right: 1rem;
+    transform: none;
+    max-width: none;
+  }
 }
 
-/* Adjust history panel position when session panel is visible */
+/* Adjust history panel position when room panel is visible */
 @media (min-width: 769px) {
   .roll-history-panel {
     right: 1rem;
   }
+}
+
+/* Toast notifications */
+.toast-container {
+  position: fixed;
+  top: 6rem; /* Moved down to be below header/nav area */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 90vw;
+}
+
+.toast {
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border-left: 4px solid #007bff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  font-size: 0.9rem;
+  max-width: 400px;
+  word-wrap: break-word;
+  animation: toastSlideIn 0.3s ease-out;
+  pointer-events: auto;
+}
+
+.toast.success {
+  border-left-color: #28a745;
+}
+
+.toast.warning {
+  border-left-color: #ffc107;
+}
+
+.toast.error {
+  border-left-color: #dc3545;
+}
+
+.toast.roll {
+  border-left-color: #6f42c1;
+  background: linear-gradient(135deg, rgba(111, 66, 193, 0.9), rgba(138, 43, 226, 0.9));
+}
+
+.toast-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.toast-player {
+  font-weight: bold;
+  color: #87ceeb;
+  font-size: 0.8rem;
+}
+
+.toast-result {
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.toast-dice {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.toast-dice .hope {
+  color: #4caf50;
+}
+
+.toast-dice .fear {
+  color: #f44336;
+}
+
+.toast-dice .advantage {
+  color: #2196f3;
+}
+
+.toast-dice .disadvantage {
+  color: #ff9800;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+}
+
+.toast.removing {
+  animation: toastSlideOut 0.3s ease-in forwards;
 }
