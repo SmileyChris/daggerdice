@@ -1003,7 +1003,7 @@ button:disabled {
   }
   
   .clear-all-btn {
-    background-color: #dc3545;
+    background-color: #6c757d;
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -1016,7 +1016,7 @@ button:disabled {
   }
   
   .clear-all-btn:hover {
-    background-color: #c82333;
+    background-color: #5a6268;
   }
   
   .action-btn {

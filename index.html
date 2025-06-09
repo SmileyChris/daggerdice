@@ -153,7 +153,12 @@
               <div class="section-btn-content">
                 <span class="section-btn-icon">⚙️</span>
                 <span class="section-btn-text">Mods</span>
-                <span class="section-btn-value" x-show="modifier !== 0 || advantageType !== 'none'" x-text="modifier"></span>
+                <span class="section-btn-value" x-show="modifier !== 0 || advantageType !== 'none'">
+                  <span x-show="advantageType === 'advantage'">A</span>
+                  <span x-show="advantageType === 'disadvantage'">D</span>
+                  <span x-show="modifier > 0">+<span x-text="modifier"></span></span>
+                  <span x-show="modifier < 0" x-text="modifier"></span>
+                </span>
               </div>
             </button>
           </div>
@@ -216,6 +221,18 @@
           </div>
           
           <div class="dialog-content">
+            <!-- Clear button -->
+            <div class="dialog-section">
+              <button
+                @click="modifier = 0; advantageType = 'none'; showModifiers = false"
+                class="clear-all-btn"
+                x-show="modifier !== 0 || advantageType !== 'none'"
+                title="Clear all modifiers"
+              >
+                🔄 Clear All Modifiers
+              </button>
+            </div>
+
             <!-- Advantage/Disadvantage controls -->
             <div class="dialog-section">
               <label>Roll Type:</label>
@@ -267,18 +284,6 @@
                   +
                 </button>
               </div>
-            </div>
-
-            <!-- Clear button -->
-            <div class="dialog-section">
-              <button
-                @click="modifier = 0; advantageType = 'none'; showModifiers = false"
-                class="clear-all-btn"
-                x-show="modifier !== 0 || advantageType !== 'none'"
-                title="Clear all modifiers"
-              >
-                🔄 Clear All Modifiers
-              </button>
             </div>
           </div>
         </div>
