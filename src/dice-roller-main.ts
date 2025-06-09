@@ -18,6 +18,7 @@ import {
   getSavedPlayerName,
   getLastSessionId,
   clearSavedSessionData,
+  clearLastSessionId,
   savePlayerName,
   saveLastSessionId
 } from "./session/utils.js";
@@ -332,6 +333,16 @@ function diceRoller() {
       return !this.joinSessionId.trim() || isValidSessionId(this.joinSessionId.trim());
     },
 
+    handleRoomIdChange() {
+      // Convert to uppercase
+      this.joinSessionId = this.joinSessionId.toUpperCase();
+      
+      // Clear localStorage if room ID is empty
+      if (!this.joinSessionId.trim()) {
+        clearLastSessionId();
+      }
+    },
+
     async createSession() {
       if (!this.playerName.trim()) {
         alert('Please enter your name');
@@ -365,7 +376,7 @@ function diceRoller() {
           saveLastSessionId(sessionId);
           
           // Update URL without page reload
-          history.pushState({}, '', `/session/${sessionId}`);
+          history.pushState({}, '', `/room/${sessionId}`);
           
           // Start heartbeat
           this.sessionClient.startHeartbeat();
@@ -419,7 +430,7 @@ function diceRoller() {
           saveLastSessionId(normalizedSessionId);
           
           // Update URL without page reload and use normalized ID
-          history.pushState({}, '', `/session/${normalizedSessionId}`);
+          history.pushState({}, '', `/room/${normalizedSessionId}`);
           
           // Start heartbeat
           this.sessionClient.startHeartbeat();
@@ -435,6 +446,9 @@ function diceRoller() {
     },
 
     leaveSession(clearSavedData = false) {
+      // Preserve current session ID for easy rejoining
+      const currentSessionId = this.sessionId;
+      
       if (this.sessionClient) {
         this.sessionClient.disconnect();
         this.sessionClient = null;
@@ -450,6 +464,11 @@ function diceRoller() {
         clearSavedSessionData();
         this.playerName = "";
         this.joinSessionId = "";
+      } else {
+        // Keep the room ID populated for easy rejoining
+        if (currentSessionId) {
+          this.joinSessionId = currentSessionId;
+        }
       }
       
       // Return to solo URL

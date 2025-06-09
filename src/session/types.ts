@@ -39,7 +39,8 @@ export type ClientMessage =
   | { type: 'LEAVE_ANNOUNCEMENT'; playerId: string }
   | { type: 'ROLL'; rollData: SharedRollHistoryItem }
   | { type: 'HISTORY_SHARE'; rollHistory: SharedRollHistoryItem[] }
-  | { type: 'PING' };
+  | { type: 'PING' }
+  | { type: 'PONG' };
 
 export type ServerMessage = ClientMessage;
 

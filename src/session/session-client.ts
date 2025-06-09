@@ -23,6 +23,9 @@ export class SessionClient {
   private connectedPlayers: Map<string, Player> = new Map();
   private localRollHistory: SharedRollHistoryItem[] = [];
   private manualDisconnect = false;
+  private heartbeatInterval: number | null = null;
+  private pingTimeout: number | null = null;
+  private lastPongReceived = 0;
 
   constructor() {
     this.available = this.checkAvailability();
@@ -112,7 +115,7 @@ export class SessionClient {
     try {
       // Construct WebSocket URL for Cloudflare Workers
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/api/session/${sessionId}`;
+      const wsUrl = `${protocol}//${window.location.host}/api/room/${sessionId}`;
       
       this.websocket = new WebSocket(wsUrl);
       
@@ -163,6 +166,7 @@ export class SessionClient {
         
         // Attempt to reconnect if not manually closed
         if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts && !this.manualDisconnect) {
+          this.connectionState = 'connecting';
           setTimeout(() => {
             this.attemptReconnect(playerName);
           }, this.reconnectDelay * Math.pow(2, this.reconnectAttempts));
@@ -209,17 +213,40 @@ export class SessionClient {
   }
 
   private async attemptReconnect(playerName: string): Promise<void> {
-    if (!this.sessionId || this.reconnectAttempts >= this.maxReconnectAttempts) {
+    if (!this.sessionId || this.reconnectAttempts >= this.maxReconnectAttempts || this.manualDisconnect) {
+      console.log('Stopping reconnection attempts');
+      this.resetConnectionState();
       return;
     }
 
     this.reconnectAttempts++;
     console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
     
+    // Update status to show we're trying to reconnect
+    this.connectionState = 'connecting';
+    // Note: No specific event handler for 'connecting' state, UI will check connectionState
+    
     try {
-      await this.connect(this.sessionId, playerName);
+      const success = await this.connect(this.sessionId, playerName);
+      if (success) {
+        console.log('Reconnection successful');
+        this.reconnectAttempts = 0; // Reset on successful reconnection
+      } else {
+        throw new Error('Reconnection failed');
+      }
     } catch (error) {
       console.error('Reconnection failed:', error);
+      this.connectionState = 'error';
+      this.eventHandlers.onError?.('Reconnection failed');
+      
+      // If we haven't exceeded max attempts, try again
+      if (this.reconnectAttempts < this.maxReconnectAttempts && !this.manualDisconnect) {
+        setTimeout(() => {
+          this.attemptReconnect(playerName);
+        }, this.reconnectDelay * Math.pow(2, this.reconnectAttempts));
+      } else {
+        this.resetConnectionState();
+      }
     }
   }
 
@@ -246,13 +273,26 @@ export class SessionClient {
   }
 
   public ping(): void {
-    if (this.connectionState === 'connected') {
+    if (this.connectionState === 'connected' && this.websocket?.readyState === WebSocket.OPEN) {
       this.sendMessage({ type: 'PING' });
     }
   }
 
+  // Public method to check connection health
+  public isConnectionHealthy(): boolean {
+    if (this.connectionState !== 'connected') return false;
+    if (!this.websocket || this.websocket.readyState !== WebSocket.OPEN) return false;
+    
+    // Check if we've received a pong recently (within last 60 seconds)
+    const timeSinceLastPong = Date.now() - this.lastPongReceived;
+    return timeSinceLastPong < 60000;
+  }
+
   public disconnect(): void {
     this.manualDisconnect = true;
+    
+    // Stop heartbeat immediately
+    this.stopHeartbeat();
     
     if (this.websocket && this.playerId) {
       // Send leave announcement to other players
@@ -284,6 +324,7 @@ export class SessionClient {
     this.connectedPlayers.clear();
     this.localRollHistory = [];
     this.manualDisconnect = false;
+    this.stopHeartbeat();
   }
 
   private sendMessage(message: ClientMessage): void {
@@ -368,7 +409,17 @@ export class SessionClient {
         break;
 
       case 'PING':
-        // Heartbeat message - no action needed, just acknowledge receipt
+        // Respond to server ping with pong
+        this.sendMessage({ type: 'PONG' });
+        break;
+
+      case 'PONG':
+        // Clear ping timeout when pong received
+        if (this.pingTimeout) {
+          clearTimeout(this.pingTimeout);
+          this.pingTimeout = null;
+        }
+        this.lastPongReceived = Date.now();
         break;
 
       default:
@@ -378,9 +429,39 @@ export class SessionClient {
 
   // Heartbeat to keep connection alive
   public startHeartbeat(): void {
-    setInterval(() => {
-      this.ping();
+    // Clear any existing heartbeat
+    this.stopHeartbeat();
+    
+    this.heartbeatInterval = window.setInterval(() => {
+      if (this.connectionState === 'connected') {
+        this.sendPingWithTimeout();
+      }
     }, 30000); // Ping every 30 seconds
+  }
+
+  private stopHeartbeat(): void {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
+    if (this.pingTimeout) {
+      clearTimeout(this.pingTimeout);
+      this.pingTimeout = null;
+    }
+  }
+
+  private sendPingWithTimeout(): void {
+    if (this.connectionState !== 'connected') return;
+    
+    // Send ping
+    this.ping();
+    
+    // Set timeout for pong response
+    this.pingTimeout = window.setTimeout(() => {
+      console.warn('Ping timeout - connection may be stale');
+      // Don't immediately disconnect, but mark as potentially problematic
+      // The WebSocket will handle actual disconnection if needed
+    }, 10000); // 10 second timeout for pong
   }
 
   private generatePlayerId(): string {

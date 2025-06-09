@@ -10,8 +10,8 @@
     <!-- Toast container -->
     <div class="toast-container" x-data="toastManager()" x-init="init()">
       <template x-for="toast in toasts" :key="toast.id">
-        <div 
-          class="toast" 
+        <div
+          class="toast"
           :class="toast.type"
           x-show="toast.visible"
           x-transition:enter="transition ease-out duration-300"
@@ -27,7 +27,10 @@
     </div>
 
     <div class="container" x-data="diceRoller()" x-init="init()" x-cloak>
-      <div class="header">
+      <div
+        class="header"
+        :class="{ 'no-result': !result, 'has-result': result }"
+      >
         <!-- Logo section - shows logo-text when no result -->
         <div class="logo-container" x-show="!result">
           <img
@@ -128,7 +131,7 @@
               >🔴</span
             >
             <span
-              x-text="'Playing with Friends (' + (connectedPlayers.length + 1) + ')'"
+              x-text="connectedPlayers.length === 0 ? 'Waiting for others...' : 'Playing with Friends (' + (connectedPlayers.length + 1) + ')'"
             ></span>
           </span>
         </button>
@@ -160,7 +163,7 @@
               class="session-id-input"
               type="search"
               maxlength="6"
-              @input="joinSessionId = joinSessionId.toUpperCase()"
+              @input="handleRoomIdChange()"
               @keyup.enter="joinSessionId.trim() ? joinSession() : createSession()"
             />
           </div>

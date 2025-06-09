@@ -87,7 +87,7 @@ export function formatTimestamp(timestamp: number): string {
  * Extracts session ID from current URL path and normalizes it
  */
 export function getSessionIdFromUrl(): string | null {
-  const match = window.location.pathname.match(/^\/session\/(.+)$/);
+  const match = window.location.pathname.match(/^\/room\/(.+)$/);
   const sessionId = match ? match[1] : null;
   return sessionId ? normalizeSessionId(sessionId) : null;
 }
@@ -126,7 +126,7 @@ export function isSessionEnvironmentSupported(): boolean {
  */
 export function createSessionUrl(sessionId: string): string {
   const baseUrl = `${window.location.protocol}//${window.location.host}`;
-  return `${baseUrl}/session/${sessionId}`;
+  return `${baseUrl}/room/${sessionId}`;
 }
 
 /**
@@ -236,6 +236,17 @@ export function getLastSessionId(): string {
   } catch (error) {
     console.warn('Failed to retrieve session ID from localStorage:', error);
     return '';
+  }
+}
+
+/**
+ * Clears last session ID from localStorage
+ */
+export function clearLastSessionId(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.LAST_SESSION_ID);
+  } catch (error) {
+    console.warn('Failed to clear session ID from localStorage:', error);
   }
 }
 

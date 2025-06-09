@@ -21,6 +21,16 @@ body {
   z-index: 10;
   transition: all 0.4s ease;
   min-height: 40px;
+  overflow: hidden;
+}
+
+/* Header states for different content */
+.header.no-result {
+  height: 40px; /* Very short height - logo-text overlays beyond this */
+}
+
+.header.has-result {
+  height: 60px; /* Compact height for result + inline logo */
 }
 
 .logo-container {
@@ -653,6 +663,15 @@ button:disabled {
     right: 1rem;
     transform: none;
     max-width: none;
+  }
+  
+  /* Adjust header heights for mobile */
+  .header.no-result {
+    height: 35px; /* Extra short on mobile - logo-text overlays beyond this */
+  }
+  
+  .header.has-result {
+    height: 55px; /* Very compact on mobile */
   }
 }
 

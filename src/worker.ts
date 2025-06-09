@@ -82,8 +82,8 @@ export default {
     const url = new URL(request.url);
     
     // Handle WebSocket connections for multiplayer sessions
-    if (url.pathname.startsWith('/api/session/')) {
-      const sessionIdMatch = url.pathname.match(/^\/api\/session\/([^\/]+)$/);
+    if (url.pathname.startsWith('/api/room/')) {
+      const sessionIdMatch = url.pathname.match(/^\/api\/room\/([^\/]+)$/);
       
       if (!sessionIdMatch) {
         return new Response('Invalid session URL', { status: 400 });
