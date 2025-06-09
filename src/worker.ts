@@ -12,7 +12,7 @@ interface Env {
 }
 
 // Durable Object for managing WebSocket sessions
-export class SessionRoom {
+export class SessionDurableObject {
   private connections: Set<WebSocket> = new Set();
   private state: DurableObjectState;
 

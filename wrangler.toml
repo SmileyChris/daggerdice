@@ -10,12 +10,12 @@ binding = "ASSETS"
 # Durable Objects configuration
 [[durable_objects.bindings]]
 name = "SESSION_ROOMS"
-class_name = "SessionRoom"
+class_name = "SessionDurableObject"
 
 # Durable Objects migrations
 [[migrations]]
 tag = "v1"
-new_classes = [ "SessionRoom" ]
+new_classes = [ "SessionDurableObject" ]
 
 # Routes for the unified worker (serves both API and static assets)
 # routes = [
@@ -33,4 +33,4 @@ binding = "ASSETS"
 # Durable Objects configuration for production
 [[env.production.durable_objects.bindings]]
 name = "SESSION_ROOMS"
-class_name = "SessionRoom"
+class_name = "SessionDurableObject"
