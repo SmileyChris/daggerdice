@@ -10,7 +10,8 @@
       "Bash(npm run verify:*)",
       "Bash(git add:*)",
       "Bash(npx tsc:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(sed:*)"
     ]
   },
   "enableAllProjectMcpServers": false

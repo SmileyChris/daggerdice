@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run dev` - Start development server with hot reload
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build locally
+- `npm run build` after making changes
 
 ## Project Architecture
 
