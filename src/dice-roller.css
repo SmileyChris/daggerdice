@@ -102,6 +102,8 @@ h1 {
   padding: 1rem;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 10;
+  overflow-y: auto;
+  max-height: 50vh;
 }
 
 .controls > div {
@@ -396,10 +398,8 @@ button:disabled {
 /* ===== ROOM/MULTIPLAYER STYLES ===== */
 
 .session-toggle-container {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  z-index: 30;
+  margin-top: 1rem;
+  text-align: center;
 }
 
 .session-toggle-btn {
@@ -421,17 +421,28 @@ button:disabled {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-.session-panel {
-  position: absolute;
-  top: 4rem;
-  left: 1rem;
-  width: 320px;
+/* Desktop session panel */
+.desktop-session-panel {
+  margin-top: 1rem;
+  width: 100%;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
   background-color: rgba(0, 0, 0, 0.9);
   border-radius: 10px;
   padding: 1.5rem;
-  z-index: 25;
   border: 2px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* Mobile session panel */
+.mobile-session-panel {
+  display: none;
+}
+
+/* Mobile session backdrop */
+.mobile-session-backdrop {
+  display: none;
 }
 
 .session-panel h3 {
@@ -633,20 +644,431 @@ button:disabled {
   align-items: center;
 }
 
-/* Mobile responsiveness for room panel */
+/* Hide mobile bottom bar on desktop */
+.mobile-bottom-bar {
+  display: none;
+}
+
+/* Mobile responsiveness */
 @media (max-width: 768px) {
-  .session-panel {
-    left: 0.5rem;
-    right: 0.5rem;
-    width: auto;
-    max-width: calc(100vw - 1rem);
+  /* Hide desktop controls on mobile */
+  .desktop-controls {
+    display: none;
   }
   
-  .session-toggle-container {
+  /* Show mobile bottom bar */
+  .mobile-bottom-bar {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 0.5rem;
+    z-index: 30;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Bottom button bar layout */
+  .bottom-button-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+  }
+  
+  .bottom-left,
+  .bottom-center,
+  .bottom-right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .bottom-left,
+  .bottom-right {
+    flex: 1;
+  }
+  
+  .bottom-center {
+    flex: 2;
+  }
+  
+  /* Section buttons */
+  .bottom-section-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 100px;
+  }
+  
+  .bottom-section-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .bottom-section-btn.active {
+    background-color: #007bff;
+    border-color: #007bff;
+  }
+  
+  .section-btn-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  
+  .section-btn-icon {
+    font-size: 1.2rem;
+  }
+  
+  .section-btn-text {
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  
+  .section-btn-value {
+    font-size: 0.7rem;
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 0.125rem 0.375rem;
+    border-radius: 10px;
+    min-width: 20px;
+  }
+  
+  
+  /* Roll button container */
+  .roll-button-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Roll button */
+  .bottom-roll-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 160px;
+  }
+  
+  .bottom-roll-button:hover:not(:disabled) {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+  }
+  
+  .bottom-roll-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  /* Multiplayer indicator next to roll button */
+  .multiplayer-indicator {
+    position: absolute;
+    bottom: -8px;
+    right: -8px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.3s ease;
+    min-width: 24px;
+    height: 24px;
+    justify-content: center;
+  }
+  
+  .multiplayer-indicator:hover {
+    background-color: rgba(0, 0, 0, 0.9);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+  }
+  
+  .multiplayer-indicator.connected {
+    border-color: #28a745;
+  }
+  
+  .multiplayer-indicator.connecting {
+    border-color: #ffc107;
+  }
+  
+  .multiplayer-indicator.disconnected,
+  .multiplayer-indicator.error {
+    border-color: #dc3545;
+  }
+  
+  .player-count {
+    font-weight: bold;
+    font-size: 0.75rem;
+  }
+  
+  /* Mobile dialogs */
+  .mobile-dialog {
+    position: fixed;
+    bottom: 90px;
     left: 0.5rem;
+    right: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.95);
+    border-radius: 12px 12px 0 0;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.5);
+    z-index: 35;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  
+  .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .dialog-header h3 {
+    margin: 0;
+    color: white;
+    font-size: 1.2rem;
+  }
+  
+  .dialog-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+  }
+  
+  .dialog-close:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .dialog-content {
+    padding: 1rem;
+  }
+  
+  .dialog-section {
+    margin-bottom: 1.5rem;
+  }
+  
+  .dialog-section:last-child {
+    margin-bottom: 0;
+  }
+  
+  .dialog-section label {
+    display: block;
+    color: white;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Dialog controls */
+  .modifier-controls-dialog {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  .modifier-btn-dialog {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+  }
+  
+  .modifier-btn-dialog:hover {
+    background-color: #5a6268;
+  }
+  
+  .modifier-display-dialog {
+    min-width: 60px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: white;
+  }
+  
+  .clear-all-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    width: 100%;
+    transition: background-color 0.3s;
+  }
+  
+  .clear-all-btn:hover {
+    background-color: #c82333;
+  }
+  
+  .action-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1rem;
+    transition: all 0.3s;
+  }
+  
+  .action-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .action-btn-icon {
+    height: 24px;
+    width: 24px;
+    filter: brightness(0) invert(1);
+  }
+  
+  /* History dialog specific styles */
+  .mobile-dialog-history {
+    max-height: 70vh;
+  }
+  
+  .empty-history {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 2rem;
+    font-style: italic;
+  }
+  
+  .history-list {
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+  
+  .history-item-dialog {
+    padding: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: opacity 0.3s ease;
+  }
+  
+  .history-item-dialog:last-child {
+    border-bottom: none;
+  }
+  
+  .history-item-dialog .player-name-line {
+    font-size: 0.8rem;
+    color: #007bff;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+  }
+  
+  .history-item-dialog .roll-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .history-item-dialog .dice-values {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  .history-item-dialog .hope {
+    color: #4caf50;
+    font-weight: bold;
+  }
+  
+  .history-item-dialog .fear {
+    color: #f44336;
+    font-weight: bold;
+  }
+  
+  .history-item-dialog .advantage {
+    color: #90ee90;
+  }
+  
+  .history-item-dialog .disadvantage {
+    color: #ffb3b3;
+  }
+  
+  .history-item-dialog .outcome {
+    font-weight: bold;
+    text-align: right;
+  }
+  
+  /* Dialog backdrop */
+  .dialog-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 34;
+  }
+  
+  /* Adjust dice container for mobile bottom bar */
+  .dice-container {
+    margin-bottom: 100px; /* Space for bottom bar */
+  }
+  
+  /* Hide original history toggle and panel on mobile */
+  .history-toggle {
+    display: none;
+  }
+  
+  .roll-history-panel {
+    display: none;
   }
   
   /* Adjust logo and result for mobile */
+  .logo-text {
+    max-height: 100px;
+    top: 5px;
+  }
+  
   .logo-only {
     max-height: 40px;
     margin-right: 0.5rem;
@@ -656,9 +1078,14 @@ button:disabled {
     font-size: 2rem;
   }
   
+  .result-container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
   /* Toast positioning for mobile */
   .toast-container {
-    top: 5rem;
+    top: 4rem;
     left: 1rem;
     right: 1rem;
     transform: none;
@@ -667,11 +1094,139 @@ button:disabled {
   
   /* Adjust header heights for mobile */
   .header.no-result {
-    height: 35px; /* Extra short on mobile - logo-text overlays beyond this */
+    height: 35px;
   }
   
   .header.has-result {
-    height: 55px; /* Very compact on mobile */
+    height: 70px;
+  }
+  
+  /* Hide desktop session panel on mobile */
+  .desktop-session-panel {
+    display: none !important;
+  }
+  
+  /* Show mobile session panel */
+  .mobile-session-panel {
+    display: block !important;
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    margin: 0;
+    max-height: 60vh;
+    overflow-y: auto;
+    z-index: 35;
+    border-radius: 12px 12px 0 0;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.95);
+  }
+  
+  /* Show mobile session backdrop */
+  .mobile-session-backdrop {
+    display: block !important;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .container {
+    padding: 0;
+  }
+  
+  /* Smaller section buttons */
+  .bottom-section-btn {
+    padding: 0.5rem;
+    max-width: 80px;
+  }
+  
+  .section-btn-icon {
+    font-size: 1rem;
+  }
+  
+  .section-btn-text {
+    font-size: 0.7rem;
+  }
+  
+  /* Smaller roll button */
+  .bottom-roll-button {
+    padding: 0.875rem 1.5rem;
+    font-size: 1.1rem;
+    max-width: 140px;
+  }
+  
+  /* Smaller multiplayer indicator */
+  .multiplayer-indicator {
+    bottom: -6px;
+    right: -6px;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
+    min-width: 20px;
+    height: 20px;
+  }
+  
+  .player-count {
+    font-size: 0.65rem;
+  }
+  
+  /* Smaller dialog elements */
+  .dialog-header {
+    padding: 0.75rem;
+  }
+  
+  .dialog-header h3 {
+    font-size: 1.1rem;
+  }
+  
+  .dialog-content {
+    padding: 0.75rem;
+  }
+  
+  .modifier-btn-dialog {
+    width: 45px;
+    height: 45px;
+    font-size: 1.3rem;
+  }
+  
+  .modifier-display-dialog {
+    font-size: 1.3rem;
+    min-width: 50px;
+  }
+  
+  .action-btn {
+    padding: 0.875rem;
+    font-size: 0.9rem;
+  }
+  
+  .action-btn-icon {
+    height: 20px;
+    width: 20px;
+  }
+  
+  h1 {
+    font-size: 1.75rem;
+  }
+  
+  .session-panel {
+    padding: 1rem;
+  }
+  
+  /* Adjust spacing for small screens */
+  .dice-container {
+    margin-bottom: 95px; /* Slightly less space for smaller bottom bar */
+  }
+  
+  .mobile-session-panel {
+    bottom: 85px;
+    width: 95%;
+    max-width: 350px;
+  }
+  
+  .mobile-dialog {
+    bottom: 85px;
   }
 }
 

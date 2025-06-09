@@ -55,7 +55,8 @@
         <div id="dice-box"></div>
       </div>
 
-      <div class="controls">
+      <!-- Desktop controls layout -->
+      <div class="controls desktop-controls">
         <div class="modifiers">
           <div class="advantage-controls">
             <label>Roll Type:</label>
@@ -117,29 +118,311 @@
         <button @click="rollDice()" :disabled="isRolling" class="roll-button">
           <span x-text="isRolling ? 'Rolling...' : 'Roll Dice'"></span>
         </button>
+        <!-- ===== NEW: OPTIONAL SESSION PANEL ===== -->
+        <div x-show="sessionFeaturesAvailable" class="session-toggle-container">
+          <button @click="toggleSessionUI()" class="session-toggle-btn">
+            <span x-show="sessionMode === 'solo'">🎲 Play with Friends</span>
+            <span x-show="sessionMode === 'multiplayer'">
+              <span x-show="connectionStatus === 'connected'">🟢</span>
+              <span x-show="connectionStatus === 'connecting'">🟡</span>
+              <span
+                x-show="connectionStatus === 'disconnected' || connectionStatus === 'error'"
+                >🔴</span
+              >
+              <span
+                x-text="connectedPlayers.length === 0 ? 'Waiting for others...' : 'Playing with Friends (' + (connectedPlayers.length + 1) + ')'"
+              ></span>
+            </span>
+          </button>
+        </div>
       </div>
 
-      <!-- ===== NEW: OPTIONAL SESSION PANEL ===== -->
-      <div x-show="sessionFeaturesAvailable" class="session-toggle-container">
-        <button @click="toggleSessionUI()" class="session-toggle-btn">
-          <span x-show="sessionMode === 'solo'">🎲 Play with Friends</span>
-          <span x-show="sessionMode === 'multiplayer'">
-            <span x-show="connectionStatus === 'connected'">🟢</span>
-            <span x-show="connectionStatus === 'connecting'">🟡</span>
-            <span
-              x-show="connectionStatus === 'disconnected' || connectionStatus === 'error'"
-              >🔴</span
+      <!-- Mobile bottom bar -->
+      <div class="mobile-bottom-bar" x-data="{ showModifiers: false, showActions: false, showHistoryDialog: false }">
+        <!-- Bottom button bar -->
+        <div class="bottom-button-bar">
+          <!-- Left: Modifiers Button -->
+          <div class="bottom-left">
+            <button
+              @click="showModifiers = !showModifiers; showActions = false"
+              class="bottom-section-btn"
+              :class="{ 'active': showModifiers }"
+              title="Modifiers"
             >
-            <span
-              x-text="connectedPlayers.length === 0 ? 'Waiting for others...' : 'Playing with Friends (' + (connectedPlayers.length + 1) + ')'"
-            ></span>
-          </span>
-        </button>
+              <div class="section-btn-content">
+                <span class="section-btn-icon">⚙️</span>
+                <span class="section-btn-text">Mods</span>
+                <span class="section-btn-value" x-show="modifier !== 0 || advantageType !== 'none'" x-text="modifier"></span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Center: Roll Button -->
+          <div class="bottom-center">
+            <div class="roll-button-container">
+              <button @click="rollDice()" :disabled="isRolling" class="bottom-roll-button">
+                <span x-text="isRolling ? 'Rolling...' : 'Roll'"></span>
+              </button>
+              <!-- Multiplayer indicator when connected -->
+              <button
+                x-show="sessionMode === 'multiplayer' && sessionFeaturesAvailable"
+                @click="toggleSessionUI()"
+                class="multiplayer-indicator"
+                :class="connectionStatus"
+                title="Multiplayer Session"
+              >
+                <span x-show="connectionStatus === 'connected'">🟢</span>
+                <span x-show="connectionStatus === 'connecting'">🟡</span>
+                <span
+                  x-show="connectionStatus === 'disconnected' || connectionStatus === 'error'"
+                >🔴</span>
+                <span x-show="connectedPlayers.length > 0" class="player-count" x-text="connectedPlayers.length + 1"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: Actions Button -->
+          <div class="bottom-right">
+            <button
+              @click="showActions = !showActions; showModifiers = false"
+              class="bottom-section-btn"
+              :class="{ 'active': showActions }"
+              title="History & Multiplayer"
+            >
+              <div class="section-btn-content">
+                <span class="section-btn-icon">📋</span>
+                <span class="section-btn-text">More</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Left Dialog: Modifiers -->
+        <div
+          class="mobile-dialog mobile-dialog-left"
+          :class="{ 'visible': showModifiers }"
+          x-show="showModifiers"
+          x-transition:enter="transition ease-out duration-300"
+          x-transition:enter-start="transform translate-y-full"
+          x-transition:enter-end="transform translate-y-0"
+          x-transition:leave="transition ease-in duration-300"
+          x-transition:leave-start="transform translate-y-0"
+          x-transition:leave-end="transform translate-y-full"
+        >
+          <div class="dialog-header">
+            <h3>Modifiers</h3>
+            <button @click="showModifiers = false" class="dialog-close">✕</button>
+          </div>
+          
+          <div class="dialog-content">
+            <!-- Advantage/Disadvantage controls -->
+            <div class="dialog-section">
+              <label>Roll Type:</label>
+              <div class="toggle-buttons">
+                <button
+                  @click="setAdvantageType('none')"
+                  :class="{ 'active': advantageType === 'none' }"
+                  class="toggle-btn"
+                  :disabled="isRolling"
+                >
+                  Standard
+                </button>
+                <button
+                  @click="setAdvantageType('advantage')"
+                  :class="{ 'active': advantageType === 'advantage' }"
+                  class="toggle-btn"
+                  :disabled="isRolling"
+                >
+                  Advantage
+                </button>
+                <button
+                  @click="setAdvantageType('disadvantage')"
+                  :class="{ 'active': advantageType === 'disadvantage' }"
+                  class="toggle-btn"
+                  :disabled="isRolling"
+                >
+                  Disadvantage
+                </button>
+              </div>
+            </div>
+
+            <!-- Numeric modifier controls -->
+            <div class="dialog-section">
+              <label>Numeric Modifier:</label>
+              <div class="modifier-controls-dialog">
+                <button
+                  @click="modifier = Math.max(modifier - 1, -20)"
+                  class="modifier-btn-dialog"
+                  title="Decrease modifier"
+                >
+                  -
+                </button>
+                <span class="modifier-display-dialog" x-text="modifier"></span>
+                <button
+                  @click="modifier = Math.min(modifier + 1, 20)"
+                  class="modifier-btn-dialog"
+                  title="Increase modifier"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <!-- Clear button -->
+            <div class="dialog-section">
+              <button
+                @click="modifier = 0; advantageType = 'none'; showModifiers = false"
+                class="clear-all-btn"
+                x-show="modifier !== 0 || advantageType !== 'none'"
+                title="Clear all modifiers"
+              >
+                🔄 Clear All Modifiers
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Dialog: Actions (History & Multiplayer) -->
+        <div
+          class="mobile-dialog mobile-dialog-right"
+          :class="{ 'visible': showActions }"
+          x-show="showActions"
+          x-transition:enter="transition ease-out duration-300"
+          x-transition:enter-start="transform translate-y-full"
+          x-transition:enter-end="transform translate-y-0"
+          x-transition:leave="transition ease-in duration-300"
+          x-transition:leave-start="transform translate-y-0"
+          x-transition:leave-end="transform translate-y-full"
+        >
+          <div class="dialog-header">
+            <h3>Actions</h3>
+            <button @click="showActions = false" class="dialog-close">✕</button>
+          </div>
+          
+          <div class="dialog-content">
+            <!-- History section -->
+            <div class="dialog-section">
+              <button
+                class="action-btn"
+                @click="showHistoryDialog = true; showActions = false"
+                title="Show Roll History"
+              >
+                <img src="/src/assets/history.svg" alt="History" class="action-btn-icon" />
+                <span>Roll History</span>
+              </button>
+            </div>
+
+            <!-- Multiplayer section -->
+            <div class="dialog-section" x-show="sessionFeaturesAvailable">
+              <button
+                class="action-btn"
+                @click="toggleSessionUI(); showActions = false"
+                title="Multiplayer Options"
+              >
+                <span class="action-btn-icon">
+                  <span x-show="sessionMode === 'solo'">🎲</span>
+                  <span x-show="sessionMode === 'multiplayer'">
+                    <span x-show="connectionStatus === 'connected'">🟢</span>
+                    <span x-show="connectionStatus === 'connecting'">🟡</span>
+                    <span
+                      x-show="connectionStatus === 'disconnected' || connectionStatus === 'error'"
+                      >🔴</span
+                    >
+                  </span>
+                </span>
+                <span x-show="sessionMode === 'solo'">Play with Friends</span>
+                <span x-show="sessionMode === 'multiplayer'">
+                  <span
+                    x-text="connectedPlayers.length === 0 ? 'Waiting for others...' : 'Playing with Friends (' + (connectedPlayers.length + 1) + ')'"
+                  ></span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Roll History Dialog -->
+        <div
+          class="mobile-dialog mobile-dialog-history"
+          :class="{ 'visible': showHistoryDialog }"
+          x-show="showHistoryDialog"
+          x-transition:enter="transition ease-out duration-300"
+          x-transition:enter-start="transform translate-y-full"
+          x-transition:enter-end="transform translate-y-0"
+          x-transition:leave="transition ease-in duration-300"
+          x-transition:leave-start="transform translate-y-0"
+          x-transition:leave-end="transform translate-y-full"
+        >
+          <div class="dialog-header">
+            <h3>Roll History</h3>
+            <button @click="showHistoryDialog = false" class="dialog-close">✕</button>
+          </div>
+          
+          <div class="dialog-content">
+            <div x-show="rollHistory.length === 0" class="empty-history">
+              No rolls yet. Roll some dice to see your history!
+            </div>
+            <div x-show="rollHistory.length > 0" class="history-list">
+              <template
+                x-for="(roll, index) in rollHistory.slice(0, 10)"
+                :key="index"
+              >
+                <div class="history-item-dialog">
+                  <!-- Player name on separate line for multiplayer -->
+                  <div
+                    x-show="sessionMode === 'multiplayer' && roll.playerName"
+                    class="player-name-line"
+                  >
+                    <span x-text="roll.playerName"></span>
+                  </div>
+
+                  <div class="roll-details">
+                    <div class="dice-values">
+                      <span class="hope" x-text="roll.hopeValue"></span>
+                      <span class="fear" x-text="roll.fearValue"></span>
+                      <span
+                        x-show="roll.advantageValue !== 0"
+                        :class="roll.advantageValue > 0 ? 'advantage' : 'disadvantage'"
+                        x-text="(roll.advantageValue > 0 ? '+' : '') + roll.advantageValue"
+                      ></span>
+                      <span
+                        x-show="roll.modifier !== 0"
+                        x-text="(roll.modifier > 0 ? '+' : '') + roll.modifier"
+                      ></span>
+                    </div>
+                    <div class="outcome">
+                      <template x-if="!roll.result.includes('Critical')">
+                        <strong x-text="roll.total"></strong>
+                      </template>
+                      <small
+                        x-text="roll.result.includes('hope') ? 'hope' : roll.result.includes('fear') ? 'fear' : 'crit'"
+                      ></small>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- Backdrop to close dialogs -->
+        <div
+          class="dialog-backdrop"
+          x-show="showModifiers || showActions || showHistoryDialog"
+          @click="showModifiers = false; showActions = false; showHistoryDialog = false"
+          x-transition:enter="transition ease-out duration-300"
+          x-transition:enter-start="opacity-0"
+          x-transition:enter-end="opacity-100"
+          x-transition:leave="transition ease-in duration-300"
+          x-transition:leave-start="opacity-100"
+          x-transition:leave-end="opacity-0"
+        ></div>
       </div>
 
+      <!-- Desktop session panel -->
       <div
         x-show="showSessionUI && sessionFeaturesAvailable"
-        class="session-panel"
+        class="session-panel desktop-session-panel"
       >
         <!-- Solo mode: session creation/joining -->
         <div x-show="sessionMode === 'solo'" class="session-join">
@@ -244,6 +527,143 @@
           </button>
         </div>
       </div>
+
+      <!-- Mobile session panel -->
+      <div
+        x-show="showSessionUI && sessionFeaturesAvailable"
+        class="session-panel mobile-session-panel"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="transform translate-y-full"
+        x-transition:enter-end="transform translate-y-0"
+        x-transition:leave="transition ease-in duration-300"
+        x-transition:leave-start="transform translate-y-0"
+        x-transition:leave-end="transform translate-y-full"
+      >
+        <!-- Session panel header -->
+        <div class="dialog-header">
+          <h3 x-show="sessionMode === 'solo'">Multiplayer Room</h3>
+          <h3 x-show="sessionMode === 'multiplayer'">Room Info</h3>
+          <button @click="toggleSessionUI()" class="dialog-close">✕</button>
+        </div>
+
+        <!-- Solo mode: session creation/joining -->
+        <div x-show="sessionMode === 'solo'" class="session-join">
+          <div class="dialog-content">
+            <div class="session-input">
+              <input
+                x-model="playerName"
+                placeholder="Your name"
+                required
+                maxlength="20"
+                class="player-name-input"
+                @keyup.enter="joinSessionId.trim() ? joinSession() : createSession()"
+              />
+            </div>
+
+            <div class="session-input">
+              <input
+                x-model="joinSessionId"
+                placeholder="Room ID (optional)"
+                class="session-id-input"
+                type="search"
+                maxlength="6"
+                @input="handleRoomIdChange()"
+                @keyup.enter="joinSessionId.trim() ? joinSession() : createSession()"
+              />
+            </div>
+
+            <div class="session-action">
+              <button
+                @click="joinSessionId.trim() ? joinSession() : createSession()"
+                :disabled="!playerName.trim() || connectionStatus === 'connecting' || !isJoinSessionValid"
+                class="session-btn primary-btn"
+              >
+                <span x-show="connectionStatus === 'connecting'">
+                  <span
+                    x-text="joinSessionId.trim() ? 'Joining...' : 'Creating...'"
+                  ></span>
+                </span>
+                <span x-show="connectionStatus !== 'connecting'">
+                  <span
+                    x-text="joinSessionId.trim() ? 'Join Room' : 'Create New Room'"
+                  ></span>
+                </span>
+              </button>
+            </div>
+
+            <div x-show="connectionStatus === 'error'" class="session-error">
+              Connection failed. Please try again.
+            </div>
+          </div>
+        </div>
+
+        <!-- Multiplayer mode: room info -->
+        <div x-show="sessionMode === 'multiplayer'" class="session-info">
+          <div class="dialog-content">
+            <div class="session-details">
+              <div class="session-id-display">
+                <strong>Room:</strong>
+                <span x-text="sessionId" class="session-id"></span>
+                <button
+                  @click="copySessionLink()"
+                  class="copy-btn"
+                  title="Copy room link"
+                >
+                  📋
+                </button>
+              </div>
+
+              <div class="connection-status" :class="connectionStatus">
+                <span x-show="connectionStatus === 'connected'"
+                  >🟢 Connected</span
+                >
+                <span x-show="connectionStatus === 'connecting'"
+                  >🟡 Connecting...</span
+                >
+                <span x-show="connectionStatus === 'disconnected'"
+                  >🔴 Disconnected</span
+                >
+                <span x-show="connectionStatus === 'error'">❌ Error</span>
+              </div>
+            </div>
+
+            <div class="players-list">
+              <strong
+                >Players (<span x-text="connectedPlayers.length + 1"></span
+                >):</strong
+              >
+              <div class="players-container">
+                <div class="player-item self">
+                  <span x-text="playerName + ' (you)'"></span>
+                </div>
+                <template x-for="player in connectedPlayers" :key="player.id">
+                  <div class="player-item">
+                    <span x-text="player.name"></span>
+                    <span x-show="!player.isActive" class="inactive">(away)</span>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <button @click="leaveSession()" class="session-btn leave-btn">
+              Leave Room
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Session panel backdrop for mobile -->
+      <div
+        class="dialog-backdrop mobile-session-backdrop"
+        x-show="showSessionUI && sessionFeaturesAvailable"
+        @click="toggleSessionUI()"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-300"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+      ></div>
 
       <button
         class="history-toggle"
