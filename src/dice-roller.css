@@ -16,21 +16,20 @@ body {
 
 .header {
   text-align: center;
-  padding: 1rem;
+  padding: 1rem 5rem 1rem 12rem;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 10;
   transition: all 0.4s ease;
   min-height: 40px;
-  overflow: hidden;
 }
 
 /* Header states for different content */
 .header.no-result {
-  height: 40px; /* Very short height - logo-text overlays beyond this */
+  min-height: 40px; /* Allow expansion for logo text */
 }
 
 .header.has-result {
-  height: 60px; /* Compact height for result + inline logo */
+  min-height: 60px; /* Allow expansion for wrapped text */
 }
 
 .logo-container {
@@ -731,7 +730,7 @@ button:disabled {
   .desktop-controls {
     display: none;
   }
-  
+
   /* Show mobile bottom bar */
   .mobile-bottom-bar {
     display: block;
@@ -744,7 +743,7 @@ button:disabled {
     z-index: 30;
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
   }
-  
+
   /* Bottom button bar layout */
   .bottom-button-bar {
     display: flex;
@@ -752,7 +751,7 @@ button:disabled {
     justify-content: space-between;
     padding: 0.75rem;
   }
-  
+
   .bottom-left,
   .bottom-center,
   .bottom-right {
@@ -760,16 +759,16 @@ button:disabled {
     align-items: center;
     justify-content: center;
   }
-  
+
   .bottom-left,
   .bottom-right {
     flex: 1;
   }
-  
+
   .bottom-center {
     flex: 2;
   }
-  
+
   /* Section buttons */
   .bottom-section-btn {
     background-color: rgba(255, 255, 255, 0.1);
@@ -782,33 +781,33 @@ button:disabled {
     width: 100%;
     max-width: 100px;
   }
-  
+
   .bottom-section-btn:hover {
     background-color: rgba(255, 255, 255, 0.2);
     border-color: rgba(255, 255, 255, 0.5);
   }
-  
+
   .bottom-section-btn.active {
     background-color: #007bff;
     border-color: #007bff;
   }
-  
+
   .section-btn-content {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.25rem;
   }
-  
+
   .section-btn-icon {
     font-size: 1.2rem;
   }
-  
+
   .section-btn-text {
     font-size: 0.8rem;
     font-weight: 500;
   }
-  
+
   .section-btn-value {
     font-size: 0.7rem;
     background-color: rgba(255, 255, 255, 0.2);
@@ -816,8 +815,7 @@ button:disabled {
     border-radius: 10px;
     min-width: 20px;
   }
-  
-  
+
   /* Roll button container */
   .roll-button-container {
     position: relative;
@@ -825,7 +823,7 @@ button:disabled {
     align-items: center;
     justify-content: center;
   }
-  
+
   /* Roll button */
   .bottom-roll-button {
     background-color: #007bff;
@@ -841,17 +839,17 @@ button:disabled {
     width: 100%;
     max-width: 160px;
   }
-  
+
   .bottom-roll-button:hover:not(:disabled) {
     background-color: #0056b3;
     transform: translateY(-1px);
   }
-  
+
   .bottom-roll-button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }
-  
+
   /* Multiplayer indicator next to roll button */
   .multiplayer-indicator {
     position: absolute;
@@ -872,31 +870,31 @@ button:disabled {
     height: 24px;
     justify-content: center;
   }
-  
+
   .multiplayer-indicator:hover {
     background-color: rgba(0, 0, 0, 0.9);
     border-color: rgba(255, 255, 255, 0.5);
     transform: scale(1.1);
   }
-  
+
   .multiplayer-indicator.connected {
     border-color: #28a745;
   }
-  
+
   .multiplayer-indicator.connecting {
     border-color: #ffc107;
   }
-  
+
   .multiplayer-indicator.disconnected,
   .multiplayer-indicator.error {
     border-color: #dc3545;
   }
-  
+
   .player-count {
     font-weight: bold;
     font-size: 0.75rem;
   }
-  
+
   /* Mobile dialogs */
   .mobile-dialog {
     position: fixed;
@@ -911,7 +909,7 @@ button:disabled {
     max-height: 60vh;
     overflow-y: auto;
   }
-  
+
   .dialog-header {
     display: flex;
     justify-content: space-between;
@@ -919,13 +917,13 @@ button:disabled {
     padding: 1rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   }
-  
+
   .dialog-header h3 {
     margin: 0;
     color: white;
     font-size: 1.2rem;
   }
-  
+
   .dialog-close {
     background: none;
     border: none;
@@ -941,30 +939,30 @@ button:disabled {
     justify-content: center;
     transition: background-color 0.2s;
   }
-  
+
   .dialog-close:hover {
     background-color: rgba(255, 255, 255, 0.1);
   }
-  
+
   .dialog-content {
     padding: 1rem;
   }
-  
+
   .dialog-section {
     margin-bottom: 1.5rem;
   }
-  
+
   .dialog-section:last-child {
     margin-bottom: 0;
   }
-  
+
   .dialog-section label {
     display: block;
     color: white;
     font-weight: 500;
     margin-bottom: 0.5rem;
   }
-  
+
   /* Dialog controls */
   .modifier-controls-dialog {
     display: flex;
@@ -972,7 +970,7 @@ button:disabled {
     justify-content: center;
     gap: 1rem;
   }
-  
+
   .modifier-btn-dialog {
     background-color: #6c757d;
     color: white;
@@ -989,11 +987,11 @@ button:disabled {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s;
   }
-  
+
   .modifier-btn-dialog:hover {
     background-color: #5a6268;
   }
-  
+
   .modifier-display-dialog {
     min-width: 60px;
     text-align: center;
@@ -1001,7 +999,7 @@ button:disabled {
     font-size: 1.5rem;
     color: white;
   }
-  
+
   .clear-all-btn {
     background-color: #6c757d;
     color: white;
@@ -1014,11 +1012,11 @@ button:disabled {
     width: 100%;
     transition: background-color 0.3s;
   }
-  
+
   .clear-all-btn:hover {
     background-color: #5a6268;
   }
-  
+
   .action-btn {
     background-color: rgba(255, 255, 255, 0.1);
     color: white;
@@ -1033,87 +1031,87 @@ button:disabled {
     font-size: 1rem;
     transition: all 0.3s;
   }
-  
+
   .action-btn:hover {
     background-color: rgba(255, 255, 255, 0.2);
     border-color: rgba(255, 255, 255, 0.5);
   }
-  
+
   .action-btn-icon {
     height: 24px;
     width: 24px;
     filter: brightness(0) invert(1);
   }
-  
+
   /* History dialog specific styles */
   .mobile-dialog-history {
     max-height: 70vh;
   }
-  
+
   .empty-history {
     text-align: center;
     color: rgba(255, 255, 255, 0.7);
     padding: 2rem;
     font-style: italic;
   }
-  
+
   .history-list {
     max-height: 50vh;
     overflow-y: auto;
   }
-  
+
   .history-item-dialog {
     padding: 0.75rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     transition: opacity 0.3s ease;
   }
-  
+
   .history-item-dialog:last-child {
     border-bottom: none;
   }
-  
+
   .history-item-dialog .player-name-line {
     font-size: 0.8rem;
     color: #007bff;
     font-weight: 500;
     margin-bottom: 0.25rem;
   }
-  
+
   .history-item-dialog .roll-details {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-  
+
   .history-item-dialog .dice-values {
     display: flex;
     gap: 0.75rem;
     font-size: 1rem;
   }
-  
+
   .history-item-dialog .hope {
     color: #4caf50;
     font-weight: bold;
   }
-  
+
   .history-item-dialog .fear {
     color: #f44336;
     font-weight: bold;
   }
-  
+
   .history-item-dialog .advantage {
     color: #90ee90;
   }
-  
+
   .history-item-dialog .disadvantage {
     color: #ffb3b3;
   }
-  
+
   .history-item-dialog .outcome {
     font-weight: bold;
     text-align: right;
   }
-  
+
   /* Dialog backdrop */
   .dialog-backdrop {
     position: fixed;
@@ -1124,41 +1122,41 @@ button:disabled {
     background-color: rgba(0, 0, 0, 0.3);
     z-index: 34;
   }
-  
+
   /* Adjust dice container for mobile bottom bar */
   .dice-container {
     margin-bottom: 100px; /* Space for bottom bar */
   }
-  
+
   /* Hide original history toggle and panel on mobile */
   .history-toggle {
     display: none;
   }
-  
+
   .roll-history-panel {
     display: none;
   }
-  
+
   /* Adjust logo and result for mobile */
   .logo-text {
     max-height: 100px;
     top: 5px;
   }
-  
+
   .logo-only {
     max-height: 40px;
     margin-right: 0.5rem;
   }
-  
+
   h1 {
     font-size: 2rem;
   }
-  
+
   .result-container {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   /* Toast positioning for mobile */
   .toast-container {
     top: 4rem;
@@ -1167,16 +1165,20 @@ button:disabled {
     transform: none;
     max-width: none;
   }
-  
-  /* Adjust header heights for mobile */
+
+  /* Adjust header for mobile */
+  .header {
+    padding: 1rem; /* Reset to normal padding on mobile since buttons are hidden */
+  }
+
   .header.no-result {
-    height: 35px;
+    min-height: 35px;
   }
-  
+
   .header.has-result {
-    height: 70px;
+    min-height: 70px;
   }
-  
+
   /* Hide desktop elements on mobile */
   .desktop-session-panel,
   .desktop-session-backdrop,
@@ -1184,7 +1186,7 @@ button:disabled {
   .desktop-dialog-close {
     display: none !important;
   }
-  
+
   /* Show mobile session panel */
   .mobile-session-panel {
     display: block;
@@ -1203,7 +1205,7 @@ button:disabled {
     box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.5);
     background-color: rgba(0, 0, 0, 0.95);
   }
-  
+
   /* Show mobile session backdrop */
   .mobile-session-backdrop {
     display: block;
@@ -1215,28 +1217,28 @@ button:disabled {
   .container {
     padding: 0;
   }
-  
+
   /* Smaller section buttons */
   .bottom-section-btn {
     padding: 0.5rem;
     max-width: 80px;
   }
-  
+
   .section-btn-icon {
     font-size: 1rem;
   }
-  
+
   .section-btn-text {
     font-size: 0.7rem;
   }
-  
+
   /* Smaller roll button */
   .bottom-roll-button {
     padding: 0.875rem 1.5rem;
     font-size: 1.1rem;
     max-width: 140px;
   }
-  
+
   /* Smaller multiplayer indicator */
   .multiplayer-indicator {
     bottom: -6px;
@@ -1246,64 +1248,64 @@ button:disabled {
     min-width: 20px;
     height: 20px;
   }
-  
+
   .player-count {
     font-size: 0.65rem;
   }
-  
+
   /* Smaller dialog elements */
   .dialog-header {
     padding: 0.75rem;
   }
-  
+
   .dialog-header h3 {
     font-size: 1.1rem;
   }
-  
+
   .dialog-content {
     padding: 0.75rem;
   }
-  
+
   .modifier-btn-dialog {
     width: 45px;
     height: 45px;
     font-size: 1.3rem;
   }
-  
+
   .modifier-display-dialog {
     font-size: 1.3rem;
     min-width: 50px;
   }
-  
+
   .action-btn {
     padding: 0.875rem;
     font-size: 0.9rem;
   }
-  
+
   .action-btn-icon {
     height: 20px;
     width: 20px;
   }
-  
+
   h1 {
     font-size: 1.75rem;
   }
-  
+
   .session-panel {
     padding: 1rem;
   }
-  
+
   /* Adjust spacing for small screens */
   .dice-container {
     margin-bottom: 95px; /* Slightly less space for smaller bottom bar */
   }
-  
+
   .mobile-session-panel {
     bottom: 85px;
     width: 95%;
     max-width: 350px;
   }
-  
+
   .mobile-dialog {
     bottom: 85px;
   }
@@ -1358,7 +1360,11 @@ button:disabled {
 
 .toast.roll {
   border-left-color: #6f42c1;
-  background: linear-gradient(135deg, rgba(111, 66, 193, 0.9), rgba(138, 43, 226, 0.9));
+  background: linear-gradient(
+    135deg,
+    rgba(111, 66, 193, 0.9),
+    rgba(138, 43, 226, 0.9)
+  );
 }
 
 .toast-content {
