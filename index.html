@@ -27,6 +27,24 @@
     </div>
 
     <div class="container" x-data="diceRoller()" x-init="init()" x-cloak>
+      <!-- Desktop multiplayer button (top-left) -->
+      <div x-show="sessionFeaturesAvailable" class="desktop-multiplayer-button">
+        <button @click="toggleSessionUI()" class="multiplayer-top-btn">
+          <span x-show="sessionMode === 'solo'">🎲 Play with Friends</span>
+          <span x-show="sessionMode === 'multiplayer'">
+            <span x-show="connectionStatus === 'connected'">🟢</span>
+            <span x-show="connectionStatus === 'connecting'">🟡</span>
+            <span
+              x-show="connectionStatus === 'disconnected' || connectionStatus === 'error'"
+              >🔴</span
+            >
+            <span
+              x-text="connectedPlayers.length === 0 ? 'Waiting for others...' : 'Playing with Friends (' + (connectedPlayers.length + 1) + ')'"
+            ></span>
+          </span>
+        </button>
+      </div>
+
       <div
         class="header"
         :class="{ 'no-result': !result, 'has-result': result }"
@@ -118,23 +136,6 @@
         <button @click="rollDice()" :disabled="isRolling" class="roll-button">
           <span x-text="isRolling ? 'Rolling...' : 'Roll Dice'"></span>
         </button>
-        <!-- ===== NEW: OPTIONAL SESSION PANEL ===== -->
-        <div x-show="sessionFeaturesAvailable" class="session-toggle-container">
-          <button @click="toggleSessionUI()" class="session-toggle-btn">
-            <span x-show="sessionMode === 'solo'">🎲 Play with Friends</span>
-            <span x-show="sessionMode === 'multiplayer'">
-              <span x-show="connectionStatus === 'connected'">🟢</span>
-              <span x-show="connectionStatus === 'connecting'">🟡</span>
-              <span
-                x-show="connectionStatus === 'disconnected' || connectionStatus === 'error'"
-                >🔴</span
-              >
-              <span
-                x-text="connectedPlayers.length === 0 ? 'Waiting for others...' : 'Playing with Friends (' + (connectedPlayers.length + 1) + ')'"
-              ></span>
-            </span>
-          </button>
-        </div>
       </div>
 
       <!-- Mobile bottom bar -->
@@ -419,11 +420,35 @@
         ></div>
       </div>
 
+      <!-- Desktop session panel backdrop -->
+      <div
+        class="desktop-session-backdrop"
+        x-show="showSessionUI && sessionFeaturesAvailable"
+        @click="toggleSessionUI()"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-300"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+      ></div>
+
       <!-- Desktop session panel -->
       <div
         x-show="showSessionUI && sessionFeaturesAvailable"
         class="session-panel desktop-session-panel"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 transform scale-95"
+        x-transition:enter-end="opacity-100 transform scale-100"
+        x-transition:leave="transition ease-in duration-300"
+        x-transition:leave-start="opacity-100 transform scale-100"
+        x-transition:leave-end="opacity-0 transform scale-95"
+        @keydown.escape.window="showSessionUI && toggleSessionUI()"
       >
+        <!-- Close button for desktop -->
+        <button @click="toggleSessionUI()" class="desktop-dialog-close" title="Close">
+          ✕
+        </button>
         <!-- Solo mode: session creation/joining -->
         <div x-show="sessionMode === 'solo'" class="session-join">
           <h3>Multiplayer Room</h3>
