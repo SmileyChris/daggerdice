@@ -2138,3 +2138,150 @@ button:disabled {
   height: 1.2rem;
   accent-color: #8e44ad; /* Purple to match GM theme */
 }
+
+/* Keyboard Shortcuts Help Dialog */
+.keyboard-help-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.keyboard-help-dialog {
+  background-color: rgba(0, 0, 0, 0.7);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.keyboard-help-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.keyboard-help-header h3 {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.close-dialog-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.close-dialog-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.keyboard-help-content {
+  padding: 20px 24px 24px;
+}
+
+.shortcut-section {
+  margin-bottom: 24px;
+}
+
+.shortcut-section:last-child {
+  margin-bottom: 0;
+}
+
+.shortcut-section h4 {
+  margin: 0 0 12px 0;
+  color: var(--accent-color);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 4px 0;
+}
+
+.shortcut-item:last-child {
+  margin-bottom: 0;
+}
+
+.shortcut-item kbd {
+  background: var(--accent-color);
+  color: var(--bg-color);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  min-width: 32px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.shortcut-item span {
+  color: var(--text-color);
+  font-size: 0.95rem;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .keyboard-help-overlay {
+    padding: 16px;
+  }
+  
+  .keyboard-help-dialog {
+    max-height: 85vh;
+  }
+  
+  .keyboard-help-header {
+    padding: 16px 20px 12px;
+  }
+  
+  .keyboard-help-header h3 {
+    font-size: 1.3rem;
+  }
+  
+  .keyboard-help-content {
+    padding: 16px 20px 20px;
+  }
+  
+  .shortcut-section {
+    margin-bottom: 20px;
+  }
+  
+  .shortcut-item {
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .shortcut-item kbd {
+    min-width: 28px;
+    padding: 3px 6px;
+    font-size: 0.85rem;
+  }
+  
+  .shortcut-item span {
+    font-size: 0.9rem;
+  }
+}

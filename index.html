@@ -1299,6 +1299,87 @@
       </div>
     </div>
 
+    <!-- Keyboard Shortcuts Help Dialog -->
+    <div 
+      x-data="diceRoller()"
+      class="keyboard-help-overlay"
+      x-show="showKeyboardHelp"
+      @click.self="showKeyboardHelp = false"
+      x-transition:enter="transition ease-out duration-200"
+      x-transition:enter-start="opacity-0"
+      x-transition:enter-end="opacity-100"
+      x-transition:leave="transition ease-in duration-150"
+      x-transition:leave-start="opacity-100"
+      x-transition:leave-end="opacity-0"
+    >
+      <div class="keyboard-help-dialog">
+        <div class="keyboard-help-header">
+          <h3>Keyboard Shortcuts</h3>
+          <button 
+            @click="showKeyboardHelp = false"
+            class="close-dialog-btn"
+            title="Close"
+          >
+            ✕
+          </button>
+        </div>
+        
+        <div class="keyboard-help-content">
+          <div class="shortcut-section">
+            <h4>Roll Types</h4>
+            <div class="shortcut-item">
+              <kbd>C</kbd>
+              <span>Switch to Check rolls</span>
+            </div>
+            <div class="shortcut-item">
+              <kbd>D</kbd>
+              <span>Switch to Damage rolls</span>
+            </div>
+            <div class="shortcut-item">
+              <kbd>G</kbd>
+              <span>Switch to GM rolls</span>
+            </div>
+          </div>
+
+          <div class="shortcut-section">
+            <h4>Modifiers</h4>
+            <div class="shortcut-item">
+              <kbd>←</kbd>
+              <span>Decrease modifier (Check/GM)</span>
+            </div>
+            <div class="shortcut-item">
+              <kbd>→</kbd>
+              <span>Increase modifier (Check/GM)</span>
+            </div>
+          </div>
+
+          <div class="shortcut-section">
+            <h4>Actions</h4>
+            <div class="shortcut-item">
+              <kbd>Space</kbd>
+              <span>Roll dice</span>
+            </div>
+            <div class="shortcut-item">
+              <kbd>H</kbd>
+              <span>Toggle roll history</span>
+            </div>
+            <div class="shortcut-item">
+              <kbd>M</kbd>
+              <span>Toggle multiplayer panel</span>
+            </div>
+            <div class="shortcut-item">
+              <kbd>?</kbd>
+              <span>Show this help</span>
+            </div>
+            <div class="shortcut-item">
+              <kbd>Esc</kbd>
+              <span>Close dialogs</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Import the built JavaScript module -->
     <script type="module" src="/src/dice-roller-main.ts"></script>
   </body>

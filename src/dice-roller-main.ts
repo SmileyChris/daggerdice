@@ -190,6 +190,7 @@ function diceRoller() {
     sessionFeaturesAvailable: true,
     connectionStatus: "disconnected" as "disconnected" | "connecting" | "connected" | "error",
     initialized: false,
+    showKeyboardHelp: false,
 
     setAdvantageType(type: "none" | "advantage" | "disadvantage") {
       this.advantageType = type;
@@ -861,6 +862,94 @@ function diceRoller() {
           }, 100);
         }
       }
+      
+      // Setup keyboard shortcuts
+      this.setupKeyboardShortcuts();
+    },
+
+    setupKeyboardShortcuts() {
+      document.addEventListener('keydown', (event) => {
+        // Ignore shortcuts when typing in inputs or textareas
+        const activeElement = document.activeElement;
+        if (activeElement && (
+          activeElement.tagName === 'INPUT' || 
+          activeElement.tagName === 'TEXTAREA' ||
+          activeElement.tagName === 'SELECT' ||
+          activeElement.isContentEditable
+        )) {
+          return;
+        }
+
+        // Ignore if currently rolling
+        if (this.isRolling) {
+          return;
+        }
+
+        const key = event.key.toLowerCase();
+        
+        // Tab switching: C (Check), D (Damage), G (GM)
+        if (key === 'c') {
+          event.preventDefault();
+          this.setRollType('check');
+        } else if (key === 'd') {
+          event.preventDefault();
+          this.setRollType('damage');
+        } else if (key === 'g') {
+          event.preventDefault();
+          this.setRollType('gm');
+        }
+        
+        // Modifier changes with arrow keys
+        else if (key === 'arrowleft') {
+          event.preventDefault();
+          if (this.rollType === 'check') {
+            this.modifier = Math.max(this.modifier - 1, -20);
+          } else if (this.rollType === 'gm') {
+            this.gmModifier = Math.max(this.gmModifier - 1, -20);
+          }
+        } else if (key === 'arrowright') {
+          event.preventDefault();
+          if (this.rollType === 'check') {
+            this.modifier = Math.min(this.modifier + 1, 20);
+          } else if (this.rollType === 'gm') {
+            this.gmModifier = Math.min(this.gmModifier + 1, 20);
+          }
+        }
+        
+        // Roll dice with spacebar
+        else if (key === ' ') {
+          event.preventDefault();
+          this.rollDice();
+        }
+        
+        // Toggle history with H
+        else if (key === 'h') {
+          event.preventDefault();
+          this.toggleHistory();
+        }
+        
+        // Toggle multiplayer/session UI with M
+        else if (key === 'm') {
+          event.preventDefault();
+          if (this.sessionFeaturesAvailable) {
+            this.toggleSessionUI();
+          }
+        }
+        
+        // Show keyboard help with ?
+        else if (key === '?' || (event.shiftKey && key === '/')) {
+          event.preventDefault();
+          this.showKeyboardHelp = true;
+        }
+        
+        // Close dialogs with escape
+        else if (key === 'escape') {
+          event.preventDefault();
+          if (this.showKeyboardHelp) {
+            this.showKeyboardHelp = false;
+          }
+        }
+      });
     },
 
     // Mobile dialog transition methods
