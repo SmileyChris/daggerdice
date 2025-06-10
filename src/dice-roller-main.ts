@@ -419,7 +419,15 @@ function diceRoller() {
         resultParts.push(`${bonusDieValue}`);
       }
 
-      let resultText = resultParts.join(" + ") + ` = ${totalDamage}`;
+      let resultText;
+      
+      // Only show calculation if there are multiple parts or modifiers
+      if (resultParts.length > 1 || this.isCritical || this.hasResistance) {
+        resultText = resultParts.join(" + ") + ` = ${totalDamage}`;
+      } else {
+        // Just show the single value
+        resultText = `${totalDamage}`;
+      }
       
       if (this.hasResistance) {
         resultText += ` → ${finalDamage}`;
@@ -458,9 +466,9 @@ function diceRoller() {
 
       const finalTotal = this.d20Value + this.gmModifier;
       
-      let resultText = `d20: ${this.d20Value}`;
+      let resultText = `${this.d20Value}`;
       if (this.gmModifier !== 0) {
-        resultText += ` ${this.gmModifier > 0 ? "+" : ""}${this.gmModifier} = ${finalTotal}`;
+        resultText += ` <small>${this.gmModifier > 0 ? "+" : ""}${this.gmModifier}</small> = ${finalTotal}`;
       }
 
       this.result = resultText;
@@ -544,7 +552,7 @@ function diceRoller() {
         // Fallback for GM rolls
         this.d20Value = Math.floor(Math.random() * 20) + 1;
         const finalTotal = this.d20Value + this.gmModifier;
-        this.result = `d20: ${this.d20Value} + ${this.gmModifier} = ${finalTotal}`;
+        this.result = `${this.d20Value} <small>+${this.gmModifier}</small> = ${finalTotal}`;
       }
       // Damage rolls fallback would be more complex, keeping simple for now
     },
