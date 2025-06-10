@@ -885,6 +885,11 @@ function diceRoller() {
           return;
         }
 
+        // For space key, also ignore if a button has focus to prevent double-triggering
+        if (event.key === ' ' && activeElement && activeElement.tagName === 'BUTTON') {
+          return;
+        }
+
         const key = event.key.toLowerCase();
         
         // Tab switching: C (Check), D (Damage), G (GM)
@@ -917,7 +922,7 @@ function diceRoller() {
         }
         
         // Roll dice with spacebar
-        else if (key === ' ') {
+        else if (key === ' ' || key === 'space') {
           event.preventDefault();
           this.rollDice();
         }
