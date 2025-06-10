@@ -9,13 +9,30 @@ export interface Player {
 }
 
 export interface RollData {
-  hopeValue: number;
-  fearValue: number;
-  advantageValue: number;
-  advantageType: "none" | "advantage" | "disadvantage";
-  modifier: number;
+  rollType: "check" | "damage" | "gm";
   total: number;
   result: string;
+  
+  // Check roll fields (Hope/Fear system)
+  hopeValue?: number;
+  fearValue?: number;
+  advantageValue?: number;
+  advantageType?: "none" | "advantage" | "disadvantage";
+  modifier?: number;
+  
+  // Damage roll fields
+  baseDiceCount?: number;
+  baseDiceType?: 4 | 6 | 8 | 10 | 12;
+  baseDiceValues?: number[];
+  bonusDieEnabled?: boolean;
+  bonusDieType?: 4 | 6 | 8 | 10 | 12;
+  bonusDieValue?: number;
+  isCritical?: boolean;
+  hasResistance?: boolean;
+  
+  // GM roll fields
+  d20Value?: number;
+  gmModifier?: number;
 }
 
 export interface SharedRollHistoryItem extends RollData {
@@ -47,7 +64,7 @@ export type ServerMessage = ClientMessage;
 // Session client event types
 export interface SessionEventHandlers {
   onConnected?: (playerId: string) => void;
-  onPlayerJoined?: (player: Player) => void;
+  onPlayerJoined?: (player: Player, isInitialResponse?: boolean) => void;
   onPlayerLeft?: (playerId: string) => void;
   onRollReceived?: (roll: SharedRollHistoryItem) => void;
   onHistoryReceived?: (rolls: SharedRollHistoryItem[]) => void;

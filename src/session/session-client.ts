@@ -342,7 +342,7 @@ export class SessionClient {
         if (message.player.id !== this.playerId) {
           // Add to our player list
           this.connectedPlayers.set(message.player.id, message.player);
-          this.eventHandlers.onPlayerJoined?.(message.player);
+          this.eventHandlers.onPlayerJoined?.(message.player, false); // New join, not initial response
           
           // Send our player info back to the new player
           if (this.playerId && this.playerName) {
@@ -384,7 +384,7 @@ export class SessionClient {
           this.connectedPlayers.set(message.player.id, message.player);
           // Only trigger onPlayerJoined if this is a new player (not already triggered by JOIN_ANNOUNCEMENT)
           if (!wasAlreadyKnown) {
-            this.eventHandlers.onPlayerJoined?.(message.player);
+            this.eventHandlers.onPlayerJoined?.(message.player, true); // Initial response from existing player
           }
         }
         break;

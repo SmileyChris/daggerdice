@@ -692,11 +692,21 @@ function diceRoller() {
           this.connectionStatus = "connected";
         },
         
-        onPlayerJoined: (player: Player) => {
-          console.log('Player joined:', player.name);
+        onPlayerJoined: (player: Player, isInitialResponse?: boolean) => {
+          console.log('Player joined:', player.name, 'Initial response:', isInitialResponse);
           const existingIndex = this.connectedPlayers.findIndex(p => p.id === player.id);
-          if (existingIndex === -1) {
+          const isNewPlayer = existingIndex === -1;
+          
+          if (isNewPlayer) {
             this.connectedPlayers.push(player);
+            
+            // Show toast notification for new players (but not for ourselves when first joining)
+            // Don't show toasts for initial responses (existing players telling us they're here)
+            if (this.sessionClient && player.id !== this.sessionClient.getPlayerId() && !isInitialResponse) {
+              if (globalToastManager) {
+                globalToastManager.show('info', `<strong>${player.name}</strong> joined the room`, 4000);
+              }
+            }
           } else {
             this.connectedPlayers[existingIndex] = player;
           }
@@ -704,6 +714,13 @@ function diceRoller() {
         
         onPlayerLeft: (playerId: string) => {
           console.log('Player left:', playerId);
+          
+          // Find the player who left to show their name in the toast
+          const leavingPlayer = this.connectedPlayers.find(p => p.id === playerId);
+          if (leavingPlayer && globalToastManager) {
+            globalToastManager.show('info', `<strong>${leavingPlayer.name}</strong> left the room`, 4000);
+          }
+          
           this.connectedPlayers = this.connectedPlayers.filter(p => p.id !== playerId);
         },
         
