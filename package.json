@@ -7,14 +7,26 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:workers": "vitest --config vitest.workers.config.ts",
+    "test:workers:run": "vitest run --config vitest.workers.config.ts",
+    "test:all": "npm run test:run && npm run test:workers:run",
     "deploy": "npm run build && wrangler deploy",
     "dev:worker": "wrangler dev",
     "verify": "curl -s -o /dev/null -w \"%{http_code}\" https://daggerdice.chris-personal-account-072.workers.dev"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.5.0",
+    "@cloudflare/vitest-pool-workers": "^0.8.36",
+    "@testing-library/dom": "^10.4.0",
+    "@vitest/ui": "^3.2.3",
+    "happy-dom": "^17.6.3",
+    "jsdom": "^26.1.0",
     "typescript": "~5.8.3",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "vitest": "^3.2.3"
   },
   "dependencies": {
     "@3d-dice/dice-box": "^1.1.4",

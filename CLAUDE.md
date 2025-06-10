@@ -7,7 +7,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run dev` - Start development server with hot reload
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build locally
-- `npm run build` after making changes
+- `npm run test` - Run frontend tests in watch mode
+- `npm run test:run` - Run frontend tests once
+- `npm run test:ui` - Run frontend tests with interactive UI
+- `npm run test:workers` - Run Cloudflare Workers tests in watch mode
+- `npm run test:workers:run` - Run Workers tests once
+- `npm run test:all` - Run both frontend and Workers tests
 
 ## Project Architecture
 
@@ -52,3 +57,7 @@ Alpine.js manages all reactive state:
 - **TypeScript**: Strict typing with custom global declarations for DiceBox
 - **Asset handling**: Static assets served from `/public/assets/`
 - **Module imports**: ES modules with proper Alpine.js and DiceBox integration
+
+## Development workflow
+
+Always run `npm run build` after making changes.
