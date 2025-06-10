@@ -19,7 +19,9 @@
       "Bash(git commit:*)",
       "Bash(rg:*)",
       "Bash(npm run test:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(ls:*)",
+      "Bash(npm run:*)"
     ]
   },
   "enableAllProjectMcpServers": false
