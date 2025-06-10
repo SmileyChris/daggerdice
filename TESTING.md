@@ -163,11 +163,11 @@ it('should validate session ID format', async () => {
 
 ### CI/CD Integration
 
-The project uses GitHub Actions for automated testing and deployment. Tests run automatically on:
+The project uses GitHub Actions for automated testing, with Cloudflare Workers handling deployment. Tests run automatically on:
 
-- **Push to main/develop**: Full test suite + deployment (main only)
-- **Pull Requests**: Test coverage, quality checks, and security audit
-- **Manual trigger**: Deploy workflow can be triggered manually
+- **Push to main/develop**: Full test suite + build verification
+- **Pull Requests**: Test coverage, quality checks, and security audit  
+- **Manual trigger**: Test workflow can be triggered manually
 
 #### GitHub Actions Workflows
 
@@ -175,17 +175,20 @@ The project uses GitHub Actions for automated testing and deployment. Tests run 
    - Runs frontend and Workers tests in parallel
    - Verifies build succeeds
    - Uploads build artifacts
+   - Provides test summary
 
 2. **`pr-checks.yml`** - Pull request validation
-   - Comprehensive test coverage
-   - Security audit
-   - Dependency checks
-   - Automated PR comments with results
+   - Comprehensive test coverage (all 69 tests)
+   - Security audit and dependency checks
+   - Automated PR comments with detailed results
+   - Quality gate before merging
 
-3. **`deploy.yml`** - Production deployment
-   - Tests → Build → Deploy → Verify
-   - Automatic deployment to Cloudflare Workers
-   - Deployment status tracking
+#### Deployment
+
+Cloudflare Workers handles deployment automatically via GitHub integration:
+- Deploys when main branch is updated
+- No additional CI/CD configuration needed
+- No repository secrets required
 
 #### Test Results
 ```bash
@@ -198,9 +201,8 @@ Expected output:
 - Workers Tests: 20/20 passing
 - **Total: 69 tests passing**
 
-#### Required Repository Secrets
-- `CLOUDFLARE_API_TOKEN`: Workers deployment permissions
-- `CLOUDFLARE_ACCOUNT_ID`: Target Cloudflare account
+#### No Additional Setup Required
+Since Cloudflare Workers handles deployment via GitHub integration, no repository secrets are needed for the CI/CD pipeline.
 
 ## Test Configuration
 
