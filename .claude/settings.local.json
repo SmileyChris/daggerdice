@@ -15,7 +15,11 @@
       "WebFetch(domain:www.daggerheart.com)",
       "Bash(ag:*)",
       "Bash(npm run test:run:*)",
-      "Bash(npm run test:workers:run:*)"
+      "Bash(npm run test:workers:run:*)",
+      "Bash(git commit:*)",
+      "Bash(rg:*)",
+      "Bash(npm run test:*)",
+      "Bash(git push:*)"
     ]
   },
   "enableAllProjectMcpServers": false
