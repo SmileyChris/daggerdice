@@ -15,7 +15,7 @@
     "test:all": "npm run test:run && npm run test:workers:run",
     "deploy": "npm run build && wrangler deploy",
     "dev:worker": "wrangler dev",
-    "verify": "curl -s -o /dev/null -w \"%{http_code}\" https://daggerdice.chris-personal-account-072.workers.dev"
+    "verify": "curl -s -o /dev/null -w \"%{http_code}\" https://daggerdice.smileychris.workers.dev"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.5.0",

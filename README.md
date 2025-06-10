@@ -78,7 +78,14 @@ public/
         ├── default/    # Standard dice appearance
         └── smooth/     # Smoother dice appearance
 
+docs/                   # MkDocs documentation system
+├── index.md           # Documentation homepage
+├── getting-started.md # Setup and usage guide
+├── features.md        # Feature documentation
+└── development.md     # Developer documentation
+
 index.html              # Single-page application template
+mkdocs.yml             # Documentation site configuration
 ```
 
 ## Game Mechanics
