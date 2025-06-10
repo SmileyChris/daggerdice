@@ -79,24 +79,21 @@
           <button
             @click="setRollType('check')"
             :class="{ 'active': rollType === 'check' }"
-            class="roll-type-btn"
-            :disabled="isRolling"
+            class="roll-type-btn check-tab"
           >
             Check
           </button>
           <button
             @click="setRollType('damage')"
             :class="{ 'active': rollType === 'damage' }"
-            class="roll-type-btn"
-            :disabled="isRolling"
+            class="roll-type-btn damage-tab"
           >
             Damage
           </button>
           <button
             @click="setRollType('gm')"
             :class="{ 'active': rollType === 'gm' }"
-            class="roll-type-btn"
-            :disabled="isRolling"
+            class="roll-type-btn gm-tab"
           >
             GM
           </button>
@@ -211,7 +208,7 @@
                   :checked="bonusDieEnabled"
                   :disabled="isRolling"
                 />
-                Bonus Die:
+                Bonus Die
               </label>
               <select
                 x-show="bonusDieEnabled"
@@ -302,6 +299,77 @@
         class="mobile-bottom-bar"
         x-data="{ showModifiers: false, showActions: false, showHistoryDialog: false }"
       >
+        <!-- Mobile Roll Type Tab Selector (at top of bottom area) -->
+        <div class="roll-type-selector mobile-controls">
+          <div class="roll-type-buttons">
+            <button
+              @click="setRollType('check')"
+              :class="{ 'active': rollType === 'check' }"
+              class="roll-type-btn check-tab"
+            >
+              Check
+            </button>
+            <button
+              @click="setRollType('damage')"
+              :class="{ 'active': rollType === 'damage' }"
+              class="roll-type-btn damage-tab"
+            >
+              Damage
+            </button>
+            <button
+              @click="setRollType('gm')"
+              :class="{ 'active': rollType === 'gm' }"
+              class="roll-type-btn gm-tab"
+            >
+              GM
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile base dice controls (shown below damage tab) -->
+        <div
+          class="mobile-base-dice-controls"
+          x-show="rollType === 'damage'"
+          x-transition:enter="transition ease-out duration-200"
+          x-transition:enter-start="opacity-0 transform -translate-y-2"
+          x-transition:enter-end="opacity-100 transform translate-y-0"
+          x-transition:leave="transition ease-in duration-200"
+          x-transition:leave-start="opacity-100 transform translate-y-0"
+          x-transition:leave-end="opacity-0 transform -translate-y-2"
+        >
+          <div class="base-dice-row">
+            <div class="dice-count-controls">
+              <button
+                @click="setBaseDiceCount(baseDiceCount - 1)"
+                class="dice-control-btn"
+                :disabled="isRolling"
+              >
+                -
+              </button>
+              <span class="dice-count-display" x-text="baseDiceCount"></span>
+              <button
+                @click="setBaseDiceCount(baseDiceCount + 1)"
+                class="dice-control-btn"
+                :disabled="isRolling"
+              >
+                +
+              </button>
+            </div>
+            <select
+              @change="setBaseDiceType(parseInt($event.target.value))"
+              :value="baseDiceType"
+              class="mobile-dice-select"
+              :disabled="isRolling"
+            >
+              <option value="4">d4</option>
+              <option value="6">d6</option>
+              <option value="8">d8</option>
+              <option value="10">d10</option>
+              <option value="12">d12</option>
+            </select>
+          </div>
+        </div>
+
         <!-- Bottom button bar -->
         <div class="bottom-button-bar">
           <!-- Left: Modifiers Button -->
@@ -313,11 +381,15 @@
               title="Modifiers"
             >
               <div class="section-btn-content">
-                <span class="section-btn-icon">⚙️</span>
+                <img
+                  src="/assets/icons/gear.png"
+                  alt="Mods"
+                  class="section-btn-icon"
+                />
                 <span class="section-btn-text">Mods</span>
                 <span
                   class="section-btn-value"
-                  x-show="(rollType === 'check' && (modifier !== 0 || advantageType !== 'none')) || (rollType === 'gm' && gmModifier !== 0)"
+                  x-show="(rollType === 'check' && (modifier !== 0 || advantageType !== 'none')) || (rollType === 'gm' && gmModifier !== 0) || (rollType === 'damage' && (bonusDieEnabled || isCritical || hasResistance))"
                 >
                   <!-- Check roll modifiers -->
                   <template x-if="rollType === 'check'">
@@ -337,6 +409,14 @@
                         >+<span x-text="gmModifier"></span
                       ></span>
                       <span x-show="gmModifier < 0" x-text="gmModifier"></span>
+                    </span>
+                  </template>
+                  <!-- Damage roll modifiers -->
+                  <template x-if="rollType === 'damage'">
+                    <span>
+                      <span x-show="bonusDieEnabled">B</span>
+                      <span x-show="isCritical">C</span>
+                      <span x-show="hasResistance">R</span>
                     </span>
                   </template>
                 </span>
@@ -386,7 +466,11 @@
               title="History & Multiplayer"
             >
               <div class="section-btn-content">
-                <span class="section-btn-icon">📋</span>
+                <img
+                  src="/assets/icons/more.png"
+                  alt="More"
+                  class="section-btn-icon"
+                />
                 <span class="section-btn-text">More</span>
               </div>
             </button>
@@ -413,39 +497,20 @@
           </div>
 
           <div class="dialog-content">
-            <!-- Roll Type Selector -->
-            <div class="dialog-section">
-              <label>Dice Type:</label>
-              <div class="toggle-buttons">
-                <button
-                  @click="setRollType('check')"
-                  :class="{ 'active': rollType === 'check' }"
-                  class="toggle-btn"
-                  :disabled="isRolling"
-                >
-                  Check
-                </button>
-                <button
-                  @click="setRollType('damage')"
-                  :class="{ 'active': rollType === 'damage' }"
-                  class="toggle-btn"
-                  :disabled="isRolling"
-                >
-                  Damage
-                </button>
-                <button
-                  @click="setRollType('gm')"
-                  :class="{ 'active': rollType === 'gm' }"
-                  class="toggle-btn"
-                  :disabled="isRolling"
-                >
-                  GM
-                </button>
-              </div>
-            </div>
-
             <!-- Check Roll Controls -->
             <div x-show="rollType === 'check'">
+              <!-- Clear button for Check rolls -->
+              <div class="dialog-section">
+                <button
+                  @click="modifier = 0; advantageType = 'none'; showModifiers = false"
+                  class="clear-all-btn"
+                  x-show="modifier !== 0 || advantageType !== 'none'"
+                  title="Clear all modifiers"
+                >
+                  🔄 Clear All Modifiers
+                </button>
+              </div>
+
               <!-- Numeric modifier controls -->
               <div class="dialog-section">
                 <label>Numeric Modifier:</label>
@@ -503,56 +568,20 @@
                   </button>
                 </div>
               </div>
-
-              <!-- Clear button for Check rolls -->
-              <div class="dialog-section">
-                <button
-                  @click="modifier = 0; advantageType = 'none'; showModifiers = false"
-                  class="clear-all-btn"
-                  x-show="modifier !== 0 || advantageType !== 'none'"
-                  title="Clear all modifiers"
-                >
-                  🔄 Clear All Modifiers
-                </button>
-              </div>
             </div>
 
             <!-- Damage Roll Controls -->
             <div x-show="rollType === 'damage'">
+              <!-- Clear button for Damage rolls -->
               <div class="dialog-section">
-                <label>Base Dice:</label>
-                <div class="modifier-controls-dialog">
-                  <button
-                    @click="setBaseDiceCount(baseDiceCount - 1)"
-                    class="modifier-btn-dialog"
-                    :disabled="isRolling"
-                  >
-                    -
-                  </button>
-                  <span
-                    class="modifier-display-dialog"
-                    x-text="baseDiceCount"
-                  ></span>
-                  <button
-                    @click="setBaseDiceCount(baseDiceCount + 1)"
-                    class="modifier-btn-dialog"
-                    :disabled="isRolling"
-                  >
-                    +
-                  </button>
-                </div>
-                <select
-                  @change="setBaseDiceType(parseInt($event.target.value))"
-                  :value="baseDiceType"
-                  class="dice-select"
-                  :disabled="isRolling"
+                <button
+                  @click="bonusDieEnabled = false; isCritical = false; hasResistance = false"
+                  class="clear-all-btn"
+                  x-show="bonusDieEnabled || isCritical || hasResistance"
+                  title="Clear options (keeps base dice)"
                 >
-                  <option value="4">d4</option>
-                  <option value="6">d6</option>
-                  <option value="8">d8</option>
-                  <option value="10">d10</option>
-                  <option value="12">d12</option>
-                </select>
+                  🔄 Clear Options
+                </button>
               </div>
 
               <div class="dialog-section">
@@ -600,22 +629,22 @@
                   Resistance
                 </label>
               </div>
-
-              <!-- Clear button for Damage rolls -->
-              <div class="dialog-section">
-                <button
-                  @click="bonusDieEnabled = false; isCritical = false; hasResistance = false"
-                  class="clear-all-btn"
-                  x-show="bonusDieEnabled || isCritical || hasResistance"
-                  title="Clear options (keeps base dice)"
-                >
-                  🔄 Clear Options
-                </button>
-              </div>
             </div>
 
             <!-- GM Roll Controls -->
             <div x-show="rollType === 'gm'">
+              <!-- Clear button for GM rolls -->
+              <div class="dialog-section">
+                <button
+                  @click="gmModifier = 0; showModifiers = false"
+                  class="clear-all-btn"
+                  x-show="gmModifier !== 0"
+                  title="Clear GM modifier"
+                >
+                  🔄 Clear GM Modifier
+                </button>
+              </div>
+
               <div class="dialog-section">
                 <label>D20 Modifier:</label>
                 <div class="modifier-controls-dialog">
@@ -640,18 +669,6 @@
                     +
                   </button>
                 </div>
-              </div>
-
-              <!-- Clear button for GM rolls -->
-              <div class="dialog-section">
-                <button
-                  @click="gmModifier = 0; showModifiers = false"
-                  class="clear-all-btn"
-                  x-show="gmModifier !== 0"
-                  title="Clear GM modifier"
-                >
-                  🔄 Clear GM Modifier
-                </button>
               </div>
             </div>
           </div>
@@ -800,7 +817,8 @@
                             <span
                               x-text="roll.advantageValue > 0 ? 'Adv.' : 'Disadv.'"
                             ></span></span
-                          ><span x-show="roll.modifier !== undefined && roll.modifier !== 0"
+                          ><span
+                            x-show="roll.modifier !== undefined && roll.modifier !== 0"
                             >,
                             <span
                               x-text="(roll.modifier > 0 ? '+' : '') + roll.modifier"
@@ -1207,7 +1225,8 @@
                         <span
                           x-text="roll.advantageValue > 0 ? 'Adv.' : 'Disadv.'"
                         ></span></span
-                      ><span x-show="roll.modifier !== undefined && roll.modifier !== 0"
+                      ><span
+                        x-show="roll.modifier !== undefined && roll.modifier !== 0"
                         >,
                         <span
                           x-text="(roll.modifier > 0 ? '+' : '') + roll.modifier"

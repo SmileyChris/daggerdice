@@ -746,10 +746,8 @@ button:disabled {
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: rgba(0, 0, 0, 0.9);
-    padding: 0.5rem;
+    background: transparent;
     z-index: 30;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
   }
 
   /* Bottom button bar layout */
@@ -758,6 +756,7 @@ button:disabled {
     align-items: center;
     justify-content: space-between;
     padding: 0.75rem;
+    background-color: rgba(0, 0, 0, 0.9);
   }
 
   .bottom-left,
@@ -788,16 +787,19 @@ button:disabled {
     transition: all 0.3s ease;
     width: 100%;
     max-width: 100px;
+    box-shadow: none;
   }
 
   .bottom-section-btn:hover {
     background-color: rgba(255, 255, 255, 0.2);
     border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: none;
   }
 
   .bottom-section-btn.active {
     background-color: #007bff;
     border-color: #007bff;
+    box-shadow: none;
   }
 
   .section-btn-content {
@@ -809,6 +811,8 @@ button:disabled {
 
   .section-btn-icon {
     font-size: 1.2rem;
+    height: 20px;
+    /* filter: brightness(0) invert(1); Make PNG icons white */
   }
 
   .section-btn-text {
@@ -842,7 +846,7 @@ button:disabled {
     font-weight: bold;
     border-radius: 8px;
     cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: none;
     transition: all 0.3s ease;
     width: 100%;
     max-width: 160px;
@@ -851,6 +855,7 @@ button:disabled {
   .bottom-roll-button:hover:not(:disabled) {
     background-color: #0056b3;
     transform: translateY(-1px);
+    box-shadow: none;
   }
 
   .bottom-roll-button:disabled {
@@ -903,10 +908,147 @@ button:disabled {
     font-size: 0.75rem;
   }
 
-  /* Mobile dialogs */
+  /* Mobile specific roll type selector styling */
+  .roll-type-selector.mobile-controls {
+    background: transparent;
+    padding: 0.5rem;
+    padding-bottom: 0;
+  }
+
+  .roll-type-selector.mobile-controls .roll-type-btn {
+    background: rgba(0, 0, 0, 0.3);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0.75rem 1rem;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    min-width: 70px;
+    text-align: center;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-bottom: none;
+    position: relative;
+    flex: 1;
+    font-size: 0.9rem;
+  }
+
+  .roll-type-selector.mobile-controls .roll-type-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Override desktop hover for mobile */
+  .roll-type-selector.mobile-controls .roll-type-btn.check-tab:hover,
+  .roll-type-selector.mobile-controls .roll-type-btn.damage-tab:hover,
+  .roll-type-selector.mobile-controls .roll-type-btn.gm-tab:hover {
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+  }
+
+  .roll-type-selector.mobile-controls .roll-type-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Mobile base dice controls */
+  .mobile-base-dice-controls {
+    background: black;
+    padding: 0.75rem 1rem 0;
+  }
+
+  .base-dice-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+  }
+
+  .dice-count-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .dice-control-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: none;
+    transition: background-color 0.3s;
+  }
+
+  .dice-control-btn:hover:not(:disabled) {
+    background-color: #5a6268;
+  }
+
+  .dice-control-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .dice-count-display {
+    min-width: 40px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.3rem;
+    color: white;
+  }
+
+  .mobile-dice-select {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+    min-width: 80px;
+  }
+
+  .mobile-dice-select option {
+    background: #2c2c2c;
+    color: white;
+  }
+
+  .mobile-dice-select:focus {
+    outline: none;
+    border-color: #ff6b35;
+    box-shadow: 0 0 5px rgba(255, 107, 53, 0.5);
+  }
+
+  /* Mobile active tab styling */
+  .roll-type-selector.mobile-controls .roll-type-btn.check-tab.active {
+    background: rgba(0, 0, 0, 0.9);
+    border-color: #4caf50;
+    color: white;
+    box-shadow: none;
+  }
+
+  .roll-type-selector.mobile-controls .roll-type-btn.damage-tab.active {
+    background: rgba(0, 0, 0, 0.9);
+    border-color: #ff6b35;
+    color: white;
+    box-shadow: none;
+  }
+
+  .roll-type-selector.mobile-controls .roll-type-btn.gm-tab.active {
+    background: rgba(0, 0, 0, 0.9);
+    border-color: #8e44ad;
+    color: white;
+    box-shadow: none;
+  }
+
+  /* Mobile dialogs (keep for history dialog) */
   .mobile-dialog {
     position: fixed;
-    bottom: 90px;
+    bottom: 120px;
     left: 0.5rem;
     right: 0.5rem;
     background-color: rgba(0, 0, 0, 0.95);
@@ -1009,7 +1151,7 @@ button:disabled {
   }
 
   .clear-all-btn {
-    background-color: #6c757d;
+    background-color: black;
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -1022,7 +1164,7 @@ button:disabled {
   }
 
   .clear-all-btn:hover {
-    background-color: #5a6268;
+    background-color: #333;
   }
 
   .action-btn {
@@ -1133,7 +1275,7 @@ button:disabled {
 
   /* Adjust dice container for mobile bottom bar */
   .dice-container {
-    margin-bottom: 100px; /* Space for bottom bar */
+    margin-bottom: 120px; /* Space for tab selector and bottom bar */
   }
 
   /* Hide original history toggle and panel on mobile */
@@ -1305,17 +1447,17 @@ button:disabled {
 
   /* Adjust spacing for small screens */
   .dice-container {
-    margin-bottom: 95px; /* Slightly less space for smaller bottom bar */
+    margin-bottom: 115px; /* Slightly less space for smaller bottom bar */
   }
 
   .mobile-session-panel {
-    bottom: 85px;
+    bottom: 105px;
     width: 95%;
     max-width: 350px;
   }
 
   .mobile-dialog {
-    bottom: 85px;
+    bottom: 120px;
   }
 }
 
@@ -1477,16 +1619,16 @@ button:disabled {
   position: relative;
 }
 
-/* Default colored borders for each roll type */
-.roll-type-btn:nth-child(1) {
+/* Shared colored borders for each roll type */
+.roll-type-btn.check-tab {
   border-color: rgba(76, 175, 80, 0.6);
 }
 
-.roll-type-btn:nth-child(2) {
+.roll-type-btn.damage-tab {
   border-color: rgba(255, 107, 53, 0.6);
 }
 
-.roll-type-btn:nth-child(3) {
+.roll-type-btn.gm-tab {
   border-color: rgba(142, 68, 173, 0.6);
 }
 
@@ -1496,30 +1638,30 @@ button:disabled {
 }
 
 /* Enhanced colors when hovering */
-.roll-type-btn:nth-child(1):hover {
+.roll-type-btn.check-tab:hover {
   border-color: #4caf50;
   box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
 }
 
-.roll-type-btn:nth-child(2):hover {
+.roll-type-btn.damage-tab:hover {
   border-color: #ff6b35;
   box-shadow: 0 4px 8px rgba(255, 107, 53, 0.3);
 }
 
-.roll-type-btn:nth-child(3):hover {
+.roll-type-btn.gm-tab:hover {
   border-color: #8e44ad;
   box-shadow: 0 4px 8px rgba(142, 68, 173, 0.3);
 }
 
-/* Active state styling */
-.roll-type-btn:nth-child(1).active {
+/* Desktop active state styling */
+.roll-type-selector.desktop-controls .roll-type-btn.check-tab.active {
   background: rgba(0, 0, 0, 0.5);
   border-color: #4caf50;
   box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
   z-index: 10;
 }
 
-.roll-type-btn:nth-child(1).active::after {
+.roll-type-selector.desktop-controls .roll-type-btn.check-tab.active::after {
   content: "";
   position: absolute;
   bottom: -2px;
@@ -1530,14 +1672,14 @@ button:disabled {
   z-index: 11;
 }
 
-.roll-type-btn:nth-child(2).active {
+.roll-type-selector.desktop-controls .roll-type-btn.damage-tab.active {
   background: rgba(0, 0, 0, 0.5);
   border-color: #ff6b35;
   box-shadow: 0 0 15px rgba(255, 107, 53, 0.3);
   z-index: 10;
 }
 
-.roll-type-btn:nth-child(2).active::after {
+.roll-type-selector.desktop-controls .roll-type-btn.damage-tab.active::after {
   content: "";
   position: absolute;
   bottom: -2px;
@@ -1548,14 +1690,14 @@ button:disabled {
   z-index: 11;
 }
 
-.roll-type-btn:nth-child(3).active {
+.roll-type-selector.desktop-controls .roll-type-btn.gm-tab.active {
   background: rgba(0, 0, 0, 0.5);
   border-color: #8e44ad;
   box-shadow: 0 0 15px rgba(142, 68, 173, 0.3);
   z-index: 10;
 }
 
-.roll-type-btn:nth-child(3).active::after {
+.roll-type-selector.desktop-controls .roll-type-btn.gm-tab.active::after {
   content: "";
   position: absolute;
   bottom: -2px;
@@ -1589,17 +1731,17 @@ button:disabled {
 .dice-count-controls {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
 }
 
 .dice-type-selector select,
 .dice-select {
-  background: rgba(255, 255, 255, 0.1);
+  background: black;
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 4px;
   padding: 0.5rem;
-  font-size: 1rem;
+  font-size: 1.2rem;
+  width: 100%;
 }
 
 .dice-type-selector select option,
@@ -1626,6 +1768,10 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.bonus-die-controls select {
+  font-size: 1.2rem;
 }
 
 .damage-options {
