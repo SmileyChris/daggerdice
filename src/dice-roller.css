@@ -1799,6 +1799,8 @@ button:disabled {
 .gm-controls {
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 2rem;
 }
 
 /* Mobile roll type selector in dialog */
@@ -1895,7 +1897,8 @@ button:disabled {
 
 /* Pulsing animation for waiting connection */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
@@ -2095,4 +2098,43 @@ button:disabled {
     transform: translateX(0);
     opacity: 1;
   }
+}
+
+/* GM Options Styling (matches damage-options) */
+.gm-options {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.gm-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.gm-options input[type="checkbox"] {
+  width: 1.2rem;
+  height: 1.2rem;
+  accent-color: #8e44ad; /* Purple to match GM theme */
+}
+
+/* Mobile dialog checkbox styling */
+.dialog-checkbox-group {
+  display: flex;
+  justify-content: center;
+}
+
+.dialog-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.dialog-checkbox-label input[type="checkbox"] {
+  width: 1.2rem;
+  height: 1.2rem;
+  accent-color: #8e44ad; /* Purple to match GM theme */
 }

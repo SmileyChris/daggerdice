@@ -177,6 +177,7 @@ function diceRoller() {
     // GM roll state
     gmModifier: 0,
     d20Value: 0,
+    gmPrivateRolls: false,
 
     // ===== NEW SESSION STATE (ADDITIVE) =====
     sessionMode: "solo" as "solo" | "multiplayer",
@@ -491,10 +492,14 @@ function diceRoller() {
         this.rollHistory = this.rollHistory.slice(0, maxHistory);
       }
 
-      // In multiplayer: broadcast and sync
+      // In multiplayer: broadcast and sync (unless it's a private GM roll)
       if (this.sessionMode === "multiplayer" && this.sessionClient) {
-        this.sessionClient.setRollHistory(this.rollHistory);
-        this.sessionClient.broadcastRoll(rollData);
+        const isPrivateGMRoll = rollType === "gm" && this.gmPrivateRolls;
+        
+        if (!isPrivateGMRoll) {
+          this.sessionClient.setRollHistory(this.rollHistory);
+          this.sessionClient.broadcastRoll(rollData);
+        }
       }
     },
 

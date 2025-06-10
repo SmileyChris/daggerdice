@@ -276,6 +276,18 @@
                 +
               </button>
             </div>
+            
+            <!-- Private Rolls Checkbox (multiplayer only) -->
+            <div x-show="sessionMode === 'multiplayer'" class="gm-options">
+              <label>
+                <input 
+                  type="checkbox" 
+                  x-model="gmPrivateRolls"
+                  :disabled="isRolling"
+                />
+                Private rolls
+              </label>
+            </div>
           </div>
 
           <!-- GM Roll Clear Button -->
@@ -668,6 +680,20 @@
                   >
                     +
                   </button>
+                </div>
+              </div>
+              
+              <!-- Private Rolls Checkbox (multiplayer only) -->
+              <div x-show="sessionMode === 'multiplayer'" class="dialog-section">
+                <div class="dialog-checkbox-group">
+                  <label class="dialog-checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      x-model="gmPrivateRolls"
+                      :disabled="isRolling"
+                    />
+                    Private rolls
+                  </label>
                 </div>
               </div>
             </div>
