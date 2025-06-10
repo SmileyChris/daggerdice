@@ -26,6 +26,7 @@ export class SessionClient {
   private heartbeatInterval: number | null = null;
   private pingTimeout: number | null = null;
   private lastPongReceived = 0;
+  private maxReconnectAttemptsExceeded = false;
 
   constructor() {
     this.available = this.checkAvailability();
@@ -33,6 +34,16 @@ export class SessionClient {
     // Send leave announcement when page is being unloaded
     window.addEventListener('beforeunload', () => {
       this.sendLeaveAnnouncementSync();
+    });
+
+    // Restart reconnection attempts when user returns to window
+    window.addEventListener('focus', () => {
+      this.onWindowFocus();
+    });
+
+    // Restart reconnection attempts when network comes back online
+    window.addEventListener('online', () => {
+      this.onNetworkOnline();
     });
   }
 
@@ -215,6 +226,9 @@ export class SessionClient {
   private async attemptReconnect(playerName: string): Promise<void> {
     if (!this.sessionId || this.reconnectAttempts >= this.maxReconnectAttempts || this.manualDisconnect) {
       console.log('Stopping reconnection attempts');
+      if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+        this.maxReconnectAttemptsExceeded = true;
+      }
       this.resetConnectionState();
       return;
     }
@@ -245,8 +259,37 @@ export class SessionClient {
           this.attemptReconnect(playerName);
         }, this.reconnectDelay * Math.pow(2, this.reconnectAttempts));
       } else {
+        this.maxReconnectAttemptsExceeded = true;
         this.resetConnectionState();
       }
+    }
+  }
+
+  private onWindowFocus(): void {
+    this.tryRestartReconnection('Window focused');
+  }
+
+  private onNetworkOnline(): void {
+    this.tryRestartReconnection('Network came online');
+  }
+
+  private tryRestartReconnection(reason: string): void {
+    // Only restart reconnection if we were disconnected due to max attempts being exceeded
+    // and we have session data that would allow reconnection
+    if (this.maxReconnectAttemptsExceeded && 
+        this.sessionId && 
+        this.playerName && 
+        this.connectionState === 'disconnected' &&
+        !this.manualDisconnect) {
+      
+      console.log(`${reason} after max reconnection attempts exceeded. Restarting reconnection...`);
+      
+      // Reset reconnection state
+      this.maxReconnectAttemptsExceeded = false;
+      this.reconnectAttempts = 0;
+      
+      // Attempt to reconnect
+      this.attemptReconnect(this.playerName);
     }
   }
 
@@ -317,9 +360,14 @@ export class SessionClient {
 
   private resetConnectionState(): void {
     this.connectionState = 'disconnected';
-    this.sessionId = null;
-    this.playerId = null;
-    this.playerName = null;
+    // Only reset session data for manual disconnects
+    // Keep session data for automatic disconnects to allow window focus reconnection
+    if (this.manualDisconnect) {
+      this.sessionId = null;
+      this.playerId = null;
+      this.playerName = null;
+      this.maxReconnectAttemptsExceeded = false;
+    }
     this.reconnectAttempts = 0;
     this.connectedPlayers.clear();
     this.localRollHistory = [];
