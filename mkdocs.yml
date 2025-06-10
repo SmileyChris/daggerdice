@@ -1,0 +1,20 @@
+site_name: DaggerDice Documentation
+site_url: https://daggerdice.smileychris.workers.dev
+repo_url: https://github.com/smileychris/daggerdice
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Features: features.md
+  - Development: development.md
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.indexes
+    - toc.integrate
+markdown_extensions:
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.emoji
