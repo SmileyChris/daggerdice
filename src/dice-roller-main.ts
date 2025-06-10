@@ -909,8 +909,8 @@ function diceRoller() {
           return;
         }
 
-        // Ignore if currently rolling
-        if (this.isRolling) {
+        // Only block modifier and roll actions while rolling
+        if (this.isRolling && (event.key === 'ArrowLeft' || event.key === 'ArrowRight' || event.key === ' ')) {
           return;
         }
 
