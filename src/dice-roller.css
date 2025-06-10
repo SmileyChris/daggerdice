@@ -1947,10 +1947,7 @@ button:disabled {
 }
 
 /* View transition names for roll type content */
-.modifier-controls,
-.advantage-controls,
-.damage-controls,
-.gm-controls {
+.controls .modifiers {
   view-transition-name: roll-type-content;
 }
 
