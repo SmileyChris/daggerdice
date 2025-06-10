@@ -30,6 +30,14 @@ declare global {
     diceRoller: () => any;
     toastManager: () => any;
   }
+  
+  interface Document {
+    startViewTransition?: (callback: () => void | Promise<void>) => {
+      ready: Promise<void>;
+      finished: Promise<void>;
+      updateCallbackDone: Promise<void>;
+    };
+  }
 }
 
 // Global dice box instance
@@ -190,8 +198,16 @@ function diceRoller() {
     },
 
     setRollType(type: "check" | "damage" | "gm") {
-      this.rollType = type;
-      this.result = "";
+      // Use View Transitions API if available
+      if (document.startViewTransition) {
+        document.startViewTransition(() => {
+          this.rollType = type;
+          this.result = "";
+        });
+      } else {
+        this.rollType = type;
+        this.result = "";
+      }
     },
 
     setBaseDiceCount(count: number) {
@@ -515,12 +531,26 @@ function diceRoller() {
     },
 
     toggleHistory() {
-      this.showHistory = !this.showHistory;
+      // Use View Transitions API if available
+      if (document.startViewTransition) {
+        document.startViewTransition(() => {
+          this.showHistory = !this.showHistory;
+        });
+      } else {
+        this.showHistory = !this.showHistory;
+      }
     },
 
     // ===== NEW SESSION METHODS (ADDITIVE) =====
     toggleSessionUI() {
-      this.showSessionUI = !this.showSessionUI;
+      // Use View Transitions API if available
+      if (document.startViewTransition) {
+        document.startViewTransition(() => {
+          this.showSessionUI = !this.showSessionUI;
+        });
+      } else {
+        this.showSessionUI = !this.showSessionUI;
+      }
     },
 
     get isJoinSessionValid() {
@@ -643,30 +673,39 @@ function diceRoller() {
       // Preserve current session ID for easy rejoining
       const currentSessionId = this.sessionId;
       
-      if (this.sessionClient) {
-        this.sessionClient.disconnect();
-        this.sessionClient = null;
-      }
-      
-      this.sessionMode = "solo";
-      this.sessionId = null;
-      this.connectedPlayers = [];
-      this.connectionStatus = "disconnected";
-      
-      // Clear saved session data if requested
-      if (clearSavedData) {
-        clearSavedSessionData();
-        this.playerName = "";
-        this.joinSessionId = "";
-      } else {
-        // Keep the room ID populated for easy rejoining
-        if (currentSessionId) {
-          this.joinSessionId = currentSessionId;
+      // Use View Transitions API if available
+      const updateState = () => {
+        if (this.sessionClient) {
+          this.sessionClient.disconnect();
+          this.sessionClient = null;
         }
+        
+        this.sessionMode = "solo";
+        this.sessionId = null;
+        this.connectedPlayers = [];
+        this.connectionStatus = "disconnected";
+        
+        // Clear saved session data if requested
+        if (clearSavedData) {
+          clearSavedSessionData();
+          this.playerName = "";
+          this.joinSessionId = "";
+        } else {
+          // Keep the room ID populated for easy rejoining
+          if (currentSessionId) {
+            this.joinSessionId = currentSessionId;
+          }
+        }
+        
+        // Return to solo URL
+        history.pushState({}, '', '/');
+      };
+
+      if (document.startViewTransition) {
+        document.startViewTransition(updateState);
+      } else {
+        updateState();
       }
-      
-      // Return to solo URL
-      history.pushState({}, '', '/');
     },
 
     async copySessionLink() {
@@ -816,6 +855,31 @@ function diceRoller() {
             }
           }, 100);
         }
+      }
+    },
+
+    // Mobile dialog transition methods
+    toggleModifiersDialog() {
+      if (document.startViewTransition) {
+        document.startViewTransition(() => {
+          (this as any).showModifiers = !(this as any).showModifiers;
+          (this as any).showActions = false;
+        });
+      } else {
+        (this as any).showModifiers = !(this as any).showModifiers;
+        (this as any).showActions = false;
+      }
+    },
+
+    toggleActionsDialog() {
+      if (document.startViewTransition) {
+        document.startViewTransition(() => {
+          (this as any).showActions = !(this as any).showActions;
+          (this as any).showModifiers = false;
+        });
+      } else {
+        (this as any).showActions = !(this as any).showActions;
+        (this as any).showModifiers = false;
       }
     },
   };

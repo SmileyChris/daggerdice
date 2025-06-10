@@ -375,7 +375,7 @@
           <!-- Left: Modifiers Button -->
           <div class="bottom-left">
             <button
-              @click="showModifiers = !showModifiers; showActions = false"
+              @click="toggleModifiersDialog()"
               class="bottom-section-btn"
               :class="{ 'active': showModifiers }"
               title="Modifiers"
@@ -460,7 +460,7 @@
           <!-- Right: Actions Button -->
           <div class="bottom-right">
             <button
-              @click="showActions = !showActions; showModifiers = false"
+              @click="toggleActionsDialog()"
               class="bottom-section-btn"
               :class="{ 'active': showActions }"
               title="History & Multiplayer"

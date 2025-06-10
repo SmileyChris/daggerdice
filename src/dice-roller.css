@@ -1908,3 +1908,194 @@ button:disabled {
 .connection-waiting {
   animation: pulse 2s ease-in-out infinite;
 }
+
+/* View Transitions */
+::view-transition-old(roll-type-content),
+::view-transition-new(roll-type-content) {
+  animation-duration: 0.3s;
+  animation-timing-function: ease-out;
+}
+
+::view-transition-old(roll-type-content) {
+  animation-name: slide-out-left;
+}
+
+::view-transition-new(roll-type-content) {
+  animation-name: slide-in-right;
+}
+
+@keyframes slide-out-left {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* View transition names for roll type content */
+.modifier-controls,
+.advantage-controls,
+.damage-controls,
+.gm-controls {
+  view-transition-name: roll-type-content;
+}
+
+/* View transition names for mobile dialogs */
+.dialog-overlay {
+  view-transition-name: mobile-dialog;
+}
+
+/* Mobile dialog transitions */
+::view-transition-old(mobile-dialog),
+::view-transition-new(mobile-dialog) {
+  animation-duration: 0.25s;
+  animation-timing-function: ease-out;
+}
+
+::view-transition-old(mobile-dialog) {
+  animation-name: slide-down-out;
+}
+
+::view-transition-new(mobile-dialog) {
+  animation-name: slide-up-in;
+}
+
+@keyframes slide-down-out {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-up-in {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* View transition names for session panels */
+.session-panel {
+  view-transition-name: session-panel;
+}
+
+.session-join,
+.session-info {
+  view-transition-name: session-content;
+}
+
+/* Session panel transitions */
+::view-transition-old(session-panel),
+::view-transition-new(session-panel) {
+  animation-duration: 0.3s;
+  animation-timing-function: ease-out;
+}
+
+::view-transition-old(session-panel) {
+  animation-name: scale-fade-out;
+}
+
+::view-transition-new(session-panel) {
+  animation-name: scale-fade-in;
+}
+
+/* Session content transitions */
+::view-transition-old(session-content),
+::view-transition-new(session-content) {
+  animation-duration: 0.25s;
+  animation-timing-function: ease-out;
+}
+
+::view-transition-old(session-content) {
+  animation-name: slide-out-left;
+}
+
+::view-transition-new(session-content) {
+  animation-name: slide-in-right;
+}
+
+@keyframes scale-fade-out {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+@keyframes scale-fade-in {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* View transition names for roll history panel */
+.roll-history-panel {
+  view-transition-name: history-panel;
+}
+
+/* History panel transitions */
+::view-transition-old(history-panel),
+::view-transition-new(history-panel) {
+  animation-duration: 0.3s;
+  animation-timing-function: ease-out;
+}
+
+::view-transition-old(history-panel) {
+  animation-name: slide-out-right;
+}
+
+::view-transition-new(history-panel) {
+  animation-name: slide-in-left;
+}
+
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
