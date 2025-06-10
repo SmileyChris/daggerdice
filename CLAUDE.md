@@ -61,3 +61,19 @@ Alpine.js manages all reactive state:
 ## Development workflow
 
 Always run `npm run build` after making changes.
+
+## CI/CD Pipeline
+
+The project uses GitHub Actions for automated testing and deployment:
+
+- **Tests**: Automatically run on all pushes and pull requests
+- **Frontend Tests**: Dice logic, session utilities, UI components
+- **Workers Tests**: WebSocket APIs, session validation, error handling
+- **Build Verification**: Ensures production builds succeed
+- **Deployment**: Automatic deployment to Cloudflare Workers on main branch pushes
+
+### Required Secrets
+
+For deployment to work, the following GitHub repository secrets must be configured:
+- `CLOUDFLARE_API_TOKEN`: Cloudflare API token with Workers deployment permissions
+- `CLOUDFLARE_ACCOUNT_ID`: Cloudflare account ID

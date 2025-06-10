@@ -163,6 +163,31 @@ it('should validate session ID format', async () => {
 
 ### CI/CD Integration
 
+The project uses GitHub Actions for automated testing and deployment. Tests run automatically on:
+
+- **Push to main/develop**: Full test suite + deployment (main only)
+- **Pull Requests**: Test coverage, quality checks, and security audit
+- **Manual trigger**: Deploy workflow can be triggered manually
+
+#### GitHub Actions Workflows
+
+1. **`test.yml`** - Main testing workflow
+   - Runs frontend and Workers tests in parallel
+   - Verifies build succeeds
+   - Uploads build artifacts
+
+2. **`pr-checks.yml`** - Pull request validation
+   - Comprehensive test coverage
+   - Security audit
+   - Dependency checks
+   - Automated PR comments with results
+
+3. **`deploy.yml`** - Production deployment
+   - Tests → Build → Deploy → Verify
+   - Automatic deployment to Cloudflare Workers
+   - Deployment status tracking
+
+#### Test Results
 ```bash
 # Production test command
 npm run test:all
@@ -172,6 +197,10 @@ Expected output:
 - Frontend Tests: 49/49 passing
 - Workers Tests: 20/20 passing
 - **Total: 69 tests passing**
+
+#### Required Repository Secrets
+- `CLOUDFLARE_API_TOKEN`: Workers deployment permissions
+- `CLOUDFLARE_ACCOUNT_ID`: Target Cloudflare account
 
 ## Test Configuration
 
