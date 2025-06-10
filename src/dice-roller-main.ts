@@ -692,6 +692,11 @@ function diceRoller() {
           this.connectionStatus = "connected";
         },
         
+        onConnecting: () => {
+          console.log('Attempting to connect/reconnect to session');
+          this.connectionStatus = "connecting";
+        },
+        
         onPlayerJoined: (player: Player, isInitialResponse?: boolean) => {
           console.log('Player joined:', player.name, 'Initial response:', isInitialResponse);
           const existingIndex = this.connectedPlayers.findIndex(p => p.id === player.id);

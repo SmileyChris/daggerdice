@@ -122,6 +122,7 @@ export class SessionClient {
       console.log('Reusing existing player ID:', this.playerId, 'for player:', playerName);
     }
     this.connectionState = 'connecting';
+    this.eventHandlers.onConnecting?.();
 
     try {
       // Construct WebSocket URL for Cloudflare Workers
@@ -178,6 +179,7 @@ export class SessionClient {
         // Attempt to reconnect if not manually closed
         if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts && !this.manualDisconnect) {
           this.connectionState = 'connecting';
+          this.eventHandlers.onConnecting?.();
           setTimeout(() => {
             this.attemptReconnect(playerName);
           }, this.reconnectDelay * Math.pow(2, this.reconnectAttempts));
@@ -223,13 +225,97 @@ export class SessionClient {
     }
   }
 
+  private async attemptConnection(sessionId: string, playerName: string): Promise<boolean> {
+    try {
+      // Construct WebSocket URL for Cloudflare Workers
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/api/room/${sessionId}`;
+      
+      this.websocket = new WebSocket(wsUrl);
+      
+      this.websocket.onopen = () => {
+        console.log('WebSocket connected');
+        
+        // Save session data to localStorage
+        saveLastSessionId(sessionId);
+        savePlayerName(playerName);
+        
+        // Send join announcement to other players
+        this.sendMessage({
+          type: 'JOIN_ANNOUNCEMENT',
+          player: {
+            id: this.playerId!,
+            name: this.sanitizePlayerName(playerName),
+            joinedAt: Date.now(),
+            lastSeen: Date.now(),
+            isActive: true
+          }
+        });
+      };
+
+      this.websocket.onmessage = (event) => {
+        try {
+          const message: ServerMessage = JSON.parse(event.data);
+          this.handleServerMessage(message);
+        } catch (error) {
+          console.error('Failed to parse server message:', error);
+        }
+      };
+
+      this.websocket.onclose = (event) => {
+        console.log('WebSocket closed during reconnection:', event.code, event.reason);
+        
+        // Send leave announcement for unexpected disconnects (not manual)
+        if (!this.manualDisconnect && this.playerId && event.code !== 1000) {
+          console.log('Unexpected disconnect detected during reconnection, sending leave announcement');
+        }
+        
+        // Don't change connection state or call onDisconnected during reconnection attempts
+        // The attemptReconnect method will handle the state management
+      };
+
+      this.websocket.onerror = (error) => {
+        console.error('WebSocket error during reconnection:', error);
+        // Don't set error state here - let attemptReconnect handle it
+      };
+
+      // Wait for connection to be established
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Reconnection timeout'));
+        }, 10000);
+
+        const checkConnection = () => {
+          if (this.websocket?.readyState === WebSocket.OPEN) {
+            clearTimeout(timeout);
+            resolve();
+          } else if (this.websocket?.readyState === WebSocket.CLOSED) {
+            clearTimeout(timeout);
+            reject(new Error('Connection failed during reconnection'));
+          } else {
+            setTimeout(checkConnection, 100);
+          }
+        };
+        
+        checkConnection();
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Failed to reconnect:', error);
+      return false;
+    }
+  }
+
   private async attemptReconnect(playerName: string): Promise<void> {
     if (!this.sessionId || this.reconnectAttempts >= this.maxReconnectAttempts || this.manualDisconnect) {
       console.log('Stopping reconnection attempts');
       if (this.reconnectAttempts >= this.maxReconnectAttempts) {
         this.maxReconnectAttemptsExceeded = true;
+        this.connectionState = 'error';
+        this.eventHandlers.onError?.('Max reconnection attempts reached');
+        this.eventHandlers.onDisconnected?.();
       }
-      this.resetConnectionState();
       return;
     }
 
@@ -238,29 +324,35 @@ export class SessionClient {
     
     // Update status to show we're trying to reconnect
     this.connectionState = 'connecting';
-    // Note: No specific event handler for 'connecting' state, UI will check connectionState
+    this.eventHandlers.onConnecting?.();
     
     try {
-      const success = await this.connect(this.sessionId, playerName);
+      // Don't use the main connect method to avoid setting error state prematurely
+      const success = await this.attemptConnection(this.sessionId, playerName);
       if (success) {
         console.log('Reconnection successful');
         this.reconnectAttempts = 0; // Reset on successful reconnection
+        this.connectionState = 'connected';
+        this.eventHandlers.onConnected?.(this.playerId!);
       } else {
         throw new Error('Reconnection failed');
       }
     } catch (error) {
       console.error('Reconnection failed:', error);
-      this.connectionState = 'error';
-      this.eventHandlers.onError?.('Reconnection failed');
       
-      // If we haven't exceeded max attempts, try again
+      // If we haven't exceeded max attempts, stay in connecting state and try again
       if (this.reconnectAttempts < this.maxReconnectAttempts && !this.manualDisconnect) {
+        // Keep connectionState as 'connecting' - don't change to 'error'
+        console.log(`Scheduling next reconnection attempt in ${this.reconnectDelay * Math.pow(2, this.reconnectAttempts)}ms`);
         setTimeout(() => {
           this.attemptReconnect(playerName);
         }, this.reconnectDelay * Math.pow(2, this.reconnectAttempts));
       } else {
+        // Only set to error when all attempts are exhausted
+        this.connectionState = 'error';
+        this.eventHandlers.onError?.('All reconnection attempts failed');
+        this.eventHandlers.onDisconnected?.(); // Now notify UI of final disconnection
         this.maxReconnectAttemptsExceeded = true;
-        this.resetConnectionState();
       }
     }
   }

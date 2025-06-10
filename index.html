@@ -247,17 +247,17 @@
                 Resistance
               </label>
             </div>
-
-            <!-- Damage Roll Clear Button -->
-            <button
-              @click="bonusDieEnabled = false; isCritical = false; hasResistance = false"
-              class="modifier-clear-btn"
-              x-show="rollType === 'damage' && (bonusDieEnabled || isCritical || hasResistance) && !isRolling"
-              title="Clear modifiers (keeps base dice)"
-            >
-              🔄 Clear Options
-            </button>
           </div>
+
+          <!-- Damage Roll Clear Button -->
+          <button
+            @click="bonusDieEnabled = false; isCritical = false; hasResistance = false"
+            class="modifier-clear-btn"
+            x-show="rollType === 'damage' && (bonusDieEnabled || isCritical || hasResistance) && !isRolling"
+            title="Clear modifiers (keeps base dice)"
+          >
+            🔄 Clear Options
+          </button>
 
           <!-- GM Roll Controls -->
           <div x-show="rollType === 'gm'" class="gm-controls">

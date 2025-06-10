@@ -64,6 +64,7 @@ export type ServerMessage = ClientMessage;
 // Session client event types
 export interface SessionEventHandlers {
   onConnected?: (playerId: string) => void;
+  onConnecting?: () => void;
   onPlayerJoined?: (player: Player, isInitialResponse?: boolean) => void;
   onPlayerLeft?: (playerId: string) => void;
   onRollReceived?: (roll: SharedRollHistoryItem) => void;
