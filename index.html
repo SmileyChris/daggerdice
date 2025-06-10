@@ -1163,6 +1163,7 @@
         class="history-toggle"
         @click="toggleHistory()"
         x-show="rollHistory.length || true"
+        :disabled="rollHistory.length === 0"
       >
         <img src="/src/assets/history.svg" alt="History" class="history-icon" />
       </button>
