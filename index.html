@@ -32,7 +32,7 @@
         <button @click="toggleSessionUI()" class="multiplayer-top-btn">
           <span x-show="sessionMode === 'solo'">🎲 Play with Friends</span>
           <span x-show="sessionMode === 'multiplayer'">
-            <span x-show="connectionStatus === 'connected'">🟢</span>
+            <span x-show="connectionStatus === 'connected'" :class="{ 'connection-waiting': connectionStatus === 'connected' && connectedPlayers.length === 0 }">🟢</span>
             <span x-show="connectionStatus === 'connecting'">🟡</span>
             <span
               x-show="connectionStatus === 'disconnected' || connectionStatus === 'error'"
@@ -442,7 +442,7 @@
                 :class="connectionStatus"
                 title="Multiplayer Session"
               >
-                <span x-show="connectionStatus === 'connected'">🟢</span>
+                <span x-show="connectionStatus === 'connected'" :class="{ 'connection-waiting': connectionStatus === 'connected' && connectedPlayers.length === 0 }">🟢</span>
                 <span x-show="connectionStatus === 'connecting'">🟡</span>
                 <span
                   x-show="connectionStatus === 'disconnected' || connectionStatus === 'error'"
@@ -718,7 +718,7 @@
                 <span class="action-btn-icon">
                   <span x-show="sessionMode === 'solo'">🎲</span>
                   <span x-show="sessionMode === 'multiplayer'">
-                    <span x-show="connectionStatus === 'connected'">🟢</span>
+                    <span x-show="connectionStatus === 'connected'" :class="{ 'connection-waiting': connectionStatus === 'connected' && connectedPlayers.length === 0 }">🟢</span>
                     <span x-show="connectionStatus === 'connecting'">🟡</span>
                     <span
                       x-show="connectionStatus === 'disconnected' || connectionStatus === 'error'"
