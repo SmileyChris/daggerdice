@@ -1949,10 +1949,7 @@ button:disabled {
   }
 }
 
-/* View transition names for roll type content */
-.controls .modifiers {
-  view-transition-name: roll-type-content;
-}
+/* View transition names for roll type content - removed modifiers to prevent wiggle during history toggle */
 
 /* View transition names for mobile dialogs */
 .dialog-overlay {

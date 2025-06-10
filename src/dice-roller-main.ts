@@ -29,6 +29,7 @@ declare global {
     diceBox: any;
     diceRoller: () => any;
     toastManager: () => any;
+    daggerDiceKeyboardInitialized: boolean;
   }
   
   interface Document {
@@ -190,6 +191,7 @@ function diceRoller() {
     sessionFeaturesAvailable: true,
     connectionStatus: "disconnected" as "disconnected" | "connecting" | "connected" | "error",
     initialized: false,
+    keyboardShortcutsInitialized: false,
     showKeyboardHelp: false,
 
     setAdvantageType(type: "none" | "advantage" | "disadvantage") {
@@ -200,6 +202,11 @@ function diceRoller() {
     },
 
     setRollType(type: "check" | "damage" | "gm") {
+      // Only trigger transition if the roll type is actually changing
+      if (this.rollType === type) {
+        return;
+      }
+      
       // Use View Transitions API if available
       if (document.startViewTransition) {
         document.startViewTransition(() => {
@@ -237,7 +244,9 @@ function diceRoller() {
     },
 
     async rollDice() {
-      if (this.isRolling || !window.diceBox) return;
+      if (this.isRolling || !window.diceBox) {
+        return;
+      }
 
       this.isRolling = true;
       this.result = "";
@@ -275,15 +284,22 @@ function diceRoller() {
       }
 
       const rollResult = await window.diceBox.roll(diceArray);
-      console.log("Check roll result:", rollResult);
+      
+      // Wait a bit longer for dice to physically settle
+      // The diceBox.roll() promise resolves when results are calculated,
+      // but physics simulation may still be active
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Extract the values from the roll result
-      if (rollResult && rollResult.length >= 2) {
+      if (rollResult && rollResult.length >= 2 && 
+          rollResult[0] && typeof rollResult[0].value === 'number' &&
+          rollResult[1] && typeof rollResult[1].value === 'number') {
         this.hopeValue = rollResult[0].value;
         this.fearValue = rollResult[1].value;
 
         // Handle advantage/disadvantage D6
-        if (this.advantageType !== "none" && rollResult.length >= 3) {
+        if (this.advantageType !== "none" && rollResult.length >= 3 && 
+            rollResult[2] && typeof rollResult[2].value === 'number') {
           const d6Value = rollResult[2].value;
           this.advantageValue = this.advantageType === "advantage" ? d6Value : -d6Value;
         } else {
@@ -354,7 +370,6 @@ function diceRoller() {
       }
 
       const rollResult = await window.diceBox.roll(diceArray);
-      console.log("Damage roll result:", rollResult);
 
       let baseDiceValues = [];
       let bonusDieValue = 0;
@@ -433,7 +448,6 @@ function diceRoller() {
       ];
 
       const rollResult = await window.diceBox.roll(diceArray);
-      console.log("GM roll result:", rollResult);
 
       if (rollResult && rollResult.length >= 1) {
         this.d20Value = rollResult[0].value;
@@ -484,7 +498,6 @@ function diceRoller() {
         timestamp: this.sessionMode === "multiplayer" ? Date.now() : undefined
       };
 
-      console.log('Adding roll to history:', historyItem);
       this.rollHistory.unshift(historyItem);
 
       // Limit history
@@ -537,6 +550,11 @@ function diceRoller() {
     },
 
     toggleHistory() {
+      // Only toggle if there's history to show
+      if (!this.showHistory && this.rollHistory.length === 0) {
+        return;
+      }
+      
       // Use View Transitions API if available
       if (document.startViewTransition) {
         document.startViewTransition(() => {
@@ -823,12 +841,9 @@ function diceRoller() {
     init() {
       // Prevent multiple initializations
       if (this.initialized) {
-        console.warn('Alpine component already initialized, skipping');
         return;
       }
       this.initialized = true;
-      
-      console.log('Initializing Alpine component');
       
       // Feature detection
       this.sessionFeaturesAvailable = isSessionEnvironmentSupported();
@@ -868,6 +883,12 @@ function diceRoller() {
     },
 
     setupKeyboardShortcuts() {
+      // Prevent duplicate event listeners globally
+      if (window.daggerDiceKeyboardInitialized) {
+        return;
+      }
+      window.daggerDiceKeyboardInitialized = true;
+      
       document.addEventListener('keydown', (event) => {
         // Ignore shortcuts when typing in inputs or textareas
         const activeElement = document.activeElement;
@@ -888,6 +909,18 @@ function diceRoller() {
         // For space key, also ignore if a button has focus to prevent double-triggering
         if (event.key === ' ' && activeElement && activeElement.tagName === 'BUTTON') {
           return;
+        }
+
+        // Always prevent space key from affecting the page/3D scene
+        if (event.key === ' ') {
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+          
+          // If currently rolling, block ALL space key behavior including button activation
+          if (this.isRolling) {
+            return;
+          }
         }
 
         const key = event.key.toLowerCase();
@@ -923,7 +956,6 @@ function diceRoller() {
         
         // Roll dice with spacebar
         else if (key === ' ' || key === 'space') {
-          event.preventDefault();
           this.rollDice();
         }
         
