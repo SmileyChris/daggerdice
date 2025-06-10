@@ -85,16 +85,54 @@ function toastManager() {
     },
 
     showRollToast(roll: SharedRollHistoryItem) {
-      const resultText = roll.result.replace(/<[^>]*>/g, ''); // Strip HTML
+      // Main result line
+      let mainResult = '';
+      if (!roll.rollType || roll.rollType === 'check') {
+        const outcomeText = roll.result.includes('hope') ? ' with hope' : 
+                           roll.result.includes('fear') ? ' with fear' : 
+                           ' Critical Success!';
+        mainResult = `<strong>${roll.total}</strong>${outcomeText}`;
+      } else if (roll.rollType === 'damage') {
+        mainResult = `<strong>${roll.total}</strong> damage`;
+      } else if (roll.rollType === 'gm') {
+        mainResult = `<strong>${roll.total}</strong> GM`;
+      }
+      
+      // Details line
+      let details = '';
+      if (!roll.rollType || roll.rollType === 'check') {
+        const parts = [`${roll.hopeValue} Hope`, `${roll.fearValue} Fear`];
+        if (roll.advantageValue && roll.advantageValue !== 0) {
+          parts.push(`${Math.abs(roll.advantageValue)} ${roll.advantageValue > 0 ? 'Adv.' : 'Disadv.'}`);
+        }
+        if (roll.modifier !== undefined && roll.modifier !== 0) {
+          parts.push(`${roll.modifier > 0 ? '+' : ''}${roll.modifier}`);
+        }
+        details = parts.join(', ');
+      } else if (roll.rollType === 'damage') {
+        const parts = [`${roll.baseDiceCount}d${roll.baseDiceType}`];
+        if (roll.bonusDieEnabled) {
+          parts.push(`Bonus: 1d${roll.bonusDieType}`);
+        }
+        if (roll.isCritical) {
+          parts.push('<span class="critical-text">Critical</span>');
+        }
+        if (roll.hasResistance) {
+          parts.push('<span class="resistance-text">Resistance</span>');
+        }
+        details = parts.join(', ');
+      } else if (roll.rollType === 'gm') {
+        const parts = [`d20: ${roll.d20Value}`];
+        if (roll.gmModifier !== 0) {
+          parts.push(`Modifier: ${roll.gmModifier > 0 ? '+' : ''}${roll.gmModifier}`);
+        }
+        details = parts.join(', ');
+      }
+      
       const content = `
         <div class="toast-player">${roll.playerName} rolled:</div>
-        <div class="toast-result">${resultText}</div>
-        <div class="toast-dice">
-          <span class="hope">Hope: ${roll.hopeValue}</span>
-          <span class="fear">Fear: ${roll.fearValue}</span>
-          ${roll.advantageValue !== 0 ? `<span class="${roll.advantageValue > 0 ? 'advantage' : 'disadvantage'}">${roll.advantageValue > 0 ? 'Adv' : 'Dis'}: ${Math.abs(roll.advantageValue)}</span>` : ''}
-          ${roll.modifier !== 0 ? `<span>Mod: ${roll.modifier > 0 ? '+' : ''}${roll.modifier}</span>` : ''}
-        </div>
+        <div class="toast-main-result">${mainResult}</div>
+        <div class="toast-details">${details}</div>
       `;
       this.show('roll', content, 5000);
     }
@@ -115,6 +153,23 @@ function diceRoller() {
     advantageValue: 0,
     modifier: 0,
 
+    // ===== NEW ROLL TYPE STATE =====
+    rollType: "check" as "check" | "damage" | "gm",
+    
+    // Damage roll state
+    baseDiceCount: 1,
+    baseDiceType: 8 as 4 | 6 | 8 | 10 | 12,
+    baseDiceValues: [] as number[],
+    bonusDieEnabled: false,
+    bonusDieType: 6 as 4 | 6 | 8 | 10 | 12,
+    bonusDieValue: 0,
+    isCritical: false,
+    hasResistance: false,
+    
+    // GM roll state
+    gmModifier: 0,
+    d20Value: 0,
+
     // ===== NEW SESSION STATE (ADDITIVE) =====
     sessionMode: "solo" as "solo" | "multiplayer",
     sessionId: null as string | null,
@@ -134,6 +189,35 @@ function diceRoller() {
       }
     },
 
+    setRollType(type: "check" | "damage" | "gm") {
+      this.rollType = type;
+      this.result = "";
+    },
+
+    setBaseDiceCount(count: number) {
+      this.baseDiceCount = Math.max(1, Math.min(10, count));
+    },
+
+    setBaseDiceType(type: 4 | 6 | 8 | 10 | 12) {
+      this.baseDiceType = type;
+    },
+
+    setBonusDieType(type: 4 | 6 | 8 | 10 | 12) {
+      this.bonusDieType = type;
+    },
+
+    toggleBonusDie() {
+      this.bonusDieEnabled = !this.bonusDieEnabled;
+    },
+
+    toggleCritical() {
+      this.isCritical = !this.isCritical;
+    },
+
+    toggleResistance() {
+      this.hasResistance = !this.hasResistance;
+    },
+
     async rollDice() {
       if (this.isRolling || !window.diceBox) return;
 
@@ -141,144 +225,272 @@ function diceRoller() {
       this.result = "";
 
       try {
-        // Prepare dice array - always roll two D12 dice
-        const diceArray = [
-          { sides: 12, theme: "default", themeColor: "#4caf50" }, // Hope die (green)
-          { sides: 12, theme: "default", themeColor: "#f44336" }, // Fear die (red)
-        ];
-
-        // Add advantage/disadvantage D6 if needed
-        if (this.advantageType !== "none") {
-          diceArray.push({
-            sides: 6,
-            theme: "smooth",
-            themeColor:
-              this.advantageType === "advantage" ? "#d2ffd2" : "#ffd2d2",
-          });
-        }
-
-        const rollResult = await window.diceBox.roll(diceArray);
-
-        console.log("Roll result:", rollResult);
-
-        // Extract the values from the roll result
-        if (rollResult && rollResult.length >= 2) {
-          this.hopeValue = rollResult[0].value;
-          this.fearValue = rollResult[1].value;
-
-          // Handle advantage/disadvantage D6
-          if (this.advantageType !== "none" && rollResult.length >= 3) {
-            const d6Value = rollResult[2].value;
-            this.advantageValue =
-              this.advantageType === "advantage" ? d6Value : -d6Value;
-          } else {
-            this.advantageValue = 0;
-          }
-        } else {
-          // Fallback to random values if dice-box fails
-          this.hopeValue = Math.floor(Math.random() * 12) + 1;
-          this.fearValue = Math.floor(Math.random() * 12) + 1;
-
-          if (this.advantageType !== "none") {
-            const d6Value = Math.floor(Math.random() * 6) + 1;
-            this.advantageValue =
-              this.advantageType === "advantage" ? d6Value : -d6Value;
-          } else {
-            this.advantageValue = 0;
-          }
-        }
-
-        // Calculate total with modifiers
-        const baseTotal = this.hopeValue + this.fearValue;
-        const finalTotal = baseTotal + this.advantageValue + this.modifier;
-
-        // Calculate result text
-        let resultText = "";
-        let modifierText = "";
-
-        if (this.advantageValue !== 0 || this.modifier !== 0) {
-          const parts = [baseTotal.toString()];
-          if (this.advantageValue !== 0) {
-            parts.push(
-              `${this.advantageValue > 0 ? "+" : "-"} ${Math.abs(
-                this.advantageValue
-              )} ${this.advantageType}`
-            );
-          }
-          if (this.modifier !== 0) {
-            parts.push(
-              `${this.modifier > 0 ? "+" : "-"} ${Math.abs(
-                this.modifier
-              )} modifier`
-            );
-          }
-          modifierText = ` <small>(${parts.join(" ")})</small>`;
-        }
-
-        if (this.hopeValue === this.fearValue) {
-          resultText = "Critical Success!";
-        } else if (this.hopeValue > this.fearValue) {
-          resultText = `${finalTotal} with hope${modifierText}`;
-        } else {
-          resultText = `${finalTotal} with fear${modifierText}`;
-        }
-
-        this.result = resultText;
-
-        // Create roll data for history and session sharing
-        const rollData: RollData = {
-          hopeValue: this.hopeValue,
-          fearValue: this.fearValue,
-          advantageValue: this.advantageValue,
-          advantageType: this.advantageType,
-          modifier: this.modifier,
-          total: finalTotal,
-          result: resultText,
-        };
-
-        // ===== ROLL HISTORY HANDLING =====
-        // Create unified roll history item
-        const historyItem: RollHistoryItem = {
-          hopeValue: this.hopeValue,
-          fearValue: this.fearValue,
-          advantageValue: this.advantageValue,
-          advantageType: this.advantageType,
-          modifier: this.modifier,
-          total: finalTotal,
-          result: resultText,
-          playerId: this.sessionMode === "multiplayer" && this.sessionClient ? this.sessionClient.getPlayerId() || '' : undefined,
-          playerName: this.sessionMode === "multiplayer" ? this.playerName : undefined,
-          timestamp: this.sessionMode === "multiplayer" ? Date.now() : undefined
-        };
-
-        console.log('Adding own roll to history:', historyItem);
-        this.rollHistory.unshift(historyItem);
-
-        // Limit history (20 for multiplayer, 10 for solo)
-        const maxHistory = this.sessionMode === "multiplayer" ? 20 : 10;
-        if (this.rollHistory.length > maxHistory) {
-          this.rollHistory = this.rollHistory.slice(0, maxHistory);
-        }
-
-        // In multiplayer: broadcast and sync with session client
-        if (this.sessionMode === "multiplayer" && this.sessionClient) {
-          // Session client uses same history reference
-          this.sessionClient.setRollHistory(this.rollHistory);
-          
-          // Broadcast to other players
-          this.sessionClient.broadcastRoll(rollData);
+        if (this.rollType === "check") {
+          await this.rollCheckDice();
+        } else if (this.rollType === "damage") {
+          await this.rollDamageDice();
+        } else if (this.rollType === "gm") {
+          await this.rollGMDice();
         }
       } catch (error) {
         console.error("Error rolling dice:", error);
+        await this.handleRollError();
+      } finally {
+        this.isRolling = false;
+      }
+    },
 
+    async rollCheckDice() {
+      // Prepare dice array - always roll two D12 dice
+      const diceArray = [
+        { sides: 12, theme: "default", themeColor: "#4caf50" }, // Hope die (green)
+        { sides: 12, theme: "default", themeColor: "#f44336" }, // Fear die (red)
+      ];
+
+      // Add advantage/disadvantage D6 if needed
+      if (this.advantageType !== "none") {
+        diceArray.push({
+          sides: 6,
+          theme: "smooth",
+          themeColor: this.advantageType === "advantage" ? "#d2ffd2" : "#ffd2d2",
+        });
+      }
+
+      const rollResult = await window.diceBox.roll(diceArray);
+      console.log("Check roll result:", rollResult);
+
+      // Extract the values from the roll result
+      if (rollResult && rollResult.length >= 2) {
+        this.hopeValue = rollResult[0].value;
+        this.fearValue = rollResult[1].value;
+
+        // Handle advantage/disadvantage D6
+        if (this.advantageType !== "none" && rollResult.length >= 3) {
+          const d6Value = rollResult[2].value;
+          this.advantageValue = this.advantageType === "advantage" ? d6Value : -d6Value;
+        } else {
+          this.advantageValue = 0;
+        }
+      } else {
         // Fallback to random values
         this.hopeValue = Math.floor(Math.random() * 12) + 1;
         this.fearValue = Math.floor(Math.random() * 12) + 1;
-
+        
         if (this.advantageType !== "none") {
           const d6Value = Math.floor(Math.random() * 6) + 1;
-          this.advantageValue =
-            this.advantageType === "advantage" ? d6Value : -d6Value;
+          this.advantageValue = this.advantageType === "advantage" ? d6Value : -d6Value;
+        } else {
+          this.advantageValue = 0;
+        }
+      }
+
+      // Calculate total and result
+      const baseTotal = this.hopeValue + this.fearValue;
+      const finalTotal = baseTotal + this.advantageValue + this.modifier;
+
+      let resultText = "";
+      let modifierText = "";
+
+      if (this.advantageValue !== 0 || this.modifier !== 0) {
+        const parts = [baseTotal.toString()];
+        if (this.advantageValue !== 0) {
+          parts.push(`${this.advantageValue > 0 ? "+" : "-"} ${Math.abs(this.advantageValue)} ${this.advantageType}`);
+        }
+        if (this.modifier !== 0) {
+          parts.push(`${this.modifier > 0 ? "+" : "-"} ${Math.abs(this.modifier)} modifier`);
+        }
+        modifierText = ` <small>(${parts.join(" ")})</small>`;
+      }
+
+      if (this.hopeValue === this.fearValue) {
+        resultText = "Critical Success!";
+      } else if (this.hopeValue > this.fearValue) {
+        resultText = `${finalTotal} with hope${modifierText}`;
+      } else {
+        resultText = `${finalTotal} with fear${modifierText}`;
+      }
+
+      this.result = resultText;
+      this.addRollToHistory("check", finalTotal, resultText);
+    },
+
+    async rollDamageDice() {
+      const diceArray = [];
+      
+      // Add base damage dice
+      for (let i = 0; i < this.baseDiceCount; i++) {
+        diceArray.push({
+          sides: this.baseDiceType,
+          theme: "default",
+          themeColor: "#ff6b35" // Orange for damage dice
+        });
+      }
+
+      // Add bonus die if enabled
+      if (this.bonusDieEnabled) {
+        diceArray.push({
+          sides: this.bonusDieType,
+          theme: "smooth",
+          themeColor: "#ffd700" // Gold for bonus die
+        });
+      }
+
+      const rollResult = await window.diceBox.roll(diceArray);
+      console.log("Damage roll result:", rollResult);
+
+      let baseDiceValues = [];
+      let bonusDieValue = 0;
+
+      if (rollResult && rollResult.length >= this.baseDiceCount) {
+        // Extract base dice values
+        for (let i = 0; i < this.baseDiceCount; i++) {
+          baseDiceValues.push(rollResult[i].value);
+        }
+        
+        // Extract bonus die value if enabled
+        if (this.bonusDieEnabled && rollResult.length > this.baseDiceCount) {
+          bonusDieValue = rollResult[this.baseDiceCount].value;
+        }
+      } else {
+        // Fallback to random values
+        for (let i = 0; i < this.baseDiceCount; i++) {
+          baseDiceValues.push(Math.floor(Math.random() * this.baseDiceType) + 1);
+        }
+        if (this.bonusDieEnabled) {
+          bonusDieValue = Math.floor(Math.random() * this.bonusDieType) + 1;
+        }
+      }
+
+      // Calculate damage
+      let baseDamage = baseDiceValues.reduce((sum, val) => sum + val, 0);
+      let criticalDamage = 0;
+      
+      if (this.isCritical) {
+        criticalDamage = this.baseDiceCount * this.baseDiceType; // Max value for base dice
+        baseDamage += criticalDamage;
+      }
+      
+      const totalDamage = baseDamage + bonusDieValue;
+      const finalDamage = this.hasResistance ? Math.floor(totalDamage / 2) : totalDamage;
+
+      // Format result text
+      let resultParts = [];
+      
+      if (this.isCritical) {
+        resultParts.push(`${criticalDamage} + (${baseDiceValues.join("+")})`);
+      } else {
+        resultParts.push(baseDiceValues.join("+"));
+      }
+      
+      if (this.bonusDieEnabled && bonusDieValue > 0) {
+        resultParts.push(`${bonusDieValue}`);
+      }
+
+      let resultText = resultParts.join(" + ") + ` = ${totalDamage}`;
+      
+      if (this.hasResistance) {
+        resultText += ` → ${finalDamage}`;
+      }
+      
+      if (this.isCritical) {
+        resultText += " (Critical!)";
+      }
+      
+      if (this.hasResistance) {
+        resultText += " (Resistance)";
+      }
+
+      this.result = resultText;
+      
+      // Store dice values for history
+      this.baseDiceValues = baseDiceValues;
+      this.bonusDieValue = bonusDieValue;
+      
+      this.addRollToHistory("damage", finalDamage, resultText);
+    },
+
+    async rollGMDice() {
+      const diceArray = [
+        { sides: 20, theme: "default", themeColor: "#8e44ad" } // Purple for GM die
+      ];
+
+      const rollResult = await window.diceBox.roll(diceArray);
+      console.log("GM roll result:", rollResult);
+
+      if (rollResult && rollResult.length >= 1) {
+        this.d20Value = rollResult[0].value;
+      } else {
+        // Fallback to random value
+        this.d20Value = Math.floor(Math.random() * 20) + 1;
+      }
+
+      const finalTotal = this.d20Value + this.gmModifier;
+      
+      let resultText = `d20: ${this.d20Value}`;
+      if (this.gmModifier !== 0) {
+        resultText += ` ${this.gmModifier > 0 ? "+" : ""}${this.gmModifier} = ${finalTotal}`;
+      }
+
+      this.result = resultText;
+      this.addRollToHistory("gm", finalTotal, resultText);
+    },
+
+    addRollToHistory(rollType: string, total: number, result: string) {
+      // Create roll data for session sharing
+      const rollData: any = {
+        rollType,
+        total,
+        result,
+        hopeValue: this.rollType === "check" ? this.hopeValue : undefined,
+        fearValue: this.rollType === "check" ? this.fearValue : undefined,
+        advantageValue: this.rollType === "check" ? this.advantageValue : undefined,
+        advantageType: this.rollType === "check" ? this.advantageType : undefined,
+        modifier: this.rollType === "check" ? this.modifier : undefined,
+        d20Value: this.rollType === "gm" ? this.d20Value : undefined,
+        gmModifier: this.rollType === "gm" ? this.gmModifier : undefined,
+        baseDiceCount: this.rollType === "damage" ? this.baseDiceCount : undefined,
+        baseDiceType: this.rollType === "damage" ? this.baseDiceType : undefined,
+        baseDiceValues: this.rollType === "damage" ? this.baseDiceValues : undefined,
+        bonusDieEnabled: this.rollType === "damage" ? this.bonusDieEnabled : undefined,
+        bonusDieType: this.rollType === "damage" ? this.bonusDieType : undefined,
+        bonusDieValue: this.rollType === "damage" ? this.bonusDieValue : undefined,
+        isCritical: this.rollType === "damage" ? this.isCritical : undefined,
+        hasResistance: this.rollType === "damage" ? this.hasResistance : undefined,
+      };
+
+      // Create unified roll history item
+      const historyItem: RollHistoryItem = {
+        ...rollData,
+        playerId: this.sessionMode === "multiplayer" && this.sessionClient ? this.sessionClient.getPlayerId() || '' : undefined,
+        playerName: this.sessionMode === "multiplayer" ? this.playerName : undefined,
+        timestamp: this.sessionMode === "multiplayer" ? Date.now() : undefined
+      };
+
+      console.log('Adding roll to history:', historyItem);
+      this.rollHistory.unshift(historyItem);
+
+      // Limit history
+      const maxHistory = this.sessionMode === "multiplayer" ? 20 : 10;
+      if (this.rollHistory.length > maxHistory) {
+        this.rollHistory = this.rollHistory.slice(0, maxHistory);
+      }
+
+      // In multiplayer: broadcast and sync
+      if (this.sessionMode === "multiplayer" && this.sessionClient) {
+        this.sessionClient.setRollHistory(this.rollHistory);
+        this.sessionClient.broadcastRoll(rollData);
+      }
+    },
+
+    async handleRollError() {
+      if (this.rollType === "check") {
+        // Fallback for check rolls
+        this.hopeValue = Math.floor(Math.random() * 12) + 1;
+        this.fearValue = Math.floor(Math.random() * 12) + 1;
+        
+        if (this.advantageType !== "none") {
+          const d6Value = Math.floor(Math.random() * 6) + 1;
+          this.advantageValue = this.advantageType === "advantage" ? d6Value : -d6Value;
         } else {
           this.advantageValue = 0;
         }
@@ -286,38 +498,20 @@ function diceRoller() {
         const baseTotal = this.hopeValue + this.fearValue;
         const finalTotal = baseTotal + this.advantageValue + this.modifier;
 
-        let resultText = "";
-        let modifierText = "";
-
-        if (this.advantageValue !== 0 || this.modifier !== 0) {
-          const parts = [];
-          if (this.advantageValue !== 0) {
-            parts.push(
-              `${this.advantageValue > 0 ? "+" : ""}${this.advantageValue} ${
-                this.advantageType
-              }`
-            );
-          }
-          if (this.modifier !== 0) {
-            parts.push(
-              `${this.modifier > 0 ? "+" : ""}${this.modifier} modifier`
-            );
-          }
-          modifierText = ` (${parts.join(", ")})`;
-        }
-
         if (this.hopeValue === this.fearValue) {
-          resultText = `Critical Success! Total: ${finalTotal}${modifierText}`;
+          this.result = `Critical Success! Total: ${finalTotal}`;
         } else if (this.hopeValue > this.fearValue) {
-          resultText = `Total: ${finalTotal} with hope${modifierText}`;
+          this.result = `Total: ${finalTotal} with hope`;
         } else {
-          resultText = `Total: ${finalTotal} with fear${modifierText}`;
+          this.result = `Total: ${finalTotal} with fear`;
         }
-
-        this.result = resultText;
-      } finally {
-        this.isRolling = false;
+      } else if (this.rollType === "gm") {
+        // Fallback for GM rolls
+        this.d20Value = Math.floor(Math.random() * 20) + 1;
+        const finalTotal = this.d20Value + this.gmModifier;
+        this.result = `d20: ${this.d20Value} + ${this.gmModifier} = ${finalTotal}`;
       }
+      // Damage rolls fallback would be more complex, keeping simple for now
     },
 
     toggleHistory() {
