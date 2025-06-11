@@ -32,7 +32,11 @@
         <button @click="toggleSessionUI()" class="multiplayer-top-btn">
           <span x-show="sessionMode === 'solo'">🎲 Play with Friends</span>
           <span x-show="sessionMode === 'multiplayer'">
-            <span x-show="connectionStatus === 'connected'" :class="{ 'connection-waiting': connectionStatus === 'connected' && connectedPlayers.length === 0 }">🟢</span>
+            <span
+              x-show="connectionStatus === 'connected'"
+              :class="{ 'connection-waiting': connectionStatus === 'connected' && connectedPlayers.length === 0 }"
+              >🟢</span
+            >
             <span x-show="connectionStatus === 'connecting'">🟡</span>
             <span
               x-show="connectionStatus === 'disconnected' || connectionStatus === 'error'"
@@ -276,12 +280,12 @@
                 +
               </button>
             </div>
-            
+
             <!-- Private Rolls Checkbox (multiplayer only) -->
             <div x-show="sessionMode === 'multiplayer'" class="gm-options">
               <label>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   x-model="gmPrivateRolls"
                   :disabled="isRolling"
                 />
@@ -454,7 +458,11 @@
                 :class="connectionStatus"
                 title="Multiplayer Session"
               >
-                <span x-show="connectionStatus === 'connected'" :class="{ 'connection-waiting': connectionStatus === 'connected' && connectedPlayers.length === 0 }">🟢</span>
+                <span
+                  x-show="connectionStatus === 'connected'"
+                  :class="{ 'connection-waiting': connectionStatus === 'connected' && connectedPlayers.length === 0 }"
+                  >🟢</span
+                >
                 <span x-show="connectionStatus === 'connecting'">🟡</span>
                 <span
                   x-show="connectionStatus === 'disconnected' || connectionStatus === 'error'"
@@ -682,13 +690,16 @@
                   </button>
                 </div>
               </div>
-              
+
               <!-- Private Rolls Checkbox (multiplayer only) -->
-              <div x-show="sessionMode === 'multiplayer'" class="dialog-section">
+              <div
+                x-show="sessionMode === 'multiplayer'"
+                class="dialog-section"
+              >
                 <div class="dialog-checkbox-group">
                   <label class="dialog-checkbox-label">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       x-model="gmPrivateRolls"
                       :disabled="isRolling"
                     />
@@ -744,7 +755,11 @@
                 <span class="action-btn-icon">
                   <span x-show="sessionMode === 'solo'">🎲</span>
                   <span x-show="sessionMode === 'multiplayer'">
-                    <span x-show="connectionStatus === 'connected'" :class="{ 'connection-waiting': connectionStatus === 'connected' && connectedPlayers.length === 0 }">🟢</span>
+                    <span
+                      x-show="connectionStatus === 'connected'"
+                      :class="{ 'connection-waiting': connectionStatus === 'connected' && connectedPlayers.length === 0 }"
+                      >🟢</span
+                    >
                     <span x-show="connectionStatus === 'connecting'">🟡</span>
                     <span
                       x-show="connectionStatus === 'disconnected' || connectionStatus === 'error'"
@@ -946,6 +961,23 @@
         <div x-show="sessionMode === 'solo'" class="session-join">
           <h3>Multiplayer Room</h3>
 
+          <!-- Streamer Mode Toggle -->
+          <div class="streamer-mode-toggle">
+            <label class="toggle-label">
+              <input
+                type="checkbox"
+                x-model="streamerMode"
+                @change="toggleStreamerMode()"
+                class="toggle-checkbox"
+              />
+              <span class="toggle-slider"></span>
+              <span class="toggle-text">🎥 Streamer Mode</span>
+            </label>
+            <div class="streamer-mode-hint" x-show="streamerMode">
+              Hides room details for privacy
+            </div>
+          </div>
+
           <div class="session-input">
             <input
               x-model="playerName"
@@ -960,9 +992,9 @@
           <div class="session-input">
             <input
               x-model="joinSessionId"
-              placeholder="Room ID (optional)"
+              :placeholder="streamerMode ? 'Room Code (optional)' : 'Room ID (optional)'"
               class="session-id-input"
-              type="search"
+              :type="streamerMode ? 'password' : 'search'"
               maxlength="6"
               @input="handleRoomIdChange()"
               @keyup.enter="joinSessionId.trim() ? joinSession() : createSession()"
@@ -995,7 +1027,22 @@
 
         <!-- Multiplayer mode: room info -->
         <div x-show="sessionMode === 'multiplayer'" class="session-info">
-          <div class="session-details">
+          <!-- Streamer Mode Controls -->
+          <div x-show="streamerMode" class="streamer-controls">
+            <button
+              @click="toggleRoomDetails()"
+              class="toggle-room-details-btn"
+              :class="{ 'active': showRoomDetails }"
+            >
+              <span x-show="!showRoomDetails">👁️ Show Room Details</span>
+              <span x-show="showRoomDetails">🙈 Hide Room Details</span>
+            </button>
+          </div>
+
+          <div
+            class="session-details"
+            x-show="!streamerMode || showRoomDetails"
+          >
             <div class="session-id-display">
               <strong>Room:</strong>
               <span x-text="sessionId" class="session-id"></span>
@@ -1012,8 +1059,8 @@
               <div class="qr-code-section">
                 <strong>Scan to Join:</strong>
                 <div class="qr-code-wrapper">
-                  <img 
-                    :src="generateQRCode(sessionId)" 
+                  <img
+                    :src="generateQRCode(sessionId)"
                     alt="QR Code to join room"
                     class="qr-code"
                     x-show="sessionId"
@@ -1021,313 +1068,338 @@
                 </div>
               </div>
             </div>
-
-            <div class="connection-status" :class="connectionStatus">
-              <span x-show="connectionStatus === 'connected'"
-                >🟢 Connected</span
-              >
-              <span x-show="connectionStatus === 'connecting'"
-                >🟡 Connecting...</span
-              >
-              <span x-show="connectionStatus === 'disconnected'"
-                >🔴 Disconnected</span
-              >
-              <span x-show="connectionStatus === 'error'">❌ Error</span>
-            </div>
           </div>
 
-          <div class="players-list">
-            <strong
-              >Players (<span x-text="connectedPlayers.length + 1"></span
-              >):</strong
+          <div class="connection-status" :class="connectionStatus">
+            <span x-show="connectionStatus === 'connected'">🟢 Connected</span>
+            <span x-show="connectionStatus === 'connecting'"
+              >🟡 Connecting...</span
             >
-            <div class="players-container">
-              <div class="player-item self">
-                <span x-text="playerName + ' (you)'"></span>
+            <span x-show="connectionStatus === 'disconnected'"
+              >🔴 Disconnected</span
+            >
+            <span x-show="connectionStatus === 'error'">❌ Error</span>
+          </div>
+        </div>
+
+        <div class="players-list">
+          <strong
+            >Players (<span x-text="connectedPlayers.length + 1"></span
+            >):</strong
+          >
+          <div class="players-container">
+            <div class="player-item self">
+              <span x-text="playerName + ' (you)'"></span>
+            </div>
+            <template x-for="player in connectedPlayers" :key="player.id">
+              <div class="player-item">
+                <span x-text="player.name"></span>
+                <span x-show="!player.isActive" class="inactive">(away)</span>
               </div>
-              <template x-for="player in connectedPlayers" :key="player.id">
-                <div class="player-item">
-                  <span x-text="player.name"></span>
-                  <span x-show="!player.isActive" class="inactive">(away)</span>
-                </div>
-              </template>
+            </template>
+          </div>
+        </div>
+
+        <button @click="leaveSession()" class="session-btn leave-btn">
+          Leave Room
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile session panel -->
+    <div
+      x-show="showSessionUI && sessionFeaturesAvailable"
+      class="session-panel mobile-session-panel"
+      x-transition:enter="transition ease-out duration-300"
+      x-transition:enter-start="transform translate-y-full"
+      x-transition:enter-end="transform translate-y-0"
+      x-transition:leave="transition ease-in duration-300"
+      x-transition:leave-start="transform translate-y-0"
+      x-transition:leave-end="transform translate-y-full"
+    >
+      <!-- Session panel header -->
+      <div class="dialog-header">
+        <h3 x-show="sessionMode === 'solo'">Multiplayer Room</h3>
+        <h3 x-show="sessionMode === 'multiplayer'">Room Info</h3>
+        <button @click="toggleSessionUI()" class="dialog-close">✕</button>
+      </div>
+
+      <!-- Solo mode: session creation/joining -->
+      <div x-show="sessionMode === 'solo'" class="session-join">
+        <div class="dialog-content">
+          <div class="session-input">
+            <input
+              x-model="playerName"
+              placeholder="Your name"
+              required
+              maxlength="20"
+              class="player-name-input"
+              @keyup.enter="joinSessionId.trim() ? joinSession() : createSession()"
+            />
+          </div>
+
+          <!-- Streamer Mode Toggle -->
+          <div class="streamer-mode-toggle mobile">
+            <label class="toggle-label">
+              <input
+                type="checkbox"
+                x-model="streamerMode"
+                @change="toggleStreamerMode()"
+                class="toggle-checkbox"
+              />
+              <span class="toggle-slider"></span>
+              <span class="toggle-text">🎥 Streamer Mode</span>
+            </label>
+            <div class="streamer-mode-hint" x-show="streamerMode">
+              Hides room details for privacy
             </div>
           </div>
 
-          <button @click="leaveSession()" class="session-btn leave-btn">
-            Leave Room
-          </button>
+          <div class="session-input">
+            <input
+              x-model="joinSessionId"
+              :placeholder="streamerMode ? 'Room Code (optional)' : 'Room ID (optional)'"
+              class="session-id-input"
+              :type="streamerMode ? 'password' : 'search'"
+              maxlength="6"
+              @input="handleRoomIdChange()"
+              @keyup.enter="joinSessionId.trim() ? joinSession() : createSession()"
+            />
+          </div>
+
+          <div class="session-action">
+            <button
+              @click="joinSessionId.trim() ? joinSession() : createSession()"
+              :disabled="!playerName.trim() || connectionStatus === 'connecting' || !isJoinSessionValid"
+              class="session-btn primary-btn"
+            >
+              <span x-show="connectionStatus === 'connecting'">
+                <span
+                  x-text="joinSessionId.trim() ? 'Joining...' : 'Creating...'"
+                ></span>
+              </span>
+              <span x-show="connectionStatus !== 'connecting'">
+                <span
+                  x-text="joinSessionId.trim() ? 'Join Room' : 'Create New Room'"
+                ></span>
+              </span>
+            </button>
+          </div>
+
+          <div x-show="connectionStatus === 'error'" class="session-error">
+            Connection failed. Please try again.
+          </div>
         </div>
       </div>
 
-      <!-- Mobile session panel -->
-      <div
-        x-show="showSessionUI && sessionFeaturesAvailable"
-        class="session-panel mobile-session-panel"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="transform translate-y-full"
-        x-transition:enter-end="transform translate-y-0"
-        x-transition:leave="transition ease-in duration-300"
-        x-transition:leave-start="transform translate-y-0"
-        x-transition:leave-end="transform translate-y-full"
-      >
-        <!-- Session panel header -->
-        <div class="dialog-header">
-          <h3 x-show="sessionMode === 'solo'">Multiplayer Room</h3>
-          <h3 x-show="sessionMode === 'multiplayer'">Room Info</h3>
-          <button @click="toggleSessionUI()" class="dialog-close">✕</button>
-        </div>
+      <!-- Multiplayer mode: room info -->
+      <div x-show="sessionMode === 'multiplayer'" class="session-info">
+        <div class="dialog-content">
+          <!-- Streamer Mode Controls -->
+          <div x-show="streamerMode" class="streamer-controls mobile">
+            <button
+              @click="toggleRoomDetails()"
+              class="toggle-room-details-btn"
+              :class="{ 'active': showRoomDetails }"
+            >
+              <span x-show="!showRoomDetails">👁️ Show Room Details</span>
+              <span x-show="showRoomDetails">🙈 Hide Room Details</span>
+            </button>
+          </div>
 
-        <!-- Solo mode: session creation/joining -->
-        <div x-show="sessionMode === 'solo'" class="session-join">
-          <div class="dialog-content">
-            <div class="session-input">
-              <input
-                x-model="playerName"
-                placeholder="Your name"
-                required
-                maxlength="20"
-                class="player-name-input"
-                @keyup.enter="joinSessionId.trim() ? joinSession() : createSession()"
-              />
-            </div>
-
-            <div class="session-input">
-              <input
-                x-model="joinSessionId"
-                placeholder="Room ID (optional)"
-                class="session-id-input"
-                type="search"
-                maxlength="6"
-                @input="handleRoomIdChange()"
-                @keyup.enter="joinSessionId.trim() ? joinSession() : createSession()"
-              />
-            </div>
-
-            <div class="session-action">
+          <div
+            class="session-details"
+            x-show="!streamerMode || showRoomDetails"
+          >
+            <div class="session-id-display">
+              <strong>Room:</strong>
+              <span x-text="sessionId" class="session-id"></span>
               <button
-                @click="joinSessionId.trim() ? joinSession() : createSession()"
-                :disabled="!playerName.trim() || connectionStatus === 'connecting' || !isJoinSessionValid"
-                class="session-btn primary-btn"
+                @click="copySessionLink()"
+                class="copy-btn"
+                title="Copy room link"
               >
-                <span x-show="connectionStatus === 'connecting'">
-                  <span
-                    x-text="joinSessionId.trim() ? 'Joining...' : 'Creating...'"
-                  ></span>
-                </span>
-                <span x-show="connectionStatus !== 'connecting'">
-                  <span
-                    x-text="joinSessionId.trim() ? 'Join Room' : 'Create New Room'"
-                  ></span>
-                </span>
+                📋
               </button>
             </div>
 
-            <div x-show="connectionStatus === 'error'" class="session-error">
-              Connection failed. Please try again.
+            <div class="qr-code-container" x-show="sessionId">
+              <div class="qr-code-section">
+                <strong>Scan to Join:</strong>
+                <div class="qr-code-wrapper">
+                  <img
+                    :src="generateQRCode(sessionId)"
+                    alt="QR Code to join room"
+                    class="qr-code"
+                    x-show="sessionId"
+                  />
+                </div>
+              </div>
             </div>
+          </div>
+
+          <div class="connection-status" :class="connectionStatus">
+            <span x-show="connectionStatus === 'connected'">🟢 Connected</span>
+            <span x-show="connectionStatus === 'connecting'"
+              >🟡 Connecting...</span
+            >
+            <span x-show="connectionStatus === 'disconnected'"
+              >🔴 Disconnected</span
+            >
+            <span x-show="connectionStatus === 'error'">❌ Error</span>
           </div>
         </div>
 
-        <!-- Multiplayer mode: room info -->
-        <div x-show="sessionMode === 'multiplayer'" class="session-info">
-          <div class="dialog-content">
-            <div class="session-details">
-              <div class="session-id-display">
-                <strong>Room:</strong>
-                <span x-text="sessionId" class="session-id"></span>
-                <button
-                  @click="copySessionLink()"
-                  class="copy-btn"
-                  title="Copy room link"
-                >
-                  📋
-                </button>
+        <div class="players-list">
+          <strong
+            >Players (<span x-text="connectedPlayers.length + 1"></span
+            >):</strong
+          >
+          <div class="players-container">
+            <div class="player-item self">
+              <span x-text="playerName + ' (you)'"></span>
+            </div>
+            <template x-for="player in connectedPlayers" :key="player.id">
+              <div class="player-item">
+                <span x-text="player.name"></span>
+                <span x-show="!player.isActive" class="inactive">(away)</span>
               </div>
+            </template>
+          </div>
+        </div>
 
-              <div class="qr-code-container" x-show="sessionId">
-                <div class="qr-code-section">
-                  <strong>Scan to Join:</strong>
-                  <div class="qr-code-wrapper">
-                    <img 
-                      :src="generateQRCode(sessionId)" 
-                      alt="QR Code to join room"
-                      class="qr-code"
-                      x-show="sessionId"
-                    />
-                  </div>
-                </div>
-              </div>
+        <button @click="leaveSession()" class="session-btn leave-btn">
+          Leave Room
+        </button>
+      </div>
+    </div>
 
-              <div class="connection-status" :class="connectionStatus">
-                <span x-show="connectionStatus === 'connected'"
-                  >🟢 Connected</span
-                >
-                <span x-show="connectionStatus === 'connecting'"
-                  >🟡 Connecting...</span
-                >
-                <span x-show="connectionStatus === 'disconnected'"
-                  >🔴 Disconnected</span
-                >
-                <span x-show="connectionStatus === 'error'">❌ Error</span>
-              </div>
+    <!-- Session panel backdrop for mobile -->
+    <div
+      class="dialog-backdrop mobile-session-backdrop"
+      x-show="showSessionUI && sessionFeaturesAvailable"
+      @click="toggleSessionUI()"
+      x-transition:enter="transition ease-out duration-300"
+      x-transition:enter-start="opacity-0"
+      x-transition:enter-end="opacity-100"
+      x-transition:leave="transition ease-in duration-300"
+      x-transition:leave-start="opacity-100"
+      x-transition:leave-end="opacity-0"
+    ></div>
+
+    <button
+      class="history-toggle"
+      @click="toggleHistory()"
+      x-show="rollHistory.length || true"
+      :disabled="rollHistory.length === 0"
+    >
+      <img src="/src/assets/history.svg" alt="History" class="history-icon" />
+    </button>
+
+    <div
+      class="roll-history-panel"
+      :class="{ 'visible': showHistory }"
+      x-show="rollHistory.length > 0"
+    >
+      <div class="roll-history">
+        <h3>Roll History</h3>
+        <template
+          x-for="(roll, index) in rollHistory.slice(0, 10)"
+          :key="index"
+        >
+          <div
+            class="history-item"
+            :class="'roll-type-' + (roll.rollType || 'check')"
+          >
+            <!-- Player name on separate line for cleaner look -->
+            <div
+              x-show="sessionMode === 'multiplayer' && roll.playerName"
+              class="player-name-line"
+            >
+              <span x-text="roll.playerName"></span>
             </div>
 
-            <div class="players-list">
-              <strong
-                >Players (<span x-text="connectedPlayers.length + 1"></span
-                >):</strong
-              >
-              <div class="players-container">
-                <div class="player-item self">
-                  <span x-text="playerName + ' (you)'"></span>
-                </div>
-                <template x-for="player in connectedPlayers" :key="player.id">
-                  <div class="player-item">
-                    <span x-text="player.name"></span>
-                    <span x-show="!player.isActive" class="inactive"
-                      >(away)</span
+            <div class="roll-details">
+              <!-- Main result line -->
+              <div class="main-result">
+                <span class="result-text">
+                  <template x-if="!roll.rollType || roll.rollType === 'check'">
+                    <span>
+                      <strong x-text="roll.total"></strong>
+                      <span
+                        x-text="roll.result.includes('hope') ? ' with hope' : roll.result.includes('fear') ? ' with fear' : ' Critical Success!'"
+                      ></span>
+                    </span>
+                  </template>
+                  <template x-if="roll.rollType === 'damage'">
+                    <span><strong x-text="roll.total"></strong> damage</span>
+                  </template>
+                  <template x-if="roll.rollType === 'gm'">
+                    <span><strong x-text="roll.total"></strong> GM</span>
+                  </template>
+                </span>
+              </div>
+
+              <!-- Details line -->
+              <div class="roll-breakdown">
+                <!-- Check Roll Details -->
+                <template x-if="!roll.rollType || roll.rollType === 'check'">
+                  <span class="breakdown-text">
+                    <span x-text="roll.hopeValue"></span> Hope,
+                    <span x-text="roll.fearValue"></span> Fear<span
+                      x-show="roll.advantageValue && roll.advantageValue !== 0"
+                      >, <span x-text="Math.abs(roll.advantageValue)"></span>
+                      <span
+                        x-text="roll.advantageValue > 0 ? 'Adv.' : 'Disadv.'"
+                      ></span></span
+                    ><span
+                      x-show="roll.modifier !== undefined && roll.modifier !== 0"
+                      >,
+                      <span
+                        x-text="(roll.modifier > 0 ? '+' : '') + roll.modifier"
+                      ></span
+                    ></span>
+                  </span>
+                </template>
+
+                <!-- Damage Roll Details -->
+                <template x-if="roll.rollType === 'damage'">
+                  <span class="breakdown-text">
+                    <span
+                      x-text="roll.baseDiceCount + 'd' + roll.baseDiceType"
+                    ></span
+                    ><span x-show="roll.bonusDieEnabled"
+                      >, Bonus:
+                      <span x-text="'1d' + roll.bonusDieType"></span></span
+                    ><span x-show="roll.isCritical"
+                      >, <span class="critical-text">Critical</span></span
+                    ><span x-show="roll.hasResistance"
+                      >, <span class="resistance-text">Resistance</span></span
                     >
-                  </div>
+                  </span>
+                </template>
+
+                <!-- GM Roll Details -->
+                <template x-if="roll.rollType === 'gm'">
+                  <span class="breakdown-text">
+                    d20: <span x-text="roll.d20Value"></span
+                    ><span x-show="roll.gmModifier !== 0"
+                      >, Modifier:
+                      <span
+                        x-text="(roll.gmModifier > 0 ? '+' : '') + roll.gmModifier"
+                      ></span
+                    ></span>
+                  </span>
                 </template>
               </div>
             </div>
-
-            <button @click="leaveSession()" class="session-btn leave-btn">
-              Leave Room
-            </button>
           </div>
-        </div>
+        </template>
       </div>
+    </div>
 
-      <!-- Session panel backdrop for mobile -->
-      <div
-        class="dialog-backdrop mobile-session-backdrop"
-        x-show="showSessionUI && sessionFeaturesAvailable"
-        @click="toggleSessionUI()"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-300"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-      ></div>
-
-      <button
-        class="history-toggle"
-        @click="toggleHistory()"
-        x-show="rollHistory.length || true"
-        :disabled="rollHistory.length === 0"
-      >
-        <img src="/src/assets/history.svg" alt="History" class="history-icon" />
-      </button>
-
-      <div
-        class="roll-history-panel"
-        :class="{ 'visible': showHistory }"
-        x-show="rollHistory.length > 0"
-      >
-        <div class="roll-history">
-          <h3>Roll History</h3>
-          <template
-            x-for="(roll, index) in rollHistory.slice(0, 10)"
-            :key="index"
-          >
-            <div
-              class="history-item"
-              :class="'roll-type-' + (roll.rollType || 'check')"
-            >
-              <!-- Player name on separate line for cleaner look -->
-              <div
-                x-show="sessionMode === 'multiplayer' && roll.playerName"
-                class="player-name-line"
-              >
-                <span x-text="roll.playerName"></span>
-              </div>
-
-              <div class="roll-details">
-                <!-- Main result line -->
-                <div class="main-result">
-                  <span class="result-text">
-                    <template
-                      x-if="!roll.rollType || roll.rollType === 'check'"
-                    >
-                      <span>
-                        <strong x-text="roll.total"></strong>
-                        <span
-                          x-text="roll.result.includes('hope') ? ' with hope' : roll.result.includes('fear') ? ' with fear' : ' Critical Success!'"
-                        ></span>
-                      </span>
-                    </template>
-                    <template x-if="roll.rollType === 'damage'">
-                      <span><strong x-text="roll.total"></strong> damage</span>
-                    </template>
-                    <template x-if="roll.rollType === 'gm'">
-                      <span><strong x-text="roll.total"></strong> GM</span>
-                    </template>
-                  </span>
-                </div>
-
-                <!-- Details line -->
-                <div class="roll-breakdown">
-                  <!-- Check Roll Details -->
-                  <template x-if="!roll.rollType || roll.rollType === 'check'">
-                    <span class="breakdown-text">
-                      <span x-text="roll.hopeValue"></span> Hope,
-                      <span x-text="roll.fearValue"></span> Fear<span
-                        x-show="roll.advantageValue && roll.advantageValue !== 0"
-                        >, <span x-text="Math.abs(roll.advantageValue)"></span>
-                        <span
-                          x-text="roll.advantageValue > 0 ? 'Adv.' : 'Disadv.'"
-                        ></span></span
-                      ><span
-                        x-show="roll.modifier !== undefined && roll.modifier !== 0"
-                        >,
-                        <span
-                          x-text="(roll.modifier > 0 ? '+' : '') + roll.modifier"
-                        ></span
-                      ></span>
-                    </span>
-                  </template>
-
-                  <!-- Damage Roll Details -->
-                  <template x-if="roll.rollType === 'damage'">
-                    <span class="breakdown-text">
-                      <span
-                        x-text="roll.baseDiceCount + 'd' + roll.baseDiceType"
-                      ></span
-                      ><span x-show="roll.bonusDieEnabled"
-                        >, Bonus:
-                        <span x-text="'1d' + roll.bonusDieType"></span></span
-                      ><span x-show="roll.isCritical"
-                        >, <span class="critical-text">Critical</span></span
-                      ><span x-show="roll.hasResistance"
-                        >, <span class="resistance-text">Resistance</span></span
-                      >
-                    </span>
-                  </template>
-
-                  <!-- GM Roll Details -->
-                  <template x-if="roll.rollType === 'gm'">
-                    <span class="breakdown-text">
-                      d20: <span x-text="roll.d20Value"></span
-                      ><span x-show="roll.gmModifier !== 0"
-                        >, Modifier:
-                        <span
-                          x-text="(roll.gmModifier > 0 ? '+' : '') + roll.gmModifier"
-                        ></span
-                      ></span>
-                    </span>
-                  </template>
-                </div>
-              </div>
-            </div>
-          </template>
-        </div>
-      </div>
-      
-      <!-- Keyboard Shortcuts Help Dialog -->
-    <div 
+    <!-- Keyboard Shortcuts Help Dialog -->
+    <div
       class="keyboard-help-overlay"
       x-show="showKeyboardHelp"
       @click.self="showKeyboardHelp = false"
@@ -1341,7 +1413,7 @@
       <div class="keyboard-help-dialog">
         <div class="keyboard-help-header">
           <h3>Keyboard Shortcuts</h3>
-          <button 
+          <button
             @click="showKeyboardHelp = false"
             class="close-dialog-btn"
             title="Close"
@@ -1349,7 +1421,7 @@
             ✕
           </button>
         </div>
-        
+
         <div class="keyboard-help-content">
           <div class="shortcut-section">
             <h4>Roll Types</h4>
@@ -1404,7 +1476,6 @@
           </div>
         </div>
       </div>
-    </div>
     </div>
 
     <!-- Import the built JavaScript module -->

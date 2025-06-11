@@ -194,6 +194,10 @@ function diceRoller() {
     initialized: false,
     keyboardShortcutsInitialized: false,
     showKeyboardHelp: false,
+    
+    // Streamer mode state
+    streamerMode: false,
+    showRoomDetails: true,
 
     setAdvantageType(type: "none" | "advantage" | "disadvantage") {
       this.advantageType = type;
@@ -631,8 +635,12 @@ function diceRoller() {
           savePlayerName(sanitizedName);
           saveLastSessionId(sessionId);
           
-          // Update URL without page reload
-          history.pushState({}, '', `/room/${sessionId}`);
+          // Update URL without page reload (respecting streamer mode)
+          if (!this.streamerMode) {
+            history.pushState({}, '', `/room/${sessionId}`);
+          } else {
+            history.pushState({}, '', '/');
+          }
           
           // Start heartbeat
           this.sessionClient.startHeartbeat();
@@ -685,8 +693,12 @@ function diceRoller() {
           savePlayerName(sanitizedName);
           saveLastSessionId(normalizedSessionId);
           
-          // Update URL without page reload and use normalized ID
-          history.pushState({}, '', `/room/${normalizedSessionId}`);
+          // Update URL without page reload and use normalized ID (respecting streamer mode)
+          if (!this.streamerMode) {
+            history.pushState({}, '', `/room/${normalizedSessionId}`);
+          } else {
+            history.pushState({}, '', '/');
+          }
           
           // Start heartbeat
           this.sessionClient.startHeartbeat();
@@ -766,6 +778,46 @@ function diceRoller() {
         console.error('Failed to generate QR code:', error);
         return '';
       }
+    },
+
+    toggleStreamerMode() {
+      this.streamerMode = !this.streamerMode;
+      
+      // When enabling streamer mode, hide room details by default
+      if (this.streamerMode) {
+        this.showRoomDetails = false;
+        // Hide room from URL if we're in a session
+        if (this.sessionId) {
+          this.updateURLForStreamerMode();
+        }
+      } else {
+        this.showRoomDetails = true;
+        // Restore room in URL if we're in a session
+        if (this.sessionId) {
+          this.updateURLForStreamerMode();
+        }
+      }
+    },
+
+    updateURLForStreamerMode() {
+      if (!this.sessionId) return;
+      
+      const currentUrl = new URL(window.location.href);
+      
+      if (this.streamerMode) {
+        // Remove room parameter from URL
+        currentUrl.searchParams.delete('room');
+      } else {
+        // Add room parameter back to URL
+        currentUrl.searchParams.set('room', this.sessionId);
+      }
+      
+      // Update URL without triggering page refresh
+      window.history.replaceState({}, '', currentUrl.toString());
+    },
+
+    toggleRoomDetails() {
+      this.showRoomDetails = !this.showRoomDetails;
     },
 
     setupSessionEventHandlers() {
