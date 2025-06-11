@@ -1008,6 +1008,20 @@
               </button>
             </div>
 
+            <div class="qr-code-container" x-show="sessionId">
+              <div class="qr-code-section">
+                <strong>Scan to Join:</strong>
+                <div class="qr-code-wrapper">
+                  <img 
+                    :src="generateQRCode(sessionId)" 
+                    alt="QR Code to join room"
+                    class="qr-code"
+                    x-show="sessionId"
+                  />
+                </div>
+              </div>
+            </div>
+
             <div class="connection-status" :class="connectionStatus">
               <span x-show="connectionStatus === 'connected'"
                 >🟢 Connected</span
@@ -1129,6 +1143,20 @@
                 >
                   📋
                 </button>
+              </div>
+
+              <div class="qr-code-container" x-show="sessionId">
+                <div class="qr-code-section">
+                  <strong>Scan to Join:</strong>
+                  <div class="qr-code-wrapper">
+                    <img 
+                      :src="generateQRCode(sessionId)" 
+                      alt="QR Code to join room"
+                      class="qr-code"
+                      x-show="sessionId"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div class="connection-status" :class="connectionStatus">

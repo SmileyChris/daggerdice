@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@3d-dice/dice-box": "^1.1.4",
-    "alpinejs": "^3.14.9"
+    "alpinejs": "^3.14.9",
+    "qrcode-generator": "^1.5.0"
   }
 }

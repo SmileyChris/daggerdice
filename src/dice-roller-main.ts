@@ -2,6 +2,7 @@
 import DiceBox from "@3d-dice/dice-box";
 import Alpine from "alpinejs";
 import "./dice-roller.css";
+import QRCode from "qrcode-generator";
 
 // Import session-related modules
 import { SessionClient } from "./session/session-client.js";
@@ -750,6 +751,20 @@ function diceRoller() {
         console.log('Room link copied to clipboard');
       } else {
         alert('Failed to copy link. Please copy manually: ' + url);
+      }
+    },
+
+    generateQRCode(sessionId: string): string {
+      try {
+        const url = createSessionUrl(sessionId);
+        const qr = QRCode(0, 'M');
+        qr.addData(url);
+        qr.make();
+        
+        return qr.createDataURL(4, 2);
+      } catch (error) {
+        console.error('Failed to generate QR code:', error);
+        return '';
       }
     },
 
