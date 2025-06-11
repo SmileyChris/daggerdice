@@ -435,43 +435,49 @@ button:disabled {
   left: 50%;
   transform: translate(-50%, -50%);
   width: 90%;
-  max-width: 400px;
-  background-color: rgba(0, 0, 0, 0.95);
-  border-radius: 12px;
-  padding: 1.5rem;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  max-width: 450px;
+  background: linear-gradient(135deg, rgba(20, 20, 30, 0.98), rgba(10, 10, 20, 0.98));
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.8),
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
   z-index: 30;
-  max-height: 80vh;
+  max-height: 85vh;
   overflow-y: auto;
 }
 
 /* Desktop dialog close button */
 .desktop-dialog-close {
   position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  width: 32px;
-  height: 32px;
+  top: 1rem;
+  right: 1rem;
+  width: 36px;
+  height: 36px;
   padding: 0;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 50%;
   font-size: 1.2rem;
   line-height: 1;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: inherit;
+  backdrop-filter: blur(10px);
 }
 
 .desktop-dialog-close:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+  transform: scale(1.05);
 }
 
 /* Desktop multiplayer button (top-left) */
@@ -530,26 +536,37 @@ button:disabled {
 
 .session-panel h3 {
   margin-top: 0;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   color: #ffffff;
-  font-size: 1.3rem;
+  font-size: 1.4rem;
+  font-weight: 600;
   text-align: center;
+  background: linear-gradient(135deg, #ffffff, #e0e0e0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .session-input {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.session-input:last-child {
+  margin-bottom: 0;
 }
 
 .player-name-input,
 .session-id-input {
   width: 100%;
-  padding: 0.75rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 6px;
-  background-color: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
   color: white;
   font-size: 1rem;
   box-sizing: border-box;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
 .player-name-input::placeholder,
@@ -561,46 +578,59 @@ button:disabled {
 .session-id-input:focus {
   outline: none;
   border-color: #007bff;
-  background-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
 }
 
 .session-btn {
   width: 100%;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
-  border: none;
-  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-weight: 500;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
 }
 
 .create-btn {
-  background-color: #28a745;
+  background: linear-gradient(135deg, #28a745, #20c997);
   color: white;
+  border-color: rgba(40, 167, 69, 0.5);
 }
 
 .create-btn:hover:not(:disabled) {
-  background-color: #218838;
+  background: linear-gradient(135deg, #218838, #1fa886);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
 }
 
 .join-btn {
-  background-color: #007bff;
+  background: linear-gradient(135deg, #007bff, #0056b3);
   color: white;
+  border-color: rgba(0, 123, 255, 0.5);
 }
 
 .join-btn:hover:not(:disabled) {
-  background-color: #0056b3;
+  background: linear-gradient(135deg, #0056b3, #004085);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
 }
 
 .leave-btn {
-  background-color: #dc3545;
+  background: linear-gradient(135deg, #dc3545, #c82333);
   color: white;
+  border-color: rgba(220, 53, 69, 0.5);
 }
 
 .leave-btn:hover {
-  background-color: #c82333;
+  background: linear-gradient(135deg, #c82333, #bd2130);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
 }
 
 .session-btn:disabled {
@@ -1345,16 +1375,20 @@ button:disabled {
     bottom: 90px;
     left: 50%;
     transform: translateX(-50%);
-    width: 90%;
-    max-width: 400px;
+    width: 92%;
+    max-width: 420px;
     margin: 0;
-    max-height: 60vh;
+    max-height: 65vh;
     overflow-y: auto;
     z-index: 35;
-    border-radius: 12px 12px 0 0;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.5);
-    background-color: rgba(0, 0, 0, 0.95);
+    border-radius: 20px 20px 0 0;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      0 -8px 32px rgba(0, 0, 0, 0.6),
+      0 -4px 16px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, rgba(20, 20, 30, 0.98), rgba(10, 10, 20, 0.98));
+    backdrop-filter: blur(20px);
   }
 
   /* Show mobile session backdrop */

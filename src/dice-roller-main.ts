@@ -407,23 +407,22 @@ function diceRoller() {
       const finalDamage = this.hasResistance ? Math.floor(totalDamage / 2) : totalDamage;
 
       // Format result text
-      let resultParts = [];
-      
-      if (this.isCritical) {
-        resultParts.push(`${criticalDamage} + (${baseDiceValues.join("+")})`);
-      } else {
-        resultParts.push(baseDiceValues.join("+"));
-      }
-      
-      if (this.bonusDieEnabled && bonusDieValue > 0) {
-        resultParts.push(`${bonusDieValue}`);
-      }
-
       let resultText;
       
-      // Only show calculation if there are multiple parts or modifiers
-      if (resultParts.length > 1 || this.isCritical || this.hasResistance) {
-        resultText = resultParts.join(" + ") + ` = ${totalDamage}`;
+      if (this.isCritical) {
+        // Critical: show max + rolled dice
+        resultText = `${criticalDamage} + (${baseDiceValues.join("+")})`; 
+        if (this.bonusDieEnabled && bonusDieValue > 0) {
+          resultText += ` <small>+${bonusDieValue}</small>`;
+        }
+        resultText += ` = ${totalDamage}`;
+      } else if (baseDiceValues.length > 1 || (this.bonusDieEnabled && bonusDieValue > 0) || this.hasResistance) {
+        // Multiple dice or bonus die - show base dice total, then smaller bonus
+        resultText = baseDiceValues.join("+");
+        if (this.bonusDieEnabled && bonusDieValue > 0) {
+          resultText += ` <small>+${bonusDieValue}</small>`;
+        }
+        resultText += ` = ${totalDamage}`;
       } else {
         // Just show the single value
         resultText = `${totalDamage}`;
