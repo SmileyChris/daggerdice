@@ -2,84 +2,84 @@ name: Pull Request Checks
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test-coverage:
     name: Test Coverage & Quality
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Generate Wrangler types
-      run: npx wrangler types
-      
-    - name: Run all tests
-      run: npm run test:all
-      
-    - name: Build project
-      run: npm run build
-      
-    - name: Comment test results
-      uses: actions/github-script@v7
-      if: always()
-      with:
-        script: |
-          const fs = require('fs');
-          
-          // Create a simple test report comment
-          const comment = `## 🧪 Test Results
-          
-          ✅ **Frontend Tests** (49): Dice logic, session utilities, and UI components
-          ✅ **Workers Tests** (20): WebSocket APIs, session validation, and error handling  
-          ✅ **Build Check**: Production build successful
-          ✅ **Security Audit**: Dependencies checked for vulnerabilities
-          
-          **Total: 69 tests passed** ✨
-          
-          All quality checks passed! This PR is ready for review and will be automatically deployed by Cloudflare Workers once merged to main.
-          
-          ---
-          *Automated by GitHub Actions*`;
-          
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: comment
-          });
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Wrangler types
+        run: npx wrangler types
+
+      - name: Run all tests
+        run: npm run test:all
+
+      - name: Build project
+        run: npm run build
+
+      - name: Comment test results
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const fs = require('fs');
+
+            // Create a simple test report comment
+            const comment = `## 🧪 Test Results
+
+            ✅ **Frontend Tests** (49): Dice logic, session utilities, and UI components
+            ✅ **Workers Tests** (20): WebSocket APIs, session validation, and error handling  
+            ✅ **Build Check**: Production build successful
+            ✅ **Security Audit**: Dependencies checked for vulnerabilities
+
+            **Total: 69 tests passed** ✨
+
+            All quality checks passed! This PR is ready for review and will be automatically deployed by Cloudflare Workers once merged to main.
+
+            ---
+            *Automated by GitHub Actions*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
 
   security-check:
     name: Security & Dependencies
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Run security audit
-      run: npm audit --audit-level=moderate
-      continue-on-error: true
-      
-    - name: Check for outdated dependencies
-      run: npm outdated || true
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run security audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Check for outdated dependencies
+        run: npm outdated || true
