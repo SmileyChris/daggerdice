@@ -24,23 +24,33 @@ import {
 } from './session/utils.js';
 
 // Type declarations for missing modules
+interface DiceBoxInstance {
+  roll: (dice: Array<{ sides: number; theme: string; themeColor: string }>) => Promise<Array<{ value: number }>>;
+  init: () => Promise<void>;
+}
+
+interface ToastManagerInstance {
+  show: (type: string, content: string, duration?: number) => void;
+  showRollToast: (roll: SharedRollHistoryItem) => void;
+}
+
 declare global {
   interface Window {
-    diceBox: any;
-    diceRoller: () => any;
-    toastManager: () => any;
+    diceBox: DiceBoxInstance;
+    diceRoller: () => object;
+    toastManager: () => ToastManagerInstance;
   }
 }
 
 // Global dice box instance
-let diceBox: any = null;
+let diceBox: DiceBoxInstance | null = null;
 
 // Use SharedRollHistoryItem for all roll history (solo and multiplayer)
 // For solo mode, playerId/playerName/timestamp will be undefined
 type RollHistoryItem = SharedRollHistoryItem;
 
 // Global toast manager instance
-let globalToastManager: any = null;
+let globalToastManager: ToastManagerInstance | null = null;
 
 // Toast manager for notifications
 function toastManager() {
@@ -931,7 +941,7 @@ document.addEventListener('DOMContentLoaded', function () {
     .then(() => {
       console.log('Dice-box initialized successfully');
     })
-    .catch((error: any) => {
+    .catch((error: unknown) => {
       console.error('Failed to initialize dice-box:', error);
     });
 

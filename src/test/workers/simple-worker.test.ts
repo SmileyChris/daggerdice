@@ -67,7 +67,7 @@ describe('Cloudflare Workers Tests', () => {
             throw new Error('Asset serving failed');
           }
         },
-        SESSION_ROOMS: {} as any
+        SESSION_ROOMS: {} as DurableObjectNamespace
       } as Env;
       
       const response = await worker.fetch(request, env, {} as ExecutionContext);

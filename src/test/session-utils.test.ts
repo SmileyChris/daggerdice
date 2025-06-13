@@ -32,8 +32,8 @@ beforeEach(() => {
   });
   
   vi.mocked(localStorage.getItem).mockReturnValue(null);
-  vi.mocked(localStorage.setItem).mockImplementation(() => {});
-  vi.mocked(localStorage.removeItem).mockImplementation(() => {});
+  vi.mocked(localStorage.setItem).mockImplementation(() => { /* mock implementation */ });
+  vi.mocked(localStorage.removeItem).mockImplementation(() => { /* mock implementation */ });
   
   window.location.pathname = '/';
   window.location.hostname = 'localhost';
@@ -47,7 +47,7 @@ beforeEach(() => {
     style: {},
     focus: vi.fn(),
     select: vi.fn()
-  } as any);
+  } as HTMLTextAreaElement);
 });
 
 describe('Session ID Functions', () => {
@@ -79,8 +79,8 @@ describe('Session ID Functions', () => {
       expect(isValidSessionId('ABC12')).toBe(false); // too short
       expect(isValidSessionId('ABC1234')).toBe(false); // too long
       expect(isValidSessionId('ABC-12')).toBe(false); // special characters
-      expect(isValidSessionId(null as any)).toBe(false);
-      expect(isValidSessionId(undefined as any)).toBe(false);
+      expect(isValidSessionId(null as unknown as string)).toBe(false);
+      expect(isValidSessionId(undefined as unknown as string)).toBe(false);
     });
   });
 
@@ -94,7 +94,7 @@ describe('Session ID Functions', () => {
       expect(normalizeSessionId('ABC12')).toBeNull();
       expect(normalizeSessionId('ABC-12')).toBeNull();
       expect(normalizeSessionId('')).toBeNull();
-      expect(normalizeSessionId(null as any)).toBeNull();
+      expect(normalizeSessionId(null as unknown as string)).toBeNull();
     });
   });
 });
@@ -105,7 +105,7 @@ describe('Player Name Functions', () => {
       vi.mocked(document.createElement).mockReturnValue({
         textContent: '',
         innerHTML: 'John Doe'
-      } as any);
+      } as HTMLElement);
       
       const result = sanitizePlayerName('John Doe');
       expect(result).toBe('John Doe');
@@ -116,7 +116,7 @@ describe('Player Name Functions', () => {
       vi.mocked(document.createElement).mockReturnValue({
         textContent: '',
         innerHTML: 'A'.repeat(20)
-      } as any);
+      } as HTMLElement);
       
       const result = sanitizePlayerName(` ${longName} `);
       expect(result).toBe('A'.repeat(20));
@@ -124,8 +124,8 @@ describe('Player Name Functions', () => {
 
     it('should return Anonymous for invalid names', () => {
       expect(sanitizePlayerName('')).toBe('Anonymous');
-      expect(sanitizePlayerName(null as any)).toBe('Anonymous');
-      expect(sanitizePlayerName(undefined as any)).toBe('Anonymous');
+      expect(sanitizePlayerName(null as unknown as string)).toBe('Anonymous');
+      expect(sanitizePlayerName(undefined as unknown as string)).toBe('Anonymous');
     });
   });
 });
@@ -220,7 +220,7 @@ describe('Clipboard Functions', () => {
         focus: vi.fn(),
         select: vi.fn()
       };
-      vi.mocked(document.createElement).mockReturnValue(mockTextArea as any);
+      vi.mocked(document.createElement).mockReturnValue(mockTextArea as HTMLTextAreaElement);
       vi.mocked(document.execCommand).mockReturnValue(true);
       
       const result = await copyToClipboard('test text');

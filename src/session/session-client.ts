@@ -136,19 +136,21 @@ export class SessionClient {
         savePlayerName(playerName);
         
         // Send join announcement to other players
-        this.sendMessage({
-          type: 'JOIN_ANNOUNCEMENT',
-          player: {
-            id: this.playerId!,
-            name: this.sanitizePlayerName(playerName),
-            joinedAt: Date.now(),
-            lastSeen: Date.now(),
-            isActive: true
-          }
-        });
-        
-        // Notify event handler after sending join announcement
-        this.eventHandlers.onConnected?.(this.playerId!);
+        if (this.playerId) {
+          this.sendMessage({
+            type: 'JOIN_ANNOUNCEMENT',
+            player: {
+              id: this.playerId,
+              name: this.sanitizePlayerName(playerName),
+              joinedAt: Date.now(),
+              lastSeen: Date.now(),
+              isActive: true
+            }
+          });
+          
+          // Notify event handler after sending join announcement
+          this.eventHandlers.onConnected?.(this.playerId);
+        }
       };
 
       this.websocket.onmessage = (event) => {

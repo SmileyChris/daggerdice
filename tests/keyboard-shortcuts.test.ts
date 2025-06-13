@@ -54,7 +54,7 @@ function createKeyboardHandler(): KeyboardShortcutHandler {
   };
 }
 
-function simulateKeyPress(handler: KeyboardShortcutHandler, key: string, target?: any) {
+function simulateKeyPress(handler: KeyboardShortcutHandler, key: string, target?: { tagName: string }) {
   const event = new KeyboardEvent('keydown', { key });
   
   // Skip if target is an input element

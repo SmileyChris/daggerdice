@@ -21,7 +21,7 @@ vi.mock('@3d-dice/dice-box', () => {
 // Mock Alpine.js
 global.Alpine = {
   start: vi.fn(),
-} as any;
+} as { start: typeof vi.fn };
 
 // Mock crypto for session ID generation
 Object.defineProperty(global, 'crypto', {
@@ -61,7 +61,7 @@ Object.defineProperty(global, 'window', {
     diceBox: {
       roll: vi.fn().mockImplementation((dice) => {
         return Promise.resolve(
-          dice.map((die: any) => ({
+          dice.map((die: { sides: number }) => ({
             value: Math.floor(Math.random() * die.sides) + 1
           }))
         );

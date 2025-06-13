@@ -8,9 +8,9 @@ const mockDiceBox = {
 };
 
 // Set up global mocks
-(global as any).window = {
+(global as typeof globalThis).window = {
   diceBox: mockDiceBox
-};
+} as Window & typeof globalThis;
 
 describe('Check Roll Mechanics', () => {
   beforeEach(() => {

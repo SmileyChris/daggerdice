@@ -38,8 +38,10 @@ export default [
         clearInterval: 'readonly',
         HTMLInputElement: 'readonly',
         HTMLTextAreaElement: 'readonly',
+        HTMLElement: 'readonly',
         KeyboardEvent: 'readonly',
         URL: 'readonly',
+        Window: 'readonly',
         // Cloudflare Workers globals
         Request: 'readonly',
         Response: 'readonly',
