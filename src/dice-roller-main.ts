@@ -839,6 +839,7 @@ function diceRoller() {
           case 'escape':
             this.showKeyboardHelp = false;
             this.showSessionUI = false;
+            this.showHistory = false;
             break;
           case 'arrowleft':
             if (this.rollType === 'check') {

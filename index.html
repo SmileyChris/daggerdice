@@ -766,8 +766,8 @@
         <!-- Roll History Dialog -->
         <div
           class="mobile-dialog mobile-dialog-history"
-          :class="{ 'visible': showHistoryDialog }"
-          x-show="showHistoryDialog"
+          :class="{ 'visible': showHistory }"
+          x-show="showHistory"
           x-transition:enter="transition ease-out duration-300"
           x-transition:enter-start="transform translate-y-full"
           x-transition:enter-end="transform translate-y-0"
@@ -777,7 +777,7 @@
         >
           <div class="dialog-header">
             <h3>Roll History</h3>
-            <button @click="showHistoryDialog = false" class="dialog-close">
+            <button @click="showHistory = false" class="dialog-close">
               ✕
             </button>
           </div>
