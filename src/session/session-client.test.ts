@@ -23,8 +23,6 @@ describe('SessionClient - Integration Tests', () => {
       },
     });
 
-    vi.spyOn(window, 'addEventListener').mockImplementation(() => {});
-
     client = new SessionClient();
   });
 

@@ -61,9 +61,9 @@ npm run test:workers   # Workers watch mode
 
 ## Test Coverage
 
-### Frontend Tests (49 tests)
+### Frontend Tests
 
-#### Dice Logic Tests (21 tests)
+#### Dice Logic Tests
 ```typescript
 // Example: Testing Hope/Fear mechanics
 describe('Check Roll Calculations', () => {
@@ -84,7 +84,7 @@ describe('Check Roll Calculations', () => {
 - ✅ GM roll calculations
 - ✅ Edge cases and error handling
 
-#### Session Utilities Tests (28 tests)
+#### Session Utilities Tests
 ```typescript
 // Example: Testing session ID validation
 describe('Session ID Functions', () => {
@@ -104,9 +104,28 @@ describe('Session ID Functions', () => {
 - ✅ Timestamp formatting
 - ✅ Utility functions (debounce, delay)
 
-### Workers Tests (20 tests)
+#### Session Client Tests
+```typescript
+// Example: Testing connection state management
+describe('SessionClient - Integration Tests', () => {
+  it('should be available in HTTPS environment', () => {
+    expect(client.isAvailable()).toBe(true)
+  })
+})
+```
 
-#### Static Asset Serving (3 tests)
+**Coverage includes:**
+- ✅ Environment availability detection
+- ✅ Connection state management
+- ✅ Player ID generation and uniqueness
+- ✅ Event handler registration
+- ✅ Roll history management
+- ✅ Connection health monitoring
+- ✅ Player management operations
+
+### Workers Tests
+
+#### Static Asset Serving
 ```typescript
 // Example: Testing SPA routing
 it('should handle SPA routing by serving index.html for unknown routes', async () => {
@@ -115,7 +134,7 @@ it('should handle SPA routing by serving index.html for unknown routes', async (
 })
 ```
 
-#### WebSocket API Endpoints (4 tests)
+#### WebSocket API Endpoints
 ```typescript
 // Example: Testing session ID validation
 it('should validate session ID format', async () => {
@@ -197,9 +216,9 @@ npm run test:all
 ```
 
 Expected output:
-- Frontend Tests: 49/49 passing
-- Workers Tests: 20/20 passing
-- **Total: 69 tests passing**
+- Frontend Tests: All passing
+- Workers Tests: All passing
+- **Total: All tests passing**
 
 #### No Additional Setup Required
 Since Cloudflare Workers handles deployment via GitHub integration, no repository secrets are needed for the CI/CD pipeline.
@@ -379,8 +398,8 @@ npm run test:workers:run
 
 ### Test Execution Times
 
-- **Frontend tests**: ~1.5 seconds (49 tests)
-- **Workers tests**: ~3.5 seconds (20 tests)
+- **Frontend tests**: ~1.5 seconds
+- **Workers tests**: ~3.5 seconds  
 - **Total**: ~5 seconds for full test suite
 
 ### Optimization Tips

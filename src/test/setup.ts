@@ -42,7 +42,7 @@ Object.defineProperty(global, 'localStorage', {
   writable: true
 })
 
-// Mock window object with common properties
+// Mock window object with common properties including addEventListener
 Object.defineProperty(global, 'window', {
   value: {
     location: {
@@ -52,6 +52,12 @@ Object.defineProperty(global, 'window', {
       pathname: '/'
     },
     isSecureContext: true,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    setInterval: vi.fn(),
+    clearInterval: vi.fn(),
+    setTimeout: vi.fn(),
+    clearTimeout: vi.fn(),
     diceBox: {
       roll: vi.fn().mockImplementation((dice) => {
         return Promise.resolve(
