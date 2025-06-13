@@ -826,6 +826,8 @@ function diceRoller() {
               this.modifier = Math.max(this.modifier - 1, -20);
             } else if (this.rollType === 'gm') {
               this.gmModifier = Math.max(this.gmModifier - 1, -20);
+            } else if (this.rollType === 'damage') {
+              this.setBaseDiceCount(this.baseDiceCount - 1);
             }
             break;
           case 'arrowright':
@@ -833,6 +835,28 @@ function diceRoller() {
               this.modifier = Math.min(this.modifier + 1, 20);
             } else if (this.rollType === 'gm') {
               this.gmModifier = Math.min(this.gmModifier + 1, 20);
+            } else if (this.rollType === 'damage') {
+              this.setBaseDiceCount(this.baseDiceCount + 1);
+            }
+            break;
+          case 'arrowup':
+            if (this.rollType === 'damage') {
+              // Cycle up through dice types: d4 -> d6 -> d8 -> d10 -> d12
+              const diceTypes = [4, 6, 8, 10, 12];
+              const currentIndex = diceTypes.indexOf(this.baseDiceType);
+              if (currentIndex < diceTypes.length - 1) {
+                this.setBaseDiceType(diceTypes[currentIndex + 1]);
+              }
+            }
+            break;
+          case 'arrowdown':
+            if (this.rollType === 'damage') {
+              // Cycle down through dice types: d12 -> d10 -> d8 -> d6 -> d4
+              const diceTypes = [4, 6, 8, 10, 12];
+              const currentIndex = diceTypes.indexOf(this.baseDiceType);
+              if (currentIndex > 0) {
+                this.setBaseDiceType(diceTypes[currentIndex - 1]);
+              }
             }
             break;
         }

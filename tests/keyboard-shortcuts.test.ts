@@ -5,6 +5,8 @@ interface KeyboardShortcutHandler {
   rollType: "check" | "damage" | "gm";
   modifier: number;
   gmModifier: number;
+  baseDiceCount: number;
+  baseDiceType: 4 | 6 | 8 | 10 | 12;
   showHistory: boolean;
   showSessionUI: boolean;
   showKeyboardHelp: boolean;
@@ -12,6 +14,8 @@ interface KeyboardShortcutHandler {
   isRolling: boolean;
   
   setRollType: (type: "check" | "damage" | "gm") => void;
+  setBaseDiceCount: (count: number) => void;
+  setBaseDiceType: (type: number) => void;
   rollDice: () => void;
   toggleHistory: () => void;
   toggleSessionUI: () => void;
@@ -22,6 +26,8 @@ function createKeyboardHandler(): KeyboardShortcutHandler {
     rollType: "check",
     modifier: 0,
     gmModifier: 0,
+    baseDiceCount: 1,
+    baseDiceType: 6,
     showHistory: false,
     showSessionUI: false,
     showKeyboardHelp: false,
@@ -30,6 +36,16 @@ function createKeyboardHandler(): KeyboardShortcutHandler {
     
     setRollType(type: "check" | "damage" | "gm") {
       this.rollType = type;
+    },
+    
+    setBaseDiceCount(count: number) {
+      this.baseDiceCount = Math.max(1, Math.min(10, count));
+    },
+    
+    setBaseDiceType(type: number) {
+      if ([4, 6, 8, 10, 12].includes(type)) {
+        this.baseDiceType = type as 4 | 6 | 8 | 10 | 12;
+      }
     },
     
     rollDice: vi.fn(),
@@ -81,6 +97,8 @@ function simulateKeyPress(handler: KeyboardShortcutHandler, key: string, target?
         handler.modifier = Math.max(handler.modifier - 1, -20);
       } else if (handler.rollType === 'gm') {
         handler.gmModifier = Math.max(handler.gmModifier - 1, -20);
+      } else if (handler.rollType === 'damage') {
+        handler.setBaseDiceCount(handler.baseDiceCount - 1);
       }
       break;
     case 'arrowright':
@@ -88,6 +106,28 @@ function simulateKeyPress(handler: KeyboardShortcutHandler, key: string, target?
         handler.modifier = Math.min(handler.modifier + 1, 20);
       } else if (handler.rollType === 'gm') {
         handler.gmModifier = Math.min(handler.gmModifier + 1, 20);
+      } else if (handler.rollType === 'damage') {
+        handler.setBaseDiceCount(handler.baseDiceCount + 1);
+      }
+      break;
+    case 'arrowup':
+      if (handler.rollType === 'damage') {
+        // Cycle up through dice types: d4 -> d6 -> d8 -> d10 -> d12
+        const diceTypes = [4, 6, 8, 10, 12];
+        const currentIndex = diceTypes.indexOf(handler.baseDiceType);
+        if (currentIndex < diceTypes.length - 1) {
+          handler.setBaseDiceType(diceTypes[currentIndex + 1]);
+        }
+      }
+      break;
+    case 'arrowdown':
+      if (handler.rollType === 'damage') {
+        // Cycle down through dice types: d12 -> d10 -> d8 -> d6 -> d4
+        const diceTypes = [4, 6, 8, 10, 12];
+        const currentIndex = diceTypes.indexOf(handler.baseDiceType);
+        if (currentIndex > 0) {
+          handler.setBaseDiceType(diceTypes[currentIndex - 1]);
+        }
       }
       break;
   }
@@ -141,7 +181,7 @@ describe('Keyboard Shortcuts', () => {
     });
   });
   
-  describe('Modifier Adjustment', () => {
+  describe('Modifier and Dice Adjustment', () => {
     it('should decrease check modifier with left arrow', () => {
       handler.rollType = 'check';
       handler.modifier = 5;
@@ -181,14 +221,46 @@ describe('Keyboard Shortcuts', () => {
       expect(handler.gmModifier).toBe(4);
     });
     
-    it('should not adjust modifiers in damage mode', () => {
+    it('should adjust dice count in damage mode with left/right arrows', () => {
       handler.rollType = 'damage';
-      handler.modifier = 5;
-      handler.gmModifier = 3;
+      handler.baseDiceCount = 3;
       
       simulateKeyPress(handler, 'ArrowLeft');
-      expect(handler.modifier).toBe(5);
-      expect(handler.gmModifier).toBe(3);
+      expect(handler.baseDiceCount).toBe(2);
+      
+      simulateKeyPress(handler, 'ArrowRight');
+      simulateKeyPress(handler, 'ArrowRight');
+      expect(handler.baseDiceCount).toBe(4);
+    });
+    
+    it('should adjust dice type in damage mode with up/down arrows', () => {
+      handler.rollType = 'damage';
+      handler.baseDiceType = 6;
+      
+      simulateKeyPress(handler, 'ArrowUp');
+      expect(handler.baseDiceType).toBe(8);
+      
+      simulateKeyPress(handler, 'ArrowUp');
+      expect(handler.baseDiceType).toBe(10);
+      
+      simulateKeyPress(handler, 'ArrowDown');
+      expect(handler.baseDiceType).toBe(8);
+    });
+    
+    it('should not increase dice type beyond d12', () => {
+      handler.rollType = 'damage';
+      handler.baseDiceType = 12;
+      
+      simulateKeyPress(handler, 'ArrowUp');
+      expect(handler.baseDiceType).toBe(12);
+    });
+    
+    it('should not decrease dice type below d4', () => {
+      handler.rollType = 'damage';
+      handler.baseDiceType = 4;
+      
+      simulateKeyPress(handler, 'ArrowDown');
+      expect(handler.baseDiceType).toBe(4);
     });
   });
   
@@ -260,10 +332,12 @@ describe('Keyboard Shortcut Help', () => {
       'M': 'Toggle multiplayer panel',
       '?': 'Show keyboard shortcuts',
       'Escape': 'Close dialogs',
-      'Left Arrow': 'Decrease modifier',
-      'Right Arrow': 'Increase modifier'
+      'Left Arrow': 'Decrease modifier/dice count',
+      'Right Arrow': 'Increase modifier/dice count',
+      'Up Arrow': 'Increase dice type (Damage)',
+      'Down Arrow': 'Decrease dice type (Damage)'
     };
     
-    expect(Object.keys(shortcuts)).toHaveLength(10);
+    expect(Object.keys(shortcuts)).toHaveLength(12);
   });
 });
