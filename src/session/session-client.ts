@@ -289,8 +289,12 @@ export class SessionClient {
 
   // Public method to check connection health
   public isConnectionHealthy(): boolean {
-    if (this.connectionState !== 'connected') return false;
-    if (!this.websocket || this.websocket.readyState !== WebSocket.OPEN) return false;
+    if (this.connectionState !== 'connected') {
+return false;
+}
+    if (!this.websocket || this.websocket.readyState !== WebSocket.OPEN) {
+return false;
+}
     
     // Check if we've received a pong recently (within last 60 seconds)
     const timeSinceLastPong = Date.now() - this.lastPongReceived;
@@ -485,7 +489,9 @@ export class SessionClient {
   }
 
   private sendPingWithTimeout(): void {
-    if (this.connectionState !== 'connected') return;
+    if (this.connectionState !== 'connected') {
+return;
+}
     
     // Send ping
     this.ping();
@@ -515,7 +521,9 @@ export class SessionClient {
   }
 
   private isHistoryKeeper(): boolean {
-    if (!this.playerId) return false;
+    if (!this.playerId) {
+return false;
+}
     
     // Get all connected player IDs including ourselves
     const allPlayerIds = [this.playerId, ...this.connectedPlayers.keys()];

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock for keyboard event handling
 interface KeyboardShortcutHandler {
-  rollType: "check" | "damage" | "gm";
+  rollType: 'check' | 'damage' | 'gm';
   modifier: number;
   gmModifier: number;
   baseDiceCount: number;
@@ -13,7 +13,7 @@ interface KeyboardShortcutHandler {
   sessionFeaturesAvailable: boolean;
   isRolling: boolean;
   
-  setRollType: (type: "check" | "damage" | "gm") => void;
+  setRollType: (type: 'check' | 'damage' | 'gm') => void;
   setBaseDiceCount: (count: number) => void;
   setBaseDiceType: (type: number) => void;
   rollDice: () => void;
@@ -23,7 +23,7 @@ interface KeyboardShortcutHandler {
 
 function createKeyboardHandler(): KeyboardShortcutHandler {
   return {
-    rollType: "check",
+    rollType: 'check',
     modifier: 0,
     gmModifier: 0,
     baseDiceCount: 1,
@@ -34,7 +34,7 @@ function createKeyboardHandler(): KeyboardShortcutHandler {
     sessionFeaturesAvailable: true,
     isRolling: false,
     
-    setRollType(type: "check" | "damage" | "gm") {
+    setRollType(type: 'check' | 'damage' | 'gm') {
       this.rollType = type;
     },
     

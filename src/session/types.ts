@@ -9,7 +9,7 @@ export interface Player {
 }
 
 export interface RollData {
-  rollType: "check" | "damage" | "gm";
+  rollType: 'check' | 'damage' | 'gm';
   total: number;
   result: string;
   
@@ -17,7 +17,7 @@ export interface RollData {
   hopeValue?: number;
   fearValue?: number;
   advantageValue?: number;
-  advantageType?: "none" | "advantage" | "disadvantage";
+  advantageType?: 'none' | 'advantage' | 'disadvantage';
   modifier?: number;
   
   // Damage roll fields

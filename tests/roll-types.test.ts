@@ -1,15 +1,14 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { RollData } from '../src/session/types';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 // Mock Alpine component data structure
 interface DiceRollerData {
   // Roll type state
-  rollType: "check" | "damage" | "gm";
+  rollType: 'check' | 'damage' | 'gm';
   
   // Check roll state
   hopeValue: number;
   fearValue: number;
-  advantageType: "none" | "advantage" | "disadvantage";
+  advantageType: 'none' | 'advantage' | 'disadvantage';
   advantageValue: number;
   modifier: number;
   
@@ -31,8 +30,8 @@ interface DiceRollerData {
   result: string;
   
   // Methods
-  setRollType: (type: "check" | "damage" | "gm") => void;
-  setAdvantageType: (type: "none" | "advantage" | "disadvantage") => void;
+  setRollType: (type: 'check' | 'damage' | 'gm') => void;
+  setAdvantageType: (type: 'none' | 'advantage' | 'disadvantage') => void;
   setBaseDiceCount: (count: number) => void;
   setBaseDiceType: (type: number) => void;
   toggleBonusDie: () => void;
@@ -45,12 +44,12 @@ interface DiceRollerData {
 function createMockDiceRoller(): DiceRollerData {
   const data: DiceRollerData = {
     // Roll type state
-    rollType: "check",
+    rollType: 'check',
     
     // Check roll state
     hopeValue: 0,
     fearValue: 0,
-    advantageType: "none",
+    advantageType: 'none',
     advantageValue: 0,
     modifier: 0,
     
@@ -69,16 +68,16 @@ function createMockDiceRoller(): DiceRollerData {
     // UI state
     showKeyboardHelp: false,
     isRolling: false,
-    result: "",
+    result: '',
     
     // Methods
-    setRollType(type: "check" | "damage" | "gm") {
+    setRollType(type: 'check' | 'damage' | 'gm') {
       this.rollType = type;
     },
     
-    setAdvantageType(type: "none" | "advantage" | "disadvantage") {
+    setAdvantageType(type: 'none' | 'advantage' | 'disadvantage') {
       this.advantageType = type;
-      if (type === "none") {
+      if (type === 'none') {
         this.advantageValue = 0;
       }
     },

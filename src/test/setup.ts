@@ -1,5 +1,5 @@
 // Test setup file
-import { vi } from 'vitest'
+import { vi } from 'vitest';
 
 // Mock DiceBox since it requires WebGL and WASM
 vi.mock('@3d-dice/dice-box', () => {
@@ -12,16 +12,16 @@ vi.mock('@3d-dice/dice-box', () => {
           dice.map(() => ({
             value: Math.floor(Math.random() * 12) + 1
           }))
-        )
+        );
       })
     }))
-  }
-})
+  };
+});
 
 // Mock Alpine.js
 global.Alpine = {
   start: vi.fn(),
-} as any
+} as any;
 
 // Mock crypto for session ID generation
 Object.defineProperty(global, 'crypto', {
@@ -29,7 +29,7 @@ Object.defineProperty(global, 'crypto', {
     getRandomValues: vi.fn()
   },
   writable: true
-})
+});
 
 // Mock localStorage
 Object.defineProperty(global, 'localStorage', {
@@ -40,7 +40,7 @@ Object.defineProperty(global, 'localStorage', {
     clear: vi.fn()
   },
   writable: true
-})
+});
 
 // Mock window object with common properties including addEventListener
 Object.defineProperty(global, 'window', {
@@ -64,12 +64,12 @@ Object.defineProperty(global, 'window', {
           dice.map((die: any) => ({
             value: Math.floor(Math.random() * die.sides) + 1
           }))
-        )
+        );
       })
     }
   },
   writable: true
-})
+});
 
 // Mock navigator
 Object.defineProperty(global, 'navigator', {
@@ -79,7 +79,7 @@ Object.defineProperty(global, 'navigator', {
     }
   },
   writable: true
-})
+});
 
 // Mock document
 Object.defineProperty(global, 'document', {
@@ -92,10 +92,10 @@ Object.defineProperty(global, 'document', {
     execCommand: vi.fn()
   },
   writable: true
-})
+});
 
 // Mock WebSocket
 Object.defineProperty(global, 'WebSocket', {
   value: vi.fn(),
   writable: true
-})
+});

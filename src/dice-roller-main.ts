@@ -1,11 +1,11 @@
 // Import Alpine.js and DiceBox from local node_modules
-import DiceBox from "@3d-dice/dice-box";
-import Alpine from "alpinejs";
-import "./dice-roller.css";
+import DiceBox from '@3d-dice/dice-box';
+import Alpine from 'alpinejs';
+import './dice-roller.css';
 
 // Import session-related modules
-import { SessionClient } from "./session/session-client.js";
-import type { Player, RollData, SharedRollHistoryItem } from "./session/types.js";
+import { SessionClient } from './session/session-client.js';
+import type { Player, RollData, SharedRollHistoryItem } from './session/types.js';
 import { 
   generateSessionId, 
   sanitizePlayerName, 
@@ -21,7 +21,7 @@ import {
   clearLastSessionId,
   savePlayerName,
   saveLastSessionId
-} from "./session/utils.js";
+} from './session/utils.js';
 
 // Type declarations for missing modules
 declare global {
@@ -54,10 +54,11 @@ function toastManager() {
     nextId: 1,
 
     init() {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
       globalToastManager = this;
     },
 
-    show(type: string, content: string, duration: number = 4000) {
+    show(type: string, content: string, duration = 4000) {
       const toast = {
         id: this.nextId++,
         type,
@@ -107,16 +108,16 @@ function diceRoller() {
     // ===== EXISTING STATE (UNCHANGED) =====
     hopeValue: 0,
     fearValue: 0,
-    result: "",
+    result: '',
     isRolling: false,
     rollHistory: [] as RollHistoryItem[],
     showHistory: false,
-    advantageType: "none" as "none" | "advantage" | "disadvantage",
+    advantageType: 'none' as 'none' | 'advantage' | 'disadvantage',
     advantageValue: 0,
     modifier: 0,
 
     // ===== ROLL TYPE STATE =====
-    rollType: "check" as "check" | "damage" | "gm",
+    rollType: 'check' as 'check' | 'damage' | 'gm',
     
     // Damage roll state
     baseDiceCount: 1,
@@ -134,27 +135,27 @@ function diceRoller() {
     showKeyboardHelp: false,
 
     // ===== NEW SESSION STATE (ADDITIVE) =====
-    sessionMode: "solo" as "solo" | "multiplayer",
+    sessionMode: 'solo' as 'solo' | 'multiplayer',
     sessionId: null as string | null,
-    playerName: "",
-    joinSessionId: "",
+    playerName: '',
+    joinSessionId: '',
     connectedPlayers: [] as Player[],
     sessionClient: null as SessionClient | null,
     showSessionUI: false,
     sessionFeaturesAvailable: true,
-    connectionStatus: "disconnected" as "disconnected" | "connecting" | "connected" | "error",
+    connectionStatus: 'disconnected' as 'disconnected' | 'connecting' | 'connected' | 'error',
     initialized: false,
     connectionMonitorInterval: null as number | null,
 
-    setAdvantageType(type: "none" | "advantage" | "disadvantage") {
+    setAdvantageType(type: 'none' | 'advantage' | 'disadvantage') {
       this.advantageType = type;
-      if (type === "none") {
+      if (type === 'none') {
         this.advantageValue = 0;
       }
     },
 
     // Roll type methods
-    setRollType(type: "check" | "damage" | "gm") {
+    setRollType(type: 'check' | 'damage' | 'gm') {
       this.rollType = type;
     },
 
@@ -205,38 +206,40 @@ function diceRoller() {
     },
 
     async rollDice() {
-      if (this.isRolling || !window.diceBox) return;
+      if (this.isRolling || !window.diceBox) {
+        return;
+      }
 
       this.isRolling = true;
-      this.result = "";
+      this.result = '';
 
       try {
         let diceArray = [];
         let rollResult;
-        let resultText = "";
+        let resultText = '';
         let totalValue = 0;
-        let rollData: RollData = { rollType: this.rollType, total: 0, result: "" };
+        let rollData: RollData = { rollType: this.rollType, total: 0, result: '' };
 
-        if (this.rollType === "check") {
+        if (this.rollType === 'check') {
           // Check roll: Hope & Fear dice
           diceArray = [
-            { sides: 12, theme: "default", themeColor: "#4caf50" }, // Hope die (green)
-            { sides: 12, theme: "default", themeColor: "#f44336" }, // Fear die (red)
+            { sides: 12, theme: 'default', themeColor: '#4caf50' }, // Hope die (green)
+            { sides: 12, theme: 'default', themeColor: '#f44336' }, // Fear die (red)
           ];
 
           // Add advantage/disadvantage D6 if needed
-          if (this.advantageType !== "none") {
+          if (this.advantageType !== 'none') {
             diceArray.push({
               sides: 6,
-              theme: "smooth",
+              theme: 'smooth',
               themeColor:
-                this.advantageType === "advantage" ? "#d2ffd2" : "#ffd2d2",
+                this.advantageType === 'advantage' ? '#d2ffd2' : '#ffd2d2',
             });
           }
 
           rollResult = await window.diceBox.roll(diceArray);
 
-          console.log("Roll result:", rollResult);
+          console.log('Roll result:', rollResult);
 
           // Extract the values from the roll result
           if (rollResult && rollResult.length >= 2) {
@@ -244,10 +247,10 @@ function diceRoller() {
             this.fearValue = rollResult[1].value;
 
             // Handle advantage/disadvantage D6
-            if (this.advantageType !== "none" && rollResult.length >= 3) {
+            if (this.advantageType !== 'none' && rollResult.length >= 3) {
               const d6Value = rollResult[2].value;
               this.advantageValue =
-                this.advantageType === "advantage" ? d6Value : -d6Value;
+                this.advantageType === 'advantage' ? d6Value : -d6Value;
             } else {
               this.advantageValue = 0;
             }
@@ -256,10 +259,10 @@ function diceRoller() {
             this.hopeValue = Math.floor(Math.random() * 12) + 1;
             this.fearValue = Math.floor(Math.random() * 12) + 1;
 
-            if (this.advantageType !== "none") {
+            if (this.advantageType !== 'none') {
               const d6Value = Math.floor(Math.random() * 6) + 1;
               this.advantageValue =
-                this.advantageType === "advantage" ? d6Value : -d6Value;
+                this.advantageType === 'advantage' ? d6Value : -d6Value;
             } else {
               this.advantageValue = 0;
             }
@@ -270,29 +273,29 @@ function diceRoller() {
           const finalTotal = baseTotal + this.advantageValue + this.modifier;
 
           // Calculate result text
-          let modifierText = "";
+          let modifierText = '';
 
           if (this.advantageValue !== 0 || this.modifier !== 0) {
             const parts = [baseTotal.toString()];
             if (this.advantageValue !== 0) {
               parts.push(
-                `${this.advantageValue > 0 ? "+" : "-"} ${Math.abs(
+                `${this.advantageValue > 0 ? '+' : '-'} ${Math.abs(
                   this.advantageValue
                 )} ${this.advantageType}`
               );
             }
             if (this.modifier !== 0) {
               parts.push(
-                `${this.modifier > 0 ? "+" : "-"} ${Math.abs(
+                `${this.modifier > 0 ? '+' : '-'} ${Math.abs(
                   this.modifier
                 )} modifier`
               );
             }
-            modifierText = ` <small>(${parts.join(" ")})</small>`;
+            modifierText = ` <small>(${parts.join(' ')})</small>`;
           }
 
           if (this.hopeValue === this.fearValue) {
-            resultText = "Critical Success!";
+            resultText = 'Critical Success!';
           } else if (this.hopeValue > this.fearValue) {
             resultText = `${finalTotal} with hope${modifierText}`;
           } else {
@@ -301,7 +304,7 @@ function diceRoller() {
 
           totalValue = finalTotal;
           rollData = {
-            rollType: "check",
+            rollType: 'check',
             hopeValue: this.hopeValue,
             fearValue: this.fearValue,
             advantageValue: this.advantageValue,
@@ -311,14 +314,14 @@ function diceRoller() {
             result: resultText,
           };
 
-        } else if (this.rollType === "damage") {
+        } else if (this.rollType === 'damage') {
           // Damage roll
           diceArray = [];
           for (let i = 0; i < this.baseDiceCount; i++) {
             diceArray.push({
               sides: this.baseDiceType,
-              theme: "default",
-              themeColor: "#ff9800"
+              theme: 'default',
+              themeColor: '#ff9800'
             });
           }
 
@@ -326,14 +329,14 @@ function diceRoller() {
           if (this.bonusDieEnabled) {
             diceArray.push({
               sides: this.bonusDieType,
-              theme: "smooth",
-              themeColor: "#ffd54f"
+              theme: 'smooth',
+              themeColor: '#ffd54f'
             });
           }
 
           rollResult = await window.diceBox.roll(diceArray);
 
-          let baseDiceValues = [];
+          const baseDiceValues = [];
           let bonusDieValue = 0;
           let damageTotal = 0;
 
@@ -377,7 +380,7 @@ function diceRoller() {
           totalValue = damageTotal;
 
           rollData = {
-            rollType: "damage",
+            rollType: 'damage',
             baseDiceCount: this.baseDiceCount,
             baseDiceType: this.baseDiceType,
             baseDiceValues: baseDiceValues,
@@ -390,12 +393,12 @@ function diceRoller() {
             result: resultText
           };
 
-        } else if (this.rollType === "gm") {
+        } else if (this.rollType === 'gm') {
           // GM roll: single d20
           diceArray = [{
             sides: 20,
-            theme: "default",
-            themeColor: "#9c27b0"
+            theme: 'default',
+            themeColor: '#9c27b0'
           }];
 
           rollResult = await window.diceBox.roll(diceArray);
@@ -415,7 +418,7 @@ function diceRoller() {
           }
 
           rollData = {
-            rollType: "gm",
+            rollType: 'gm',
             d20Value: d20Value,
             gmModifier: this.gmModifier,
             total: totalValue,
@@ -429,34 +432,34 @@ function diceRoller() {
         // Create unified roll history item
         const historyItem: RollHistoryItem = {
           ...rollData,
-          playerId: this.sessionMode === "multiplayer" && this.sessionClient ? this.sessionClient.getPlayerId() || '' : undefined,
-          playerName: this.sessionMode === "multiplayer" ? this.playerName : undefined,
-          timestamp: this.sessionMode === "multiplayer" ? Date.now() : undefined
+          playerId: this.sessionMode === 'multiplayer' && this.sessionClient ? this.sessionClient.getPlayerId() || '' : undefined,
+          playerName: this.sessionMode === 'multiplayer' ? this.playerName : undefined,
+          timestamp: this.sessionMode === 'multiplayer' ? Date.now() : undefined
         };
 
         console.log('Adding own roll to history:', historyItem);
         this.rollHistory.unshift(historyItem);
 
         // Limit history (20 for multiplayer, 10 for solo)
-        const maxHistory = this.sessionMode === "multiplayer" ? 20 : 10;
+        const maxHistory = this.sessionMode === 'multiplayer' ? 20 : 10;
         if (this.rollHistory.length > maxHistory) {
           this.rollHistory = this.rollHistory.slice(0, maxHistory);
         }
 
         // In multiplayer: broadcast and sync with session client
-        if (this.sessionMode === "multiplayer" && this.sessionClient) {
+        if (this.sessionMode === 'multiplayer' && this.sessionClient) {
           // Session client uses same history reference
           this.sessionClient.setRollHistory(this.rollHistory);
           
           // Broadcast to other players (only broadcast if not a private GM roll)
-          if (!(this.rollType === "gm" && this.gmPrivateRolls)) {
+          if (!(this.rollType === 'gm' && this.gmPrivateRolls)) {
             this.sessionClient.broadcastRoll(rollData);
           }
         }
       } catch (error) {
-        console.error("Error rolling dice:", error);
+        console.error('Error rolling dice:', error);
         // Simplified fallback - just show error
-        this.result = "Error rolling dice";
+        this.result = 'Error rolling dice';
       } finally {
         this.isRolling = false;
       }
@@ -492,7 +495,7 @@ function diceRoller() {
       }
 
       // Prevent multiple concurrent connection attempts
-      if (this.connectionStatus === "connecting") {
+      if (this.connectionStatus === 'connecting') {
         console.warn('Already connecting, please wait');
         return;
       }
@@ -507,7 +510,7 @@ function diceRoller() {
       }
 
       try {
-        this.connectionStatus = "connecting";
+        this.connectionStatus = 'connecting';
         const sessionId = generateSessionId();
         const sanitizedName = sanitizePlayerName(this.playerName);
         
@@ -517,7 +520,7 @@ function diceRoller() {
         const connected = await this.sessionClient.connect(sessionId, sanitizedName);
         
         if (connected) {
-          this.sessionMode = "multiplayer";
+          this.sessionMode = 'multiplayer';
           this.sessionId = sessionId;
           this.playerName = sanitizedName;
           // Use session client's state as source of truth
@@ -538,7 +541,7 @@ function diceRoller() {
         }
       } catch (error) {
         console.error('Failed to create session:', error);
-        this.connectionStatus = "error";
+        this.connectionStatus = 'error';
         alert('Failed to create room. Please try again.');
         this.leaveSession();
       }
@@ -551,7 +554,7 @@ function diceRoller() {
       }
 
       // Prevent multiple concurrent connection attempts
-      if (this.connectionStatus === "connecting") {
+      if (this.connectionStatus === 'connecting') {
         console.warn('Already connecting, please wait');
         return;
       }
@@ -573,7 +576,7 @@ function diceRoller() {
       }
 
       try {
-        this.connectionStatus = "connecting";
+        this.connectionStatus = 'connecting';
         const sanitizedName = sanitizePlayerName(this.playerName);
         
         this.sessionClient = new SessionClient();
@@ -582,7 +585,7 @@ function diceRoller() {
         const connected = await this.sessionClient.connect(normalizedSessionId, sanitizedName);
         
         if (connected) {
-          this.sessionMode = "multiplayer";
+          this.sessionMode = 'multiplayer';
           this.sessionId = normalizedSessionId;
           this.playerName = sanitizedName;
           // Use session client's state as source of truth
@@ -602,7 +605,7 @@ function diceRoller() {
         }
       } catch (error) {
         console.error('Failed to join session:', error);
-        this.connectionStatus = "error";
+        this.connectionStatus = 'error';
         alert('Failed to join room. Please check the room ID and try again.');
         this.leaveSession();
       }
@@ -620,16 +623,16 @@ function diceRoller() {
         this.sessionClient = null;
       }
       
-      this.sessionMode = "solo";
+      this.sessionMode = 'solo';
       this.sessionId = null;
       this.connectedPlayers = [];
-      this.connectionStatus = "disconnected";
+      this.connectionStatus = 'disconnected';
       
       // Clear saved session data if requested
       if (clearSavedData) {
         clearSavedSessionData();
-        this.playerName = "";
-        this.joinSessionId = "";
+        this.playerName = '';
+        this.joinSessionId = '';
       } else {
         // Keep the room ID populated for easy rejoining
         if (currentSessionId) {
@@ -642,7 +645,9 @@ function diceRoller() {
     },
 
     async copySessionLink() {
-      if (!this.sessionId) return;
+      if (!this.sessionId) {
+        return;
+      }
       
       const url = createSessionUrl(this.sessionId);
       const success = await copyToClipboard(url);
@@ -661,7 +666,7 @@ function diceRoller() {
       
       // Monitor connection health every 5 seconds
       this.connectionMonitorInterval = window.setInterval(() => {
-        if (this.sessionClient && this.sessionMode === "multiplayer") {
+        if (this.sessionClient && this.sessionMode === 'multiplayer') {
           const actualState = this.sessionClient.getConnectionState();
           if (this.connectionStatus !== actualState) {
             console.log('Connection state mismatch detected. UI:', this.connectionStatus, 'Actual:', actualState);
@@ -684,7 +689,9 @@ function diceRoller() {
     },
 
     setupSessionEventHandlers() {
-      if (!this.sessionClient) return;
+      if (!this.sessionClient) {
+        return;
+      }
       
       this.sessionClient.setEventHandlers({
         onConnected: (playerId: string) => {
@@ -745,19 +752,21 @@ function diceRoller() {
         onError: (error: string) => {
           console.error('Session error:', error);
           // Use the session client's connection state as source of truth
-          this.connectionStatus = this.sessionClient?.getConnectionState() || "error";
+          this.connectionStatus = this.sessionClient?.getConnectionState() || 'error';
         },
         
         onDisconnected: () => {
           console.log('Disconnected from session');
           // Use the session client's connection state as source of truth
-          this.connectionStatus = this.sessionClient?.getConnectionState() || "disconnected";
+          this.connectionStatus = this.sessionClient?.getConnectionState() || 'disconnected';
         }
       });
     },
 
     generateQRCode(sessionId: string): string {
-      if (!sessionId) return '';
+      if (!sessionId) {
+        return '';
+      }
       const roomUrl = createSessionUrl(sessionId);
       const encodedUrl = encodeURIComponent(roomUrl);
       // Using qr-server.com API for QR code generation
@@ -889,15 +898,15 @@ function diceRoller() {
 }
 
 // Initialize dice-box when the page loads
-document.addEventListener("DOMContentLoaded", function () {
-  console.log("DOM loaded, initializing dice-box");
+document.addEventListener('DOMContentLoaded', function () {
+  console.log('DOM loaded, initializing dice-box');
 
   // Initialize dice-box with configuration
   diceBox = new DiceBox({
-    container: "#dice-box",
-    assetPath: "/assets/",
-    theme: "default",
-    themeColor: "#4caf50",
+    container: '#dice-box',
+    assetPath: '/assets/',
+    theme: 'default',
+    themeColor: '#4caf50',
     scale: 10,
     gravity: 1.5,
     mass: 1,
@@ -920,10 +929,10 @@ document.addEventListener("DOMContentLoaded", function () {
   diceBox
     .init()
     .then(() => {
-      console.log("Dice-box initialized successfully");
+      console.log('Dice-box initialized successfully');
     })
     .catch((error: any) => {
-      console.error("Failed to initialize dice-box:", error);
+      console.error('Failed to initialize dice-box:', error);
     });
 
   // Make diceBox available globally for Alpine.js
