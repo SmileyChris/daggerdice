@@ -115,7 +115,7 @@ describe('Cloudflare Workers Tests', () => {
         { pattern: 'ABC 12', description: 'contains space' },
       ];
 
-      for (const { pattern, description } of invalidPatterns) {
+      for (const { pattern } of invalidPatterns) {
         const response = await SELF.fetch(`https://example.com/api/room/${pattern}`);
         expect(response.status).toBe(400);
         // Should be either format validation or URL parsing error

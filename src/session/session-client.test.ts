@@ -96,7 +96,7 @@ describe('SessionClient - Integration Tests', () => {
       try {
         client1.connect('ABC123', 'Player1');
         client2.connect('DEF456', 'Player2');
-      } catch (error) {
+      } catch {
         // Expected to fail due to WebSocket mock, but should generate IDs
       }
       

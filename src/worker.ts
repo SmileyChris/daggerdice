@@ -1,8 +1,7 @@
 // Cloudflare Worker for DaggerDice API and WebSocket relay using Durable Objects
 
 import type { 
-  ClientMessage, 
-  ServerMessage
+  ClientMessage
 } from './session/types';
 
 // Environment interface  
@@ -16,7 +15,7 @@ export class SessionDurableObject {
   private connections: Set<WebSocket> = new Set();
   private state: DurableObjectState;
 
-  constructor(state: DurableObjectState, env: Env) {
+  constructor(state: DurableObjectState, _env: Env) {
     this.state = state;
   }
 
@@ -78,12 +77,12 @@ export class SessionDurableObject {
 
 // Main Worker fetch handler
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     
     // Handle WebSocket connections for multiplayer sessions
     if (url.pathname.startsWith('/api/room/')) {
-      const sessionIdMatch = url.pathname.match(/^\/api\/room\/([^\/]+)$/);
+      const sessionIdMatch = url.pathname.match(/^\/api\/room\/([^/]+)$/);
       
       if (!sessionIdMatch) {
         return new Response('Invalid session URL', { status: 400 });
