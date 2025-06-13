@@ -41,6 +41,18 @@ npm run build
 npm run preview
 ```
 
+### Testing
+```bash
+# Run all tests
+npm test
+
+# Run tests with UI
+npm run test:ui
+
+# Run tests with coverage report
+npm run test:coverage
+```
+
 ### Deployment
 ```bash
 # Deploy to Cloudflare Workers
@@ -56,6 +68,7 @@ npm run verify
 - **3D Graphics**: @3d-dice/dice-box library
 - **Multiplayer**: Cloudflare Durable Objects with WebSocket connections
 - **Storage**: SQLite (for session data)
+- **Testing**: Vitest, jsdom, @vitest/coverage-v8
 - **Deployment**: Cloudflare Workers & Pages
 
 ## Project Structure
@@ -155,6 +168,9 @@ npm run preview      # Preview production build locally
 npm run deploy       # Build and deploy to Cloudflare
 npm run dev:worker   # Start Cloudflare Worker development server
 npm run verify       # Check deployment status
+npm test             # Run all tests
+npm run test:ui      # Run tests with interactive UI
+npm run test:coverage # Run tests with coverage report
 ```
 
 ## Browser Compatibility

@@ -26,7 +26,6 @@ export class SessionClient {
   private heartbeatInterval: number | null = null;
   private pingTimeout: number | null = null;
   private lastPongReceived = 0;
-  private maxReconnectAttemptsExceeded = false;
 
   constructor() {
     this.available = this.checkAvailability();
@@ -34,16 +33,6 @@ export class SessionClient {
     // Send leave announcement when page is being unloaded
     window.addEventListener('beforeunload', () => {
       this.sendLeaveAnnouncementSync();
-    });
-
-    // Restart reconnection attempts when user returns to window
-    window.addEventListener('focus', () => {
-      this.onWindowFocus();
-    });
-
-    // Restart reconnection attempts when network comes back online
-    window.addEventListener('online', () => {
-      this.onNetworkOnline();
     });
   }
 
@@ -110,6 +99,12 @@ export class SessionClient {
       return this.connectionState === 'connected';
     }
 
+    // Clean up any existing connection first
+    if (this.websocket) {
+      this.websocket.close();
+      this.websocket = null;
+    }
+
     this.sessionId = sessionId;
     this.playerName = playerName;
     this.manualDisconnect = false; // Reset flag for new connection
@@ -122,7 +117,6 @@ export class SessionClient {
       console.log('Reusing existing player ID:', this.playerId, 'for player:', playerName);
     }
     this.connectionState = 'connecting';
-    this.eventHandlers.onConnecting?.();
 
     try {
       // Construct WebSocket URL for Cloudflare Workers
@@ -135,7 +129,7 @@ export class SessionClient {
         console.log('WebSocket connected');
         this.connectionState = 'connected';
         this.reconnectAttempts = 0;
-        this.eventHandlers.onConnected?.(this.playerId!);
+        this.lastPongReceived = Date.now(); // Initialize pong timestamp
         
         // Save session data to localStorage
         saveLastSessionId(sessionId);
@@ -152,6 +146,9 @@ export class SessionClient {
             isActive: true
           }
         });
+        
+        // Notify event handler after sending join announcement
+        this.eventHandlers.onConnected?.(this.playerId!);
       };
 
       this.websocket.onmessage = (event) => {
@@ -179,7 +176,6 @@ export class SessionClient {
         // Attempt to reconnect if not manually closed
         if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts && !this.manualDisconnect) {
           this.connectionState = 'connecting';
-          this.eventHandlers.onConnecting?.();
           setTimeout(() => {
             this.attemptReconnect(playerName);
           }, this.reconnectDelay * Math.pow(2, this.reconnectAttempts));
@@ -225,97 +221,10 @@ export class SessionClient {
     }
   }
 
-  private async attemptConnection(sessionId: string, playerName: string): Promise<boolean> {
-    try {
-      // Construct WebSocket URL for Cloudflare Workers
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/api/room/${sessionId}`;
-      
-      this.websocket = new WebSocket(wsUrl);
-      
-      this.websocket.onopen = () => {
-        console.log('WebSocket connected');
-        
-        // Save session data to localStorage
-        saveLastSessionId(sessionId);
-        savePlayerName(playerName);
-        
-        // Send join announcement to other players
-        this.sendMessage({
-          type: 'JOIN_ANNOUNCEMENT',
-          player: {
-            id: this.playerId!,
-            name: this.sanitizePlayerName(playerName),
-            joinedAt: Date.now(),
-            lastSeen: Date.now(),
-            isActive: true
-          }
-        });
-      };
-
-      this.websocket.onmessage = (event) => {
-        try {
-          const message: ServerMessage = JSON.parse(event.data);
-          this.handleServerMessage(message);
-        } catch (error) {
-          console.error('Failed to parse server message:', error);
-        }
-      };
-
-      this.websocket.onclose = (event) => {
-        console.log('WebSocket closed during reconnection:', event.code, event.reason);
-        
-        // Send leave announcement for unexpected disconnects (not manual)
-        if (!this.manualDisconnect && this.playerId && event.code !== 1000) {
-          console.log('Unexpected disconnect detected during reconnection, sending leave announcement');
-        }
-        
-        // Don't change connection state or call onDisconnected during reconnection attempts
-        // The attemptReconnect method will handle the state management
-      };
-
-      this.websocket.onerror = (error) => {
-        console.error('WebSocket error during reconnection:', error);
-        // Don't set error state here - let attemptReconnect handle it
-      };
-
-      // Wait for connection to be established
-      await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error('Reconnection timeout'));
-        }, 10000);
-
-        const checkConnection = () => {
-          if (this.websocket?.readyState === WebSocket.OPEN) {
-            clearTimeout(timeout);
-            resolve();
-          } else if (this.websocket?.readyState === WebSocket.CLOSED) {
-            clearTimeout(timeout);
-            reject(new Error('Connection failed during reconnection'));
-          } else {
-            setTimeout(checkConnection, 100);
-          }
-        };
-        
-        checkConnection();
-      });
-
-      return true;
-    } catch (error) {
-      console.error('Failed to reconnect:', error);
-      return false;
-    }
-  }
-
   private async attemptReconnect(playerName: string): Promise<void> {
     if (!this.sessionId || this.reconnectAttempts >= this.maxReconnectAttempts || this.manualDisconnect) {
       console.log('Stopping reconnection attempts');
-      if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-        this.maxReconnectAttemptsExceeded = true;
-        this.connectionState = 'error';
-        this.eventHandlers.onError?.('Max reconnection attempts reached');
-        this.eventHandlers.onDisconnected?.();
-      }
+      this.resetConnectionState();
       return;
     }
 
@@ -324,64 +233,29 @@ export class SessionClient {
     
     // Update status to show we're trying to reconnect
     this.connectionState = 'connecting';
-    this.eventHandlers.onConnecting?.();
+    // Note: No specific event handler for 'connecting' state, UI will check connectionState
     
     try {
-      // Don't use the main connect method to avoid setting error state prematurely
-      const success = await this.attemptConnection(this.sessionId, playerName);
+      const success = await this.connect(this.sessionId, playerName);
       if (success) {
         console.log('Reconnection successful');
         this.reconnectAttempts = 0; // Reset on successful reconnection
-        this.connectionState = 'connected';
-        this.eventHandlers.onConnected?.(this.playerId!);
       } else {
         throw new Error('Reconnection failed');
       }
     } catch (error) {
       console.error('Reconnection failed:', error);
+      this.connectionState = 'error';
+      this.eventHandlers.onError?.('Reconnection failed');
       
-      // If we haven't exceeded max attempts, stay in connecting state and try again
+      // If we haven't exceeded max attempts, try again
       if (this.reconnectAttempts < this.maxReconnectAttempts && !this.manualDisconnect) {
-        // Keep connectionState as 'connecting' - don't change to 'error'
-        console.log(`Scheduling next reconnection attempt in ${this.reconnectDelay * Math.pow(2, this.reconnectAttempts)}ms`);
         setTimeout(() => {
           this.attemptReconnect(playerName);
         }, this.reconnectDelay * Math.pow(2, this.reconnectAttempts));
       } else {
-        // Only set to error when all attempts are exhausted
-        this.connectionState = 'error';
-        this.eventHandlers.onError?.('All reconnection attempts failed');
-        this.eventHandlers.onDisconnected?.(); // Now notify UI of final disconnection
-        this.maxReconnectAttemptsExceeded = true;
+        this.resetConnectionState();
       }
-    }
-  }
-
-  private onWindowFocus(): void {
-    this.tryRestartReconnection('Window focused');
-  }
-
-  private onNetworkOnline(): void {
-    this.tryRestartReconnection('Network came online');
-  }
-
-  private tryRestartReconnection(reason: string): void {
-    // Only restart reconnection if we were disconnected due to max attempts being exceeded
-    // and we have session data that would allow reconnection
-    if (this.maxReconnectAttemptsExceeded && 
-        this.sessionId && 
-        this.playerName && 
-        this.connectionState === 'disconnected' &&
-        !this.manualDisconnect) {
-      
-      console.log(`${reason} after max reconnection attempts exceeded. Restarting reconnection...`);
-      
-      // Reset reconnection state
-      this.maxReconnectAttemptsExceeded = false;
-      this.reconnectAttempts = 0;
-      
-      // Attempt to reconnect
-      this.attemptReconnect(this.playerName);
     }
   }
 
@@ -452,19 +326,27 @@ export class SessionClient {
 
   private resetConnectionState(): void {
     this.connectionState = 'disconnected';
-    // Only reset session data for manual disconnects
-    // Keep session data for automatic disconnects to allow window focus reconnection
-    if (this.manualDisconnect) {
-      this.sessionId = null;
-      this.playerId = null;
-      this.playerName = null;
-      this.maxReconnectAttemptsExceeded = false;
-    }
+    this.sessionId = null;
+    // Don't reset playerId on disconnect - we want to reuse it on reconnect
+    // this.playerId = null;
+    this.playerName = null;
     this.reconnectAttempts = 0;
     this.connectedPlayers.clear();
     this.localRollHistory = [];
     this.manualDisconnect = false;
     this.stopHeartbeat();
+    
+    // Clean up websocket if it exists
+    if (this.websocket && this.websocket.readyState !== WebSocket.CLOSED) {
+      const ws = this.websocket;
+      this.websocket = null;
+      // Remove event handlers before closing to prevent recursion
+      ws.onclose = null;
+      ws.onerror = null;
+      ws.onmessage = null;
+      ws.onopen = null;
+      ws.close();
+    }
   }
 
   private sendMessage(message: ClientMessage): void {
@@ -480,9 +362,16 @@ export class SessionClient {
       case 'JOIN_ANNOUNCEMENT':
         // Another player joined - respond with our info if we're not the sender
         if (message.player.id !== this.playerId) {
-          // Add to our player list
+          // Check if we already know about this player (prevent duplicate processing)
+          const wasAlreadyKnown = this.connectedPlayers.has(message.player.id);
+          
+          // Add/update player in our list
           this.connectedPlayers.set(message.player.id, message.player);
-          this.eventHandlers.onPlayerJoined?.(message.player, false); // New join, not initial response
+          
+          // Only trigger onPlayerJoined if this is truly a new player
+          if (!wasAlreadyKnown) {
+            this.eventHandlers.onPlayerJoined?.(message.player);
+          }
           
           // Send our player info back to the new player
           if (this.playerId && this.playerName) {
@@ -498,21 +387,26 @@ export class SessionClient {
             });
           }
 
-          // If we're the history keeper among existing players, share the roll history with the new player
-          const isKeeper = this.isHistoryKeeperExcluding(message.player.id);
-          console.log('History keeper check for new player:', message.player.id, 'Am I keeper?', isKeeper, 'History length:', this.localRollHistory.length);
-          console.log('All player IDs (excluding new player):', [this.playerId, ...this.connectedPlayers.keys()].filter(id => id !== message.player.id));
-          
-          if (isKeeper && this.localRollHistory.length > 0) {
-            console.log('Sending history share to new player:', message.player.name, 'History items:', this.localRollHistory.length);
-            this.sendMessage({
-              type: 'HISTORY_SHARE',
-              rollHistory: this.localRollHistory
-            });
-          } else if (!isKeeper) {
-            console.log('Not the history keeper, someone else should send history');
-          } else {
-            console.log('No history to share');
+          // Only share history if this is a new player (not a duplicate announcement)
+          if (!wasAlreadyKnown) {
+            // Add a small delay to allow all players to update their connected player lists
+            setTimeout(() => {
+              // If we're the history keeper among existing players, share the roll history with the new player
+              const isKeeper = this.isHistoryKeeperExcluding(message.player.id);
+              console.log('History keeper check for new player:', message.player.id, 'Am I keeper?', isKeeper, 'History length:', this.localRollHistory.length);
+              
+              if (isKeeper && this.localRollHistory.length > 0) {
+                console.log('Sending history share to new player:', message.player.name, 'History items:', this.localRollHistory.length);
+                this.sendMessage({
+                  type: 'HISTORY_SHARE',
+                  rollHistory: this.localRollHistory
+                });
+              } else if (!isKeeper) {
+                console.log('Not the history keeper, someone else should send history');
+              } else {
+                console.log('No history to share');
+              }
+            }, 100); // Small delay to ensure consistent state
           }
         }
         break;
@@ -524,7 +418,7 @@ export class SessionClient {
           this.connectedPlayers.set(message.player.id, message.player);
           // Only trigger onPlayerJoined if this is a new player (not already triggered by JOIN_ANNOUNCEMENT)
           if (!wasAlreadyKnown) {
-            this.eventHandlers.onPlayerJoined?.(message.player, true); // Initial response from existing player
+            this.eventHandlers.onPlayerJoined?.(message.player);
           }
         }
         break;
@@ -640,10 +534,13 @@ export class SessionClient {
     // Get all connected player IDs including ourselves, but excluding the specified player
     const existingPlayerIds = [this.playerId, ...this.connectedPlayers.keys()].filter(id => id !== excludePlayerId);
     
+    // IMPORTANT: Remove duplicates to prevent multiple history keepers
+    const uniquePlayerIds = [...new Set(existingPlayerIds)];
+    
     // Sort alphabetically and check if we're first
-    existingPlayerIds.sort();
-    const isKeeper = existingPlayerIds[0] === this.playerId;
-    console.log('History keeper check - Existing players (excluding', excludePlayerId + '):', existingPlayerIds, 'Sorted first:', existingPlayerIds[0], 'My ID:', this.playerId, 'Am keeper:', isKeeper);
+    uniquePlayerIds.sort();
+    const isKeeper = uniquePlayerIds.length > 0 && uniquePlayerIds[0] === this.playerId;
+    console.log('History keeper check - Unique existing players (excluding', excludePlayerId + '):', uniquePlayerIds, 'Sorted first:', uniquePlayerIds[0], 'My ID:', this.playerId, 'Am keeper:', isKeeper);
     return isKeeper;
   }
 
