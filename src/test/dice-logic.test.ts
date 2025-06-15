@@ -54,15 +54,31 @@ class DiceRollerLogic {
     return { totalDamage, finalDamage, criticalDamage };
   }
 
-  static calculateGMResult(d20Value: number, gmModifier: number) {
-    const finalTotal = d20Value + gmModifier;
+  static calculateGMResult(d20Value: number, gmModifier: number, d20Value2?: number, gmAdvantageType?: "none" | "advantage" | "disadvantage") {
+    // Calculate final d20 value based on advantage/disadvantage
+    let finalD20Value: number;
+    if (gmAdvantageType && gmAdvantageType !== "none" && d20Value2 !== undefined) {
+      if (gmAdvantageType === "advantage") {
+        finalD20Value = Math.max(d20Value, d20Value2);
+      } else {
+        finalD20Value = Math.min(d20Value, d20Value2);
+      }
+    } else {
+      finalD20Value = d20Value;
+    }
+
+    const finalTotal = finalD20Value + gmModifier
     
-    let resultText = `d20: ${d20Value}`;
+    let resultText = `d20: ${finalD20Value}`;
+    if (gmAdvantageType && gmAdvantageType !== "none" && d20Value2 !== undefined) {
+      const advantageLabel = gmAdvantageType === "advantage" ? "ADV" : "DIS";
+      resultText = `d20: ${finalD20Value} [${d20Value}, ${d20Value2}] ${advantageLabel}`;
+    }
     if (gmModifier !== 0) {
       resultText += ` ${gmModifier > 0 ? '+' : ''}${gmModifier} = ${finalTotal}`;
     }
 
-    return { total: finalTotal, result: resultText };
+    return { total: finalTotal, result: resultText, finalD20Value }
   }
 }
 
@@ -180,11 +196,60 @@ describe('DiceRoller Logic', () => {
     });
 
     it('should apply negative GM modifier', () => {
-      const result = DiceRollerLogic.calculateGMResult(12, -2);
-      expect(result.total).toBe(10);
-      expect(result.result).toBe('d20: 12 -2 = 10');
-    });
-  });
+      const result = DiceRollerLogic.calculateGMResult(12, -2)
+      expect(result.total).toBe(10)
+      expect(result.result).toBe('d20: 12 -2 = 10')
+    })
+
+    it('should calculate GM advantage correctly', () => {
+      const result = DiceRollerLogic.calculateGMResult(8, 0, 15, 'advantage')
+      expect(result.total).toBe(15)
+      expect(result.result).toBe('d20: 15 [8, 15] ADV')
+      expect(result.finalD20Value).toBe(15)
+    })
+
+    it('should calculate GM disadvantage correctly', () => {
+      const result = DiceRollerLogic.calculateGMResult(8, 0, 15, 'disadvantage')
+      expect(result.total).toBe(8)
+      expect(result.result).toBe('d20: 8 [8, 15] DIS')
+      expect(result.finalD20Value).toBe(8)
+    })
+
+    it('should apply GM advantage with positive modifier', () => {
+      const result = DiceRollerLogic.calculateGMResult(12, 3, 8, 'advantage')
+      expect(result.total).toBe(15)
+      expect(result.result).toBe('d20: 12 [12, 8] ADV +3 = 15')
+      expect(result.finalD20Value).toBe(12)
+    })
+
+    it('should apply GM disadvantage with negative modifier', () => {
+      const result = DiceRollerLogic.calculateGMResult(12, -2, 8, 'disadvantage')
+      expect(result.total).toBe(6)
+      expect(result.result).toBe('d20: 8 [12, 8] DIS -2 = 6')
+      expect(result.finalD20Value).toBe(8)
+    })
+
+    it('should handle GM advantage with equal dice values', () => {
+      const result = DiceRollerLogic.calculateGMResult(10, 0, 10, 'advantage')
+      expect(result.total).toBe(10)
+      expect(result.result).toBe('d20: 10 [10, 10] ADV')
+      expect(result.finalD20Value).toBe(10)
+    })
+
+    it('should handle GM disadvantage with equal dice values', () => {
+      const result = DiceRollerLogic.calculateGMResult(10, 0, 10, 'disadvantage')
+      expect(result.total).toBe(10)
+      expect(result.result).toBe('d20: 10 [10, 10] DIS')
+      expect(result.finalD20Value).toBe(10)
+    })
+
+    it('should handle GM standard roll (no advantage/disadvantage)', () => {
+      const result = DiceRollerLogic.calculateGMResult(15, 2, undefined, 'none')
+      expect(result.total).toBe(17)
+      expect(result.result).toBe('d20: 15 +2 = 17')
+      expect(result.finalD20Value).toBe(15)
+    })
+  })
 
   describe('Edge Cases', () => {
     it('should handle minimum dice values', () => {

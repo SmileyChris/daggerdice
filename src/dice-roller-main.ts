@@ -139,6 +139,9 @@ function diceRoller() {
     
     // GM roll state
     gmModifier: 0,
+    d20Value: 0,
+    d20Value2: 0, // Second d20 for advantage/disadvantage
+    gmAdvantageType: "none" as "none" | "advantage" | "disadvantage",
     gmPrivateRolls: false,
     
     // Keyboard shortcuts
@@ -164,9 +167,30 @@ function diceRoller() {
       }
     },
 
+    setGMAdvantageType(type: "none" | "advantage" | "disadvantage") {
+      this.gmAdvantageType = type;
+      if (type === "none") {
+        this.d20Value2 = 0;
+      }
+    },
+
     // Roll type methods
     setRollType(type: 'check' | 'damage' | 'gm') {
-      this.rollType = type;
+      // Only trigger transition if the roll type is actually changing
+      if (this.rollType === type) {
+        return;
+      }
+      
+      // Use View Transitions API if available
+      if (document.startViewTransition) {
+        document.startViewTransition(() => {
+          this.rollType = type;
+          this.result = "";
+        });
+      } else {
+        this.rollType = type;
+        this.result = "";
+      }
     },
 
     // Damage roll methods
@@ -404,32 +428,72 @@ function diceRoller() {
           };
 
         } else if (this.rollType === 'gm') {
-          // GM roll: single d20
+          // GM roll: d20 with optional advantage/disadvantage
           diceArray = [{
             sides: 20,
             theme: 'default',
-            themeColor: '#9c27b0'
+            themeColor: '#8e44ad'
           }];
+
+          // Add second d20 for advantage/disadvantage
+          if (this.gmAdvantageType !== 'none') {
+            diceArray.push({
+              sides: 20,
+              theme: 'default', 
+              themeColor: this.gmAdvantageType === 'advantage' ? '#9b59b6' : '#6a0dad'
+            });
+          }
 
           rollResult = await window.diceBox.roll(diceArray);
 
-          let d20Value = 0;
           if (rollResult && rollResult.length >= 1) {
-            d20Value = rollResult[0].value;
+            this.d20Value = rollResult[0].value;
+            
+            if (this.gmAdvantageType !== 'none' && rollResult.length >= 2) {
+              this.d20Value2 = rollResult[1].value;
+            } else if (this.gmAdvantageType !== 'none') {
+              this.d20Value2 = Math.floor(Math.random() * 20) + 1;
+            } else {
+              this.d20Value2 = 0;
+            }
           } else {
-            d20Value = Math.floor(Math.random() * 20) + 1;
+            this.d20Value = Math.floor(Math.random() * 20) + 1;
+            if (this.gmAdvantageType !== 'none') {
+              this.d20Value2 = Math.floor(Math.random() * 20) + 1;
+            } else {
+              this.d20Value2 = 0;
+            }
           }
 
-          totalValue = d20Value + this.gmModifier;
-          resultText = `${totalValue}`;
+          // Calculate final d20 value based on advantage/disadvantage
+          let finalD20Value: number;
+          if (this.gmAdvantageType === 'advantage') {
+            finalD20Value = Math.max(this.d20Value, this.d20Value2);
+          } else if (this.gmAdvantageType === 'disadvantage') {
+            finalD20Value = Math.min(this.d20Value, this.d20Value2);
+          } else {
+            finalD20Value = this.d20Value;
+          }
 
+          totalValue = finalD20Value + this.gmModifier;
+          
+          // Format result text
+          if (this.gmAdvantageType !== 'none') {
+            const advantageLabel = this.gmAdvantageType === 'advantage' ? 'ADV' : 'DIS';
+            resultText = `${finalD20Value} <small>[${this.d20Value}, ${this.d20Value2}] ${advantageLabel}</small>`;
+          } else {
+            resultText = `${finalD20Value}`;
+          }
+          
           if (this.gmModifier !== 0) {
-            resultText += ` <small>(${d20Value} ${this.gmModifier > 0 ? '+' : ''}${this.gmModifier})</small>`;
+            resultText += ` <small>${this.gmModifier > 0 ? '+' : ''}${this.gmModifier}</small> = ${totalValue}`;
           }
 
           rollData = {
             rollType: 'gm',
-            d20Value: d20Value,
+            d20Value: this.d20Value,
+            d20Value2: this.d20Value2,
+            gmAdvantageType: this.gmAdvantageType,
             gmModifier: this.gmModifier,
             total: totalValue,
             result: resultText

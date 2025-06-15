@@ -32,6 +32,8 @@ export interface RollData {
   
   // GM roll fields
   d20Value?: number;
+  d20Value2?: number;
+  gmAdvantageType?: "none" | "advantage" | "disadvantage";
   gmModifier?: number;
 }
 

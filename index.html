@@ -276,7 +276,36 @@
                 +
               </button>
             </div>
-            
+            <!-- GM Advantage/Disadvantage Controls -->
+            <div class="advantage-controls">
+              <label>Roll Type:</label>
+              <div class="toggle-buttons">
+                <button
+                  @click="setGMAdvantageType('none')"
+                  :class="{ 'active': gmAdvantageType === 'none' }"
+                  class="toggle-btn"
+                  :disabled="isRolling"
+                >
+                  Standard
+                </button>
+                <button
+                  @click="setGMAdvantageType('advantage')"
+                  :class="{ 'active': gmAdvantageType === 'advantage' }"
+                  class="toggle-btn"
+                  :disabled="isRolling"
+                >
+                  Advantage
+                </button>
+                <button
+                  @click="setGMAdvantageType('disadvantage')"
+                  :class="{ 'active': gmAdvantageType === 'disadvantage' }"
+                  class="toggle-btn"
+                  :disabled="isRolling"
+                >
+                  Disadvantage
+                </button>
+              </div>
+            </div>
             <!-- Private Rolls Checkbox (multiplayer only) -->
             <div x-show="sessionMode === 'multiplayer'" class="gm-options">
               <label>
@@ -292,10 +321,10 @@
 
           <!-- GM Roll Clear Button -->
           <button
-            @click="gmModifier = 0"
+            @click="gmModifier = 0; setGMAdvantageType('none')"
             class="modifier-clear-btn"
-            x-show="rollType === 'gm' && gmModifier !== 0 && !isRolling"
-            title="Clear GM modifier"
+            x-show="rollType === 'gm' && (gmModifier !== 0 || gmAdvantageType !== 'none') && !isRolling"
+            title="Clear GM modifiers"
           >
             🔄 Clear
           </button>
@@ -401,7 +430,7 @@
                 <span class="section-btn-text">Mods</span>
                 <span
                   class="section-btn-value"
-                  x-show="(rollType === 'check' && (modifier !== 0 || advantageType !== 'none')) || (rollType === 'gm' && gmModifier !== 0) || (rollType === 'damage' && (bonusDieEnabled || isCritical || hasResistance))"
+                  x-show="(rollType === 'check' && (modifier !== 0 || advantageType !== 'none')) || (rollType === 'gm' && (gmModifier !== 0 || gmAdvantageType !== 'none')) || (rollType === 'damage' && (bonusDieEnabled || isCritical || hasResistance))"
                 >
                   <!-- Check roll modifiers -->
                   <template x-if="rollType === 'check'">
@@ -417,6 +446,8 @@
                   <!-- GM roll modifiers -->
                   <template x-if="rollType === 'gm'">
                     <span>
+                      <span x-show="gmAdvantageType === 'advantage'">A</span>
+                      <span x-show="gmAdvantageType === 'disadvantage'">D</span>
                       <span x-show="gmModifier > 0"
                         >+<span x-text="gmModifier"></span
                       ></span>
@@ -648,10 +679,10 @@
               <!-- Clear button for GM rolls -->
               <div class="dialog-section">
                 <button
-                  @click="gmModifier = 0; showModifiers = false"
+                  @click="gmModifier = 0; setGMAdvantageType('none'); showModifiers = false"
                   class="clear-all-btn"
-                  x-show="gmModifier !== 0"
-                  title="Clear GM modifier"
+                  x-show="gmModifier !== 0 || gmAdvantageType !== 'none'"
+                  title="Clear GM modifiers"
                 >
                   🔄 Clear
                 </button>
@@ -682,7 +713,36 @@
                   </button>
                 </div>
               </div>
-              
+              <!-- GM Advantage/Disadvantage Controls -->
+              <div class="dialog-section">
+                <label>Roll Type:</label>
+                <div class="toggle-buttons">
+                  <button
+                    @click="setGMAdvantageType('none')"
+                    :class="{ 'active': gmAdvantageType === 'none' }"
+                    class="toggle-btn"
+                    :disabled="isRolling"
+                  >
+                    Standard
+                  </button>
+                  <button
+                    @click="setGMAdvantageType('advantage')"
+                    :class="{ 'active': gmAdvantageType === 'advantage' }"
+                    class="toggle-btn"
+                    :disabled="isRolling"
+                  >
+                    Advantage
+                  </button>
+                  <button
+                    @click="setGMAdvantageType('disadvantage')"
+                    :class="{ 'active': gmAdvantageType === 'disadvantage' }"
+                    class="toggle-btn"
+                    :disabled="isRolling"
+                  >
+                    Disadvantage
+                  </button>
+                </div>
+              </div>
               <!-- Private Rolls Checkbox (multiplayer only) -->
               <div x-show="sessionMode === 'multiplayer'" class="dialog-section">
                 <div class="dialog-checkbox-group">
@@ -878,8 +938,15 @@
                       <!-- GM Roll Details -->
                       <template x-if="roll.rollType === 'gm'">
                         <span class="breakdown-text">
-                          d20: <span x-text="roll.d20Value"></span
-                          ><span x-show="roll.gmModifier !== 0"
+                          <span x-show="roll.gmAdvantageType === 'none'">
+                            d20: <span x-text="roll.d20Value"></span>
+                          </span>
+                          <span x-show="roll.gmAdvantageType !== 'none'">
+                            d20: <span x-text="roll.d20Value"></span>, <span x-text="roll.d20Value2"></span>
+                            <span x-show="roll.gmAdvantageType === 'advantage'"> (Advantage)</span>
+                            <span x-show="roll.gmAdvantageType === 'disadvantage'"> (Disadvantage)</span>
+                          </span>
+                          <span x-show="roll.gmModifier !== 0"
                             >, Modifier:
                             <span
                               x-text="(roll.gmModifier > 0 ? '+' : '') + roll.gmModifier"
