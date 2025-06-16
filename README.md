@@ -32,13 +32,10 @@ A 3D dice rolling web application for tabletop RPGs with Hope/Fear mechanics and
 npm install
 
 # Start development server
-npm run dev
+npm start
 
 # Build for production
 npm run build
-
-# Preview production build
-npm run preview
 ```
 
 ### Testing

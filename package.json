@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "concurrently \"vite build --watch\" \"npm run dev:worker\"",
+    "start": "concurrently \"npx vite build --watch\" \"npm run dev:worker\"",
     "dev": "vite",
     "build": "vite build",
     "test": "vitest",
@@ -34,7 +34,8 @@
     "jsdom": "^26.1.0",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
-    "vitest": "3.1.4"
+    "vitest": "3.1.4",
+    "wrangler": "^4.20.0"
   },
   "dependencies": {
     "@3d-dice/dice-box": "^1.1.4",
