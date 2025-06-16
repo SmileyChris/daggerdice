@@ -235,4 +235,127 @@ describe('Streamer Mode Features', () => {
       expect(localStorageStore.get('daggerdice_streamer_mode')).toBeUndefined();
     });
   });
+
+  describe('Temporary Override Functionality', () => {
+    it('should temporarily show room details when user confirms dialog', () => {
+      // Mock window.confirm to return true
+      vi.stubGlobal('confirm', vi.fn(() => true));
+      
+      let streamerMode = true;
+      let streamerModeTemporarilyDisabled = false;
+      
+      const temporarilyShowRoomDetails = () => {
+        if (!streamerMode) {
+          return; // Streamer mode not active
+        }
+        
+        const confirmed = confirm('Temporarily show room details? They will be hidden again when you close this dialog.');
+        if (confirmed) {
+          streamerModeTemporarilyDisabled = true;
+        }
+      };
+
+      const getEffectiveStreamerMode = () => {
+        return streamerMode && !streamerModeTemporarilyDisabled;
+      };
+
+      // Start with streamer mode enabled
+      localStorageStore.set('daggerdice_streamer_mode', 'true');
+      
+      expect(getEffectiveStreamerMode()).toBe(true);
+      
+      temporarilyShowRoomDetails();
+      
+      expect(getEffectiveStreamerMode()).toBe(false); // Temporarily disabled
+      expect(localStorageStore.get('daggerdice_streamer_mode')).toBe('true'); // Still saved in localStorage
+      expect(confirm).toHaveBeenCalledWith('Temporarily show room details? They will be hidden again when you close this dialog.');
+    });
+
+    it('should not show room details when user cancels dialog', () => {
+      // Mock window.confirm to return false
+      vi.stubGlobal('confirm', vi.fn(() => false));
+      
+      let streamerMode = true;
+      let streamerModeTemporarilyDisabled = false;
+      
+      const temporarilyShowRoomDetails = () => {
+        if (!streamerMode) {
+          return; // Streamer mode not active
+        }
+        
+        const confirmed = confirm('Temporarily show room details? They will be hidden again when you close this dialog.');
+        if (confirmed) {
+          streamerModeTemporarilyDisabled = true;
+        }
+      };
+
+      const getEffectiveStreamerMode = () => {
+        return streamerMode && !streamerModeTemporarilyDisabled;
+      };
+
+      // Start with streamer mode enabled
+      localStorageStore.set('daggerdice_streamer_mode', 'true');
+      
+      expect(getEffectiveStreamerMode()).toBe(true);
+      
+      temporarilyShowRoomDetails();
+      
+      expect(getEffectiveStreamerMode()).toBe(true); // Still hidden
+      expect(localStorageStore.get('daggerdice_streamer_mode')).toBe('true');
+      expect(confirm).toHaveBeenCalledWith('Temporarily show room details? They will be hidden again when you close this dialog.');
+    });
+
+    it('should do nothing when streamer mode is not active', () => {
+      // Mock window.confirm to track calls
+      vi.stubGlobal('confirm', vi.fn(() => true));
+      
+      let streamerMode = false;
+      let streamerModeTemporarilyDisabled = false;
+      
+      const temporarilyShowRoomDetails = () => {
+        if (!streamerMode) {
+          return; // Streamer mode not active
+        }
+        
+        const confirmed = confirm('Temporarily show room details? They will be hidden again when you close this dialog.');
+        if (confirmed) {
+          streamerModeTemporarilyDisabled = true;
+        }
+      };
+
+      temporarilyShowRoomDetails();
+      
+      expect(streamerModeTemporarilyDisabled).toBe(false);
+      expect(confirm).not.toHaveBeenCalled();
+    });
+
+    it('should reset temporary override when dialog is closed', () => {
+      let streamerMode = true;
+      let streamerModeTemporarilyDisabled = true; // Start with override active
+      let showSessionUI = true;
+      
+      const toggleSessionUI = () => {
+        showSessionUI = !showSessionUI;
+        
+        // Reset temporary streamer mode override when dialog is closed
+        if (!showSessionUI) {
+          streamerModeTemporarilyDisabled = false;
+        }
+      };
+
+      const getEffectiveStreamerMode = () => {
+        return streamerMode && !streamerModeTemporarilyDisabled;
+      };
+
+      // Initially, room details should be visible due to temporary override
+      expect(getEffectiveStreamerMode()).toBe(false);
+      
+      // Close the dialog
+      toggleSessionUI();
+      
+      // Room details should be hidden again
+      expect(getEffectiveStreamerMode()).toBe(true);
+      expect(showSessionUI).toBe(false);
+    });
+  });
 });

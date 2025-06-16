@@ -165,6 +165,7 @@ function diceRoller() {
     
     // Streamer mode state
     streamerMode: false,
+    streamerModeTemporarilyDisabled: false,
     
     // Version display
     appVersion: __APP_VERSION__,
@@ -565,6 +566,11 @@ function diceRoller() {
     // ===== NEW SESSION METHODS (ADDITIVE) =====
     toggleSessionUI() {
       this.showSessionUI = !this.showSessionUI;
+      
+      // Reset temporary streamer mode override when dialog is closed
+      if (!this.showSessionUI) {
+        this.streamerModeTemporarilyDisabled = false;
+      }
     },
 
     toggleStreamerMode() {
@@ -577,8 +583,23 @@ function diceRoller() {
       }
     },
 
+    temporarilyShowRoomDetails() {
+      if (!this.streamerMode) {
+        return; // Streamer mode not active
+      }
+      
+      const confirmed = confirm('Temporarily show room details? They will be hidden again when you close this dialog.');
+      if (confirmed) {
+        this.streamerModeTemporarilyDisabled = true;
+      }
+    },
+
     get isJoinSessionValid() {
       return !this.joinSessionId.trim() || isValidSessionId(this.joinSessionId.trim());
+    },
+
+    get effectiveStreamerMode() {
+      return this.streamerMode && !this.streamerModeTemporarilyDisabled;
     },
 
     handleRoomIdChange() {

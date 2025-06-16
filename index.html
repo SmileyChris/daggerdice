@@ -860,7 +860,7 @@
 
         <div class="dialog-content">
           <!-- Solo mode: session creation/joining -->
-          <div x-show="sessionMode === 'solo'" class="session-join">
+          <form x-show="sessionMode === 'solo'" class="session-join" autocomplete="off">
             <div class="session-input">
             <input
               x-model="playerName"
@@ -873,9 +873,15 @@
           </div>
 
           <div class="streamer-mode-toggle">
-            <button @click="toggleStreamerMode()" class="session-btn streamer-btn">
-              <span x-text="streamerMode ? '🙈 Hide Room Details' : '👁️ Show Room Details'"></span>
-            </button>
+            <label class="toggle-switch">
+              <input 
+                type="checkbox" 
+                @change="toggleStreamerMode()" 
+                :checked="streamerMode"
+              />
+              <span class="toggle-slider"></span>
+              <span class="toggle-label">Hide Room Details</span>
+            </label>
           </div>
 
           <div class="session-input">
@@ -883,8 +889,8 @@
               x-model="joinSessionId"
               placeholder="Room ID or room link (optional)"
               class="session-id-input"
-              :type="streamerMode ? 'password' : 'search'"
-              :autocomplete="streamerMode ? 'new-password' : 'off'"
+              :type="effectiveStreamerMode ? 'password' : 'search'"
+              autocomplete="new-password"
               @input="handleRoomIdChange()"
               @paste="setTimeout(() => handleRoomIdChange(), 0)"
               @keyup.enter="joinSessionId.trim() ? joinSession() : createSession()"
@@ -913,15 +919,20 @@
           <div x-show="connectionStatus === 'error'" class="session-error">
             Connection failed. Please try again.
           </div>
-        </div>
+        </form>
 
         <!-- Multiplayer mode: room info -->
         <div x-show="sessionMode === 'multiplayer'" class="session-info">
           <div class="session-details">
             <div class="session-id-display">
               <strong>Room:</strong>
-              <span x-text="sessionId" class="session-id" x-show="!streamerMode"></span>
-              <span x-show="streamerMode" class="session-id">••••••</span>
+              <span x-text="sessionId" class="session-id" x-show="!effectiveStreamerMode"></span>
+              <span 
+                x-show="effectiveStreamerMode" 
+                class="session-id session-id-hidden" 
+                @click="temporarilyShowRoomDetails()"
+                title="Click to temporarily reveal room details"
+              >🙈 ••••••</span>
               <button
                 @click="copySessionLink()"
                 class="copy-btn"
@@ -931,7 +942,7 @@
               </button>
             </div>
 
-            <div class="qr-code-container" x-show="sessionId && !streamerMode">
+            <div class="qr-code-container" x-show="sessionId && !effectiveStreamerMode">
               <div class="qr-code-section">
                 <strong>Scan to Join:</strong>
                 <div class="qr-code-wrapper">
@@ -956,7 +967,6 @@
                 >🔴 Disconnected</span
               >
               <span x-show="connectionStatus === 'error'">❌ Error</span>
-              <span x-show="streamerMode" class="streamer-indicator">🙈 Room Details Hidden</span>
             </div>
           </div>
 

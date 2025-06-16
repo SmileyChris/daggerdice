@@ -856,6 +856,18 @@ button:disabled {
   font-size: 0.9rem;
 }
 
+.session-id-hidden {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.session-id-hidden:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
 .qr-code-container {
   margin-top: 1rem;
   padding-top: 1rem;
@@ -948,25 +960,66 @@ button:disabled {
 }
 
 /* Streamer Mode Styles */
-.streamer-btn {
-  background-color: rgba(255, 165, 0, 0.2);
-  border-color: rgba(255, 165, 0, 0.5);
-  color: #ffa500;
-}
-
-.streamer-btn:hover {
-  background-color: rgba(255, 165, 0, 0.3);
-  border-color: rgba(255, 165, 0, 0.7);
-}
-
 .streamer-mode-toggle {
   margin-bottom: 0.75rem;
 }
 
-.streamer-mode-toggle .streamer-btn {
-  width: 100%;
-  padding: 0.75rem;
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-switch:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.toggle-switch input[type="checkbox"] {
+  display: none;
+}
+
+.toggle-slider {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  transition: background-color 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: #ffa500;
+  border-color: #ffa500;
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(26px);
+}
+
+.toggle-label {
+  color: white;
   font-size: 0.9rem;
+  font-weight: 500;
+  user-select: none;
 }
 
 .streamer-indicator {
