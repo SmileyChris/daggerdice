@@ -21,11 +21,16 @@ function getVersionFromLatestCommitUTC() {
     const endUTC = `${commitDateUTC}T23:59:59Z`;
 
     // Count commits in that UTC day
-    const commitCount = execSync(
+    const commitCount = parseInt(execSync(
       `git rev-list --count --since="${startUTC}" --until="${endUTC}" HEAD`
-    ).toString().trim();
+    ).toString().trim());
 
-    return `${commitDateUTC}.${commitCount}.${shortHash}`;
+    // Only include commit count if greater than 1
+    if (commitCount > 1) {
+      return `${commitDateUTC}.${commitCount}.${shortHash}`;
+    } else {
+      return `${commitDateUTC}.${shortHash}`;
+    }
   } catch (e) {
     console.warn('Git version generation failed:', e);
     return 'unknown-version';
