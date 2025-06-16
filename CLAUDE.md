@@ -60,7 +60,7 @@ Alpine.js manages all reactive state:
 
 ## Development workflow
 
-Always run `npm run build` after making changes.
+- don't need to build after every action now
 
 ## CI/CD Pipeline
 

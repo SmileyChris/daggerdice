@@ -1,20 +1,71 @@
 site_name: DaggerDice Documentation
-site_url: https://daggerdice.smileychris.workers.dev
+site_url: https://smileychris.github.io/daggerdice
 repo_url: https://github.com/smileychris/daggerdice
+edit_uri: edit/main/docs/
+
 nav:
   - Home: index.md
-  - Getting Started: getting-started.md
-  - Features: features.md
-  - Development: development.md
+  - User Guide:
+    - Getting Started: getting-started.md
+    - Features: features.md
+  - Developer Guide:
+    - Development: development.md
+    - Multiplayer Technical: multiplayer-technical.md
+
 theme:
   name: material
+  palette:
+    - scheme: default
+      primary: green
+      accent: red
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: green
+      accent: red
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
   features:
     - navigation.tabs
-    - navigation.indexes
-    - toc.integrate
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.action.edit
+    - content.action.view
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/github
+
 markdown_extensions:
   - toc:
       permalink: true
-  - pymdownx.superfences
-  - pymdownx.highlight
-  - pymdownx.emoji
+      title: On this page
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - admonition
+  - attr_list
+  - md_in_html
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/smileychris/daggerdice
+    - icon: material/web
+      link: https://daggerdice.smileychris.workers.dev

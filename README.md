@@ -1,6 +1,8 @@
 # DaggerDice
 
-A 3D dice rolling web application for tabletop RPGs with Hope/Fear mechanics and optional multiplayer sessions.
+A 3D dice rolling web application designed for tabletop RPGs, featuring the Hope/Fear mechanics and real-time multiplayer sessions.
+
+🎲 **[Play DaggerDice](https://daggerdice.smileychris.workers.dev)** 🎲
 
 ## Features
 
@@ -11,195 +13,140 @@ A 3D dice rolling web application for tabletop RPGs with Hope/Fear mechanics and
 - **Critical Success**: Occurs when Hope and Fear dice show equal values
 - **3D Physics**: Realistic dice rolling with gravity, collision, and physics simulation
 
-### Multiplayer Sessions (Optional)
+### Multiplayer Sessions
 - **Real-time Collaboration**: Share rolls with friends in live sessions
-- **Room-based System**: Create or join rooms using simple 6-character codes
+- **Easy Room Creation**: Create or join rooms using simple 6-character codes
 - **Shared Roll History**: See everyone's rolls in a combined history
-- **URL Sharing**: Invite players by sharing room links
-- **Graceful Fallback**: Automatically falls back to solo mode if multiplayer unavailable
+- **URL Sharing**: Invite players by sharing room links or QR codes
+- **Private GM Rolls**: Optional privacy for Game Master rolls
+- **Streamer Mode**: Hide room codes for content creators
 
-### User Interface
-- **Responsive Design**: Works on desktop and mobile devices
+### Advanced Features
+- **Multiple Roll Types**: Check rolls (Hope/Fear), Damage rolls, and GM rolls
+- **Keyboard Shortcuts**: Full keyboard navigation support
+- **Mobile Optimized**: Touch-friendly interface with bottom drawer navigation
+- **Toast Notifications**: Live notifications when other players roll
 - **Roll History**: Track recent rolls with detailed breakdown
-- **Toast Notifications**: Live notifications for multiplayer roll updates
 - **Theme Support**: Multiple dice themes including "default" and "smooth"
 
-## Quick Start
+## Getting Started
 
-### Development
+### For Players
+
+1. **Visit**: [daggerdice.smileychris.workers.dev](https://daggerdice.smileychris.workers.dev)
+2. **Solo Play**: Start rolling dice immediately - no signup required
+3. **Multiplayer**: Click "🎲 Play with Friends" to create or join a session
+
+### For Developers
+
+**Quick Setup:**
 ```bash
-# Install dependencies
+git clone https://github.com/smileychris/daggerdice.git
+cd daggerdice
 npm install
-
-# Start development server (frontend + worker)
 npm start
-
-# Build for production
-npm run build
 ```
 
-### Testing
-```bash
-# Run all tests
-npm test
+For detailed development instructions, see [Development Guide](docs/development.md).
 
-# Run tests with UI
-npm run test:ui
+## Browser Requirements
 
-# Run tests with coverage report
-npm run test:coverage
-```
+- **Modern Browser**: Chrome, Firefox, Safari, or Edge (ES6+ support)
+- **WebGL**: Required for 3D dice rendering
+- **WebSocket**: Required for multiplayer sessions
+- **HTTPS**: Required for multiplayer in production
 
-### Deployment
-```bash
-# Deploy to Cloudflare Workers
-npm run deploy
+## How to Use
 
-# Verify deployment
-npm run verify
-```
+### Solo Play
+1. Open DaggerDice in your browser
+2. Choose your roll type (Check, Damage, or GM)
+3. Set any modifiers or advantage/disadvantage
+4. Click "Roll" or press Space
+5. View your results and history
+
+### Multiplayer Sessions
+1. Click "🎲 Play with Friends"
+2. Enter your player name
+3. **Create Room**: Click "Create New Room" and share the URL/code
+4. **Join Room**: Enter a 6-character room code and click "Join"
+5. Roll dice together - everyone sees each other's results in real-time
+
+### Keyboard Shortcuts
+- **Space**: Roll dice
+- **C**: Switch to Check rolls
+- **D**: Switch to Damage rolls  
+- **G**: Switch to GM rolls
+- **H**: Toggle roll history
+- **M**: Open multiplayer menu
+- **?**: Show help
+- **Arrow Keys**: Adjust modifiers and settings
+- **Esc**: Close dialogs
+
+## Game Mechanics
+
+### Roll Types
+
+#### Check Rolls (Hope & Fear)
+- **Hope Die**: Green D12 representing positive outcomes
+- **Fear Die**: Red D12 representing negative outcomes  
+- **Total**: Hope + Fear + Advantage/Disadvantage + Modifier
+- **Critical Success**: When Hope and Fear show the same value
+
+#### Damage Rolls
+- **Base Dice**: Multiple dice of various types (D4, D6, D8, D10, D12)
+- **Bonus Die**: Optional additional die for extra damage
+- **Critical**: Double dice on critical hits
+- **Resistance**: Halve damage when applicable
+
+#### GM Rolls
+- **D20 System**: Standard D20 rolls for Game Masters
+- **Advantage/Disadvantage**: Roll two D20s, take higher/lower
+- **Modifiers**: Add bonuses or penalties
+- **Privacy**: Option to keep rolls hidden from players
+
+### Special Features
+- **Advantage**: Add a D6 to your total (green theme)
+- **Disadvantage**: Subtract a D6 from your total (red theme)
+- **Modifiers**: Numeric bonuses/penalties from -20 to +20
+- **Streamer Mode**: Hide room codes and sensitive information
+
+## Documentation
+
+📖 **[Complete Documentation](https://smileychris.github.io/daggerdice)** 📖
+
+### For Users
+- **[Getting Started Guide](https://smileychris.github.io/daggerdice/getting-started/)**: Complete user guide
+- **[Features Overview](https://smileychris.github.io/daggerdice/features/)**: Comprehensive feature documentation
+
+### For Developers
+- **[Development Guide](https://smileychris.github.io/daggerdice/development/)**: Setup, testing, and contribution guidelines
+- **[Multiplayer Technical](https://smileychris.github.io/daggerdice/multiplayer-technical/)**: WebSocket architecture and connection handling
 
 ## Technology Stack
 
 - **Frontend**: Alpine.js, TypeScript, Vite
-- **3D Graphics**: @3d-dice/dice-box library
+- **3D Graphics**: @3d-dice/dice-box library  
 - **Multiplayer**: Cloudflare Durable Objects with WebSocket connections
-- **Storage**: SQLite (for session data)
-- **Testing**: Vitest, jsdom, @vitest/coverage-v8
 - **Deployment**: Cloudflare Workers & Pages
-
-## Project Structure
-
-```
-src/
-├── dice-roller-main.ts    # Main Alpine.js component and dice logic
-├── dice-roller.css        # Application styles
-├── session/               # Multiplayer session functionality
-│   ├── session-client.ts  # WebSocket client for multiplayer
-│   ├── types.ts          # Type definitions for session data
-│   └── utils.ts          # Session utility functions
-├── assets/               # Static assets (logos, icons)
-└── worker.ts            # Cloudflare Worker entry point
-
-public/
-└── assets/              # 3D dice assets and themes
-    ├── ammo/           # Physics engine WASM files
-    └── themes/         # Dice visual themes
-        ├── default/    # Standard dice appearance
-        └── smooth/     # Smoother dice appearance
-
-docs/                   # MkDocs documentation system
-├── index.md           # Documentation homepage
-├── getting-started.md # Setup and usage guide
-├── features.md        # Feature documentation
-└── development.md     # Developer documentation
-
-index.html              # Single-page application template
-mkdocs.yml             # Documentation site configuration
-```
-
-## Game Mechanics
-
-### Dice Rolling
-1. **Hope Die**: Green-themed D12 representing positive outcomes
-2. **Fear Die**: Red-themed D12 representing negative outcomes
-3. **Result Calculation**: Base total = Hope + Fear + Advantage/Disadvantage + Modifier
-
-### Roll Types
-- **Standard**: Roll Hope and Fear dice only
-- **Advantage**: Add a D6 to the total (green theme)
-- **Disadvantage**: Subtract a D6 from the total (red theme)
-
-### Critical Success
-When Hope and Fear dice show the same value, the roll is a "Critical Success" regardless of total.
-
-## Multiplayer Sessions
-
-### Creating a Session
-1. Click "🎲 Play with Friends"
-2. Enter your player name
-3. Click "Create New Room"
-4. Share the room URL or 6-character room code with friends
-
-### Joining a Session
-1. Visit a shared room URL, or
-2. Click "🎲 Play with Friends"
-3. Enter your name and the 6-character room code
-4. Click "Join Room"
-
-### Session Features
-- **Live Roll Sharing**: All players see each other's rolls in real-time
-- **Combined History**: Shared roll history showing all participants
-- **Player List**: See who's currently in the room
-- **Connection Status**: Visual indicators for connectivity
-- **Easy Exit**: Return to solo mode anytime
-
-## Configuration
-
-### Dice Physics Settings
-The 3D dice simulation can be configured in `src/dice-roller-main.ts`:
-
-```typescript
-diceBox = new DiceBox({
-  container: "#dice-box",
-  assetPath: "/assets/",
-  theme: "default",
-  scale: 10,
-  gravity: 1.5,
-  mass: 1,
-  friction: 0.8,
-  restitution: 0.5,
-  // ... additional physics settings
-});
-```
-
-### Session Configuration
-Session behavior is managed through environment detection and falls back gracefully when multiplayer features are unavailable.
-
-## Development Commands
-
-```bash
-npm start            # Start development server (alias for npm run dev)
-npm run dev          # Start frontend and worker development servers with hot reload
-npm run build        # Build for production
-npm run preview      # Preview production build locally
-npm run deploy       # Build and deploy to Cloudflare
-npm run verify       # Check deployment status
-npm test             # Run all tests
-npm run test:ui      # Run tests with interactive UI
-npm run test:coverage # Run tests with coverage report
-```
-
-## Browser Compatibility
-
-- **Modern Browsers**: Chrome, Firefox, Safari, Edge (ES6+ support required)
-- **WebGL**: Required for 3D dice rendering
-- **WebSocket**: Required for multiplayer sessions
-- **HTTPS**: Required for multiplayer functionality in production
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes and test thoroughly
-4. Commit your changes: `git commit -am 'Add feature'`
-5. Push to the branch: `git push origin feature-name`
-6. Submit a pull request
+Contributions are welcome! Please see the [Development Guide](docs/development.md) for setup instructions and contribution guidelines.
+
+## Support
+
+- **Issues**: [GitHub Issues](../../issues)
+- **Questions**: Create a new issue with the "question" label
+- **Bug Reports**: Include browser version and reproduction steps
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+MIT License - see LICENSE file for details.
 
 ## Credits
 
 - **3D Dice Engine**: [@3d-dice/dice-box](https://www.npmjs.com/package/@3d-dice/dice-box)
-- **Frontend Framework**: [Alpine.js](https://alpinejs.dev/)
+- **Frontend**: [Alpine.js](https://alpinejs.dev/)
 - **Build Tool**: [Vite](https://vitejs.dev/)
-- **Deployment**: [Cloudflare Workers](https://workers.cloudflare.com/)
-
-## Support
-
-For issues, feature requests, or questions:
-1. Check the [GitHub Issues](../../issues) page
-2. Create a new issue with detailed information
-3. Include browser version and steps to reproduce any problems
+- **Hosting**: [Cloudflare Workers](https://workers.cloudflare.com/)
