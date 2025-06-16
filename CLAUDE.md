@@ -9,10 +9,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run build` - Build for production
 - `npm run test` - Run frontend tests in watch mode
 - `npm run test:run` - Run frontend tests once
+- `npm run test:coverage` - Run frontend tests with coverage report
 - `npm run test:ui` - Run frontend tests with interactive UI
 - `npm run test:workers` - Run Cloudflare Workers tests in watch mode
 - `npm run test:workers:run` - Run Workers tests once
-- `npm run test:all` - Run both frontend and Workers tests
+- `npm run test:all` - Run all tests (frontend and Workers)
 - `npm run lint` - Run ESLint on TypeScript and JavaScript files
 - `npm run lint:fix` - Fix ESLint issues automatically
 - `npm run deploy` - Build and deploy to Cloudflare Workers
@@ -72,9 +73,21 @@ Built on Cloudflare Durable Objects for real-time session management:
 - **ESLint**: Configured for TypeScript with import validation and style enforcement
 - **Testing**: Separate configs for frontend (happy-dom) and Workers (Cloudflare pool)
 
+## Testing & Coverage
+
+The project has comprehensive test coverage across two testing layers:
+- **Unit Tests**: Frontend utilities, dice logic, session management, Workers APIs
+- **Coverage Target**: 80% threshold for branches, functions, lines, and statements
+
+### Test Organization
+- **Frontend Tests**: Dice logic, session utilities, UI components, streamer mode
+- **Workers Tests**: WebSocket APIs, session validation, error handling
+- **Coverage**: Session utilities at 93%
+
 ## Development Workflow
 
 - Run `npm run lint` and `npm run test:all` before committing changes
+- Use `npm run test:coverage` to check coverage before major changes
 - Update docs when features change or are added
 - Frontend and Workers tests run separately due to different environments
 
@@ -83,8 +96,8 @@ Built on Cloudflare Durable Objects for real-time session management:
 The project uses GitHub Actions for automated testing, with Cloudflare Workers handling deployment:
 
 - **GitHub Actions**: Automated testing on all pushes and pull requests
-  - **Frontend Tests** (49): Dice logic, session utilities, UI components
-  - **Workers Tests** (20): WebSocket APIs, session validation, error handling
+  - **Frontend Tests**: Dice logic, session utilities, UI components, streamer mode
+  - **Workers Tests**: WebSocket APIs, session validation, error handling
   - **Build Verification**: Ensures production builds succeed
   - **Security Audit**: Dependency vulnerability scanning
 - **Cloudflare Workers**: Automatic deployment from GitHub integration

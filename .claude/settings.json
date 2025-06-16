@@ -24,7 +24,10 @@
       "Bash(npm run:*)",
       "Bash(npm run test:all:*)",
       "Bash(npm run test:workers:run:*)",
-      "Bash(npm run test:run:*)"
+      "Bash(npm run test:run:*)",
+      "Bash(cp:*)",
+      "Bash(magick:*)",
+      "Bash(mkdir:*)"
     ]
   },
   "enableAllProjectMcpServers": false
