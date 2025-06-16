@@ -17,7 +17,10 @@ import {
   saveLastSessionId,
   getLastSessionId,
   clearLastSessionId,
-  clearSavedSessionData
+  clearSavedSessionData,
+  saveRollHistory,
+  getSavedRollHistory,
+  clearSavedRollHistory
 } from '../session/utils';
 
 beforeEach(() => {
@@ -319,6 +322,89 @@ describe('LocalStorage Functions', () => {
       clearSavedSessionData();
       expect(localStorage.removeItem).toHaveBeenCalledWith('daggerdice_player_name');
       expect(localStorage.removeItem).toHaveBeenCalledWith('daggerdice_last_session_id');
+      expect(localStorage.removeItem).toHaveBeenCalledWith('daggerdice_roll_history');
+    });
+  });
+
+  describe('Roll History localStorage Functions', () => {
+    it('should save roll history to localStorage', () => {
+      const mockHistory = [
+        { rollType: 'check', hopeValue: 5, fearValue: 3, total: 8, result: '8 with hope' },
+        { rollType: 'gm', d20Value: 15, gmModifier: 2, total: 17, result: '17' }
+      ];
+
+      saveRollHistory(mockHistory);
+      expect(localStorage.setItem).toHaveBeenCalledWith('daggerdice_roll_history', JSON.stringify(mockHistory));
+    });
+
+    it('should limit saved history to 10 rolls', () => {
+      const mockHistory = Array.from({ length: 15 }, (_, i) => ({
+        rollType: 'check',
+        hopeValue: i,
+        fearValue: i + 1,
+        total: i * 2,
+        result: `${i * 2} with hope`
+      }));
+
+      saveRollHistory(mockHistory);
+      const expectedHistory = mockHistory.slice(0, 10);
+      expect(localStorage.setItem).toHaveBeenCalledWith('daggerdice_roll_history', JSON.stringify(expectedHistory));
+    });
+
+    it('should retrieve saved roll history from localStorage', () => {
+      const mockHistory = [
+        { rollType: 'check', hopeValue: 5, fearValue: 3, total: 8, result: '8 with hope' }
+      ];
+      vi.mocked(localStorage.getItem).mockReturnValue(JSON.stringify(mockHistory));
+
+      const result = getSavedRollHistory();
+      expect(result).toEqual(mockHistory);
+      expect(localStorage.getItem).toHaveBeenCalledWith('daggerdice_roll_history');
+    });
+
+    it('should return empty array when no saved history exists', () => {
+      vi.mocked(localStorage.getItem).mockReturnValue(null);
+
+      const result = getSavedRollHistory();
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty array for invalid JSON data', () => {
+      vi.mocked(localStorage.getItem).mockReturnValue('invalid json');
+
+      const result = getSavedRollHistory();
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty array for non-array data', () => {
+      vi.mocked(localStorage.getItem).mockReturnValue(JSON.stringify({ not: 'array' }));
+
+      const result = getSavedRollHistory();
+      expect(result).toEqual([]);
+    });
+
+    it('should clear saved roll history', () => {
+      clearSavedRollHistory();
+      expect(localStorage.removeItem).toHaveBeenCalledWith('daggerdice_roll_history');
+    });
+
+    it('should handle localStorage errors gracefully', () => {
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      vi.mocked(localStorage.setItem).mockImplementation(() => {
+        throw new Error('Storage error');
+      });
+      vi.mocked(localStorage.getItem).mockImplementation(() => {
+        throw new Error('Storage error');
+      });
+
+      expect(() => saveRollHistory([])).not.toThrow();
+      expect(() => getSavedRollHistory()).not.toThrow();
+      expect(() => clearSavedRollHistory()).not.toThrow();
+
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to save roll history to localStorage:', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to retrieve roll history from localStorage:', expect.any(Error));
+
+      consoleSpy.mockRestore();
     });
   });
 });

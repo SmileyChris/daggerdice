@@ -13,6 +13,8 @@ import {
   normalizeSessionId,
   isValidSessionId,
   isSessionEnvironmentSupported,
+  saveRollHistory,
+  getSavedRollHistory,
   createSessionUrl,
   copyToClipboard,
   getSavedPlayerName,
@@ -479,8 +481,8 @@ function diceRoller() {
           
           // Format result text
           if (this.gmAdvantageType !== 'none') {
-            const advantageLabel = this.gmAdvantageType === 'advantage' ? 'ADV' : 'DIS';
-            resultText = `${finalD20Value} <small>[${this.d20Value}, ${this.d20Value2}] ${advantageLabel}</small>`;
+            const advantageLabel = this.gmAdvantageType === 'advantage' ? 'Adv.' : 'Dis.';
+            resultText = `${finalD20Value} <small>${this.d20Value} and ${this.d20Value2} w/ ${advantageLabel}</small>`;
           } else {
             resultText = `${finalD20Value}`;
           }
@@ -518,6 +520,11 @@ function diceRoller() {
         const maxHistory = this.sessionMode === 'multiplayer' ? 20 : 10;
         if (this.rollHistory.length > maxHistory) {
           this.rollHistory = this.rollHistory.slice(0, maxHistory);
+        }
+
+        // Save to localStorage for solo play
+        if (this.sessionMode === 'solo') {
+          saveRollHistory(this.rollHistory);
         }
 
         // In multiplayer: broadcast and sync with session client
@@ -702,6 +709,9 @@ function diceRoller() {
       this.connectedPlayers = [];
       this.connectionStatus = 'disconnected';
       
+      // Load solo roll history when switching to solo mode
+      this.rollHistory = getSavedRollHistory();
+      
       // Clear saved session data if requested
       if (clearSavedData) {
         clearSavedSessionData();
@@ -865,6 +875,11 @@ function diceRoller() {
       const lastSessionId = getLastSessionId();
       if (lastSessionId) {
         this.joinSessionId = lastSessionId;
+      }
+
+      // Load saved roll history (only for solo play)
+      if (!this.sessionMode || this.sessionMode === 'solo') {
+        this.rollHistory = getSavedRollHistory();
       }
       
       // Set up keyboard shortcuts

@@ -21,6 +21,7 @@ body {
   z-index: 10;
   transition: all 0.4s ease;
   min-height: 40px;
+  position: relative;
 }
 
 /* Header states for different content */
@@ -263,23 +264,52 @@ button:disabled {
   text-align: center;
 }
 
+/* Unified responsive roll history panel */
 .roll-history-panel {
-  position: absolute;
-  top: 5rem;
-  right: 1rem;
-  width: 250px;
-  background-color: rgba(0, 0, 0, 0.7);
+  position: fixed;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.9);
   border-radius: 10px;
-  padding: 1rem;
-  max-height: calc(100vh - 10rem);
-  overflow-y: auto;
-  z-index: 20;
-  transition: transform 0.3s;
-  transform: translateX(100%);
+  transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s linear 0.3s;
+  opacity: 0;
+  visibility: hidden;
 }
 
 .roll-history-panel.visible {
-  transform: translateX(0);
+  opacity: 1;
+  visibility: visible;
+  transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s linear 0s;
+}
+
+/* Mobile-first: full-screen dialog */
+@media (max-width: 768px) {
+  .roll-history-panel {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 70vh;
+    border-radius: 15px 15px 0 0;
+    transform: translateY(100%);
+  }
+  
+  .roll-history-panel.visible {
+    transform: translateY(0);
+  }
+}
+
+/* Desktop: side panel */
+@media (min-width: 769px) {
+  .roll-history-panel {
+    top: 5rem;
+    right: 1rem;
+    width: 250px;
+    max-height: calc(100vh - 10rem);
+    transform: translateX(100%);
+  }
+  
+  .roll-history-panel.visible {
+    transform: translateX(0);
+  }
 }
 
 .history-toggle {
@@ -323,7 +353,7 @@ button:disabled {
 }
 
 .history-item {
-  padding: 0.5rem;
+  padding: 0.75rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 0.9rem;
   transition: opacity 0.3s ease;
@@ -331,6 +361,19 @@ button:disabled {
 
 .history-item:last-child {
   border-bottom: none;
+}
+
+/* Desktop: more compact spacing */
+@media (min-width: 769px) {
+  .history-item {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 5px;
+  }
+  
+  .history-item:last-child {
+    margin-bottom: 0;
+  }
 }
 
 /* Fade out older rolls */
@@ -793,8 +836,27 @@ button:disabled {
   display: none;
 }
 
+/* Mobile history tap area - hidden on desktop */
+.mobile-history-tap-area {
+  display: none;
+}
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
+  /* Mobile tap area for history */
+  .mobile-history-tap-area {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    cursor: pointer;
+    /* Visual feedback on tap */
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
+  }
+  
   /* Hide desktop controls on mobile */
   .desktop-controls {
     display: none;
@@ -1255,9 +1317,39 @@ button:disabled {
     filter: brightness(0) invert(1);
   }
 
-  /* History dialog specific styles */
-  .mobile-dialog-history {
-    max-height: 70vh;
+  /* Unified history panel dialog content styles */
+  .roll-history-panel .dialog-header {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .roll-history-panel .dialog-header h3 {
+    margin: 0;
+    color: white;
+    font-size: 1.1rem;
+  }
+
+  .roll-history-panel .dialog-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
+  }
+
+  .roll-history-panel .dialog-close:hover {
+    color: white;
+  }
+
+  .roll-history-panel .dialog-content {
+    padding: 1rem;
+    overflow-y: auto;
+    flex: 1;
   }
 
   .empty-history {
@@ -1268,60 +1360,8 @@ button:disabled {
   }
 
   .history-list {
-    max-height: 50vh;
+    max-height: calc(70vh - 4rem);
     overflow-y: auto;
-  }
-
-  .history-item-dialog {
-    padding: 0.75rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    transition: opacity 0.3s ease;
-  }
-
-  .history-item-dialog:last-child {
-    border-bottom: none;
-  }
-
-  .history-item-dialog .player-name-line {
-    font-size: 0.8rem;
-    color: #007bff;
-    font-weight: 500;
-    margin-bottom: 0.25rem;
-  }
-
-  .history-item-dialog .roll-details {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .history-item-dialog .dice-values {
-    display: flex;
-    gap: 0.75rem;
-    font-size: 1rem;
-  }
-
-  .history-item-dialog .hope {
-    color: #4caf50;
-    font-weight: bold;
-  }
-
-  .history-item-dialog .fear {
-    color: #f44336;
-    font-weight: bold;
-  }
-
-  .history-item-dialog .advantage {
-    color: #90ee90;
-  }
-
-  .history-item-dialog .disadvantage {
-    color: #ffb3b3;
-  }
-
-  .history-item-dialog .outcome {
-    font-weight: bold;
-    text-align: right;
   }
 
   /* Dialog backdrop */
@@ -1340,13 +1380,11 @@ button:disabled {
     margin-bottom: 120px; /* Space for tab selector and bottom bar */
   }
 
-  /* Hide original history toggle and panel on mobile */
-  .history-toggle {
-    display: none;
-  }
-
-  .roll-history-panel {
-    display: none;
+  /* Mobile: hide desktop-specific elements */
+  @media (max-width: 768px) {
+    .history-toggle {
+      display: none;
+    }
   }
 
   /* Adjust logo and result for mobile */
@@ -1527,10 +1565,34 @@ button:disabled {
   }
 }
 
-/* Adjust history panel position when room panel is visible */
+/* Desktop adjustments for unified history panel */
 @media (min-width: 769px) {
   .roll-history-panel {
     right: 1rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Desktop: hide close button, adjust layout */
+  .roll-history-panel .dialog-header {
+    padding: 0 0 1rem 0;
+    border-bottom: none;
+    flex-shrink: 0;
+  }
+  
+  .roll-history-panel .dialog-close {
+    display: none;
+  }
+  
+  .roll-history-panel .dialog-content {
+    padding: 0;
+    flex: 1;
+    overflow: hidden;
+  }
+  
+  .history-list {
+    max-height: calc(100vh - 12rem);
   }
 }
 
@@ -1929,17 +1991,6 @@ button:disabled {
   border-left: 3px solid #4caf50;
 }
 
-.history-item-dialog.roll-type-damage {
-  border-left: 3px solid #ff6b35;
-}
-
-.history-item-dialog.roll-type-gm {
-  border-left: 3px solid #8e44ad;
-}
-
-.history-item-dialog.roll-type-check {
-  border-left: 3px solid #4caf50;
-}
 
 /* Toast styling for new roll types */
 .toast-dice .damage {

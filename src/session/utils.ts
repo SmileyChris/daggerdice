@@ -1,4 +1,5 @@
 // Session utility functions for DaggerDice multiplayer
+import type { SharedRollHistoryItem } from './types.js';
 
 /**
  * Generates a simple 6-character session ID
@@ -185,7 +186,8 @@ export function delay(ms: number): Promise<void> {
  */
 const STORAGE_KEYS = {
   PLAYER_NAME: 'daggerdice_player_name',
-  LAST_SESSION_ID: 'daggerdice_last_session_id'
+  LAST_SESSION_ID: 'daggerdice_last_session_id',
+  ROLL_HISTORY: 'daggerdice_roll_history'
 } as const;
 
 /**
@@ -251,12 +253,55 @@ export function clearLastSessionId(): void {
 }
 
 /**
+ * Saves roll history to localStorage (for solo play)
+ */
+export function saveRollHistory(rollHistory: SharedRollHistoryItem[]): void {
+  try {
+    // Only save the last 10 rolls to avoid bloating localStorage
+    const historyToSave = rollHistory.slice(0, 10);
+    localStorage.setItem(STORAGE_KEYS.ROLL_HISTORY, JSON.stringify(historyToSave));
+  } catch (error) {
+    console.warn('Failed to save roll history to localStorage:', error);
+  }
+}
+
+/**
+ * Retrieves saved roll history from localStorage (for solo play)
+ */
+export function getSavedRollHistory(): SharedRollHistoryItem[] {
+  try {
+    const savedHistory = localStorage.getItem(STORAGE_KEYS.ROLL_HISTORY);
+    if (savedHistory) {
+      const parsed = JSON.parse(savedHistory);
+      // Validate that it's an array
+      return Array.isArray(parsed) ? parsed : [];
+    }
+    return [];
+  } catch (error) {
+    console.warn('Failed to retrieve roll history from localStorage:', error);
+    return [];
+  }
+}
+
+/**
+ * Clears saved roll history from localStorage
+ */
+export function clearSavedRollHistory(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.ROLL_HISTORY);
+  } catch (error) {
+    console.warn('Failed to clear roll history from localStorage:', error);
+  }
+}
+
+/**
  * Clears all saved session data from localStorage
  */
 export function clearSavedSessionData(): void {
   try {
     localStorage.removeItem(STORAGE_KEYS.PLAYER_NAME);
     localStorage.removeItem(STORAGE_KEYS.LAST_SESSION_ID);
+    localStorage.removeItem(STORAGE_KEYS.ROLL_HISTORY);
   } catch (error) {
     console.warn('Failed to clear session data from localStorage:', error);
   }
