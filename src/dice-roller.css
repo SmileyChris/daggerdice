@@ -408,6 +408,11 @@ button:disabled {
   opacity: 0.1;
 }
 
+/* Hover to bring back full opacity */
+.history-item:hover {
+  opacity: 1 !important;
+}
+
 .history-item .dice-values {
   display: flex;
   gap: 1rem;

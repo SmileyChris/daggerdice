@@ -482,13 +482,17 @@ function diceRoller() {
           // Format result text
           if (this.gmAdvantageType !== 'none') {
             const advantageLabel = this.gmAdvantageType === 'advantage' ? 'Adv.' : 'Dis.';
-            resultText = `${finalD20Value} <small>${this.d20Value} and ${this.d20Value2} w/ ${advantageLabel}</small>`;
+            if (this.gmModifier !== 0) {
+              resultText = `${totalValue} GM <small>(${this.d20Value} and ${this.d20Value2} w/ ${advantageLabel}, ${this.gmModifier > 0 ? '+' : ''}${this.gmModifier})</small>`;
+            } else {
+              resultText = `${finalD20Value} GM <small>(${this.d20Value} and ${this.d20Value2} w/ ${advantageLabel})</small>`;
+            }
           } else {
-            resultText = `${finalD20Value}`;
-          }
-          
-          if (this.gmModifier !== 0) {
-            resultText += ` <small>${this.gmModifier > 0 ? '+' : ''}${this.gmModifier}</small> = ${totalValue}`;
+            if (this.gmModifier !== 0) {
+              resultText = `${totalValue} GM <small>(${this.gmModifier > 0 ? '+' : ''}${this.gmModifier})</small>`;
+            } else {
+              resultText = `${finalD20Value} GM`;
+            }
           }
 
           rollData = {

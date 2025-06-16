@@ -460,9 +460,9 @@
                   <!-- Damage roll modifiers -->
                   <template x-if="rollType === 'damage'">
                     <span>
-                      <span x-show="bonusDieEnabled">B</span>
-                      <span x-show="isCritical">C</span>
-                      <span x-show="hasResistance">R</span>
+                      <span x-show="bonusDieEnabled">+d<span x-text="bonusDieType"></span></span>
+                      <span x-show="isCritical"> C</span>
+                      <span x-show="hasResistance"> R</span>
                     </span>
                   </template>
                 </span>
@@ -1262,10 +1262,10 @@
                     <template x-if="roll.rollType === 'gm'">
                       <span class="breakdown-text">
                         <span x-show="roll.gmAdvantageType === 'none'">
-                          d20: <span x-text="roll.d20Value"></span>
+                          <span x-text="roll.d20Value"></span>
                         </span>
                         <span x-show="roll.gmAdvantageType !== 'none'">
-                          d20: <span x-text="roll.d20Value"></span> and <span x-text="roll.d20Value2"></span> w/ <span x-text="roll.gmAdvantageType === 'advantage' ? 'Adv.' : 'Dis.'"></span>
+                          <span x-text="roll.d20Value"></span> and <span x-text="roll.d20Value2"></span> w/ <span x-text="roll.gmAdvantageType === 'advantage' ? 'Adv.' : 'Dis.'"></span>
                         </span>
                         <span x-show="roll.gmModifier !== 0"
                           >, Modifier:
