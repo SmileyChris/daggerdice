@@ -1552,6 +1552,10 @@ button:disabled {
   .action-btn-icon {
     height: 24px;
     width: 24px;
+  }
+
+  .action-btn-icon img,
+  img.action-btn-icon {
     filter: brightness(0) invert(1);
   }
 
@@ -1748,6 +1752,11 @@ button:disabled {
   .action-btn-icon {
     height: 20px;
     width: 20px;
+  }
+
+  .action-btn-icon img,
+  img.action-btn-icon {
+    filter: brightness(0) invert(1);
   }
 
   h1 {
