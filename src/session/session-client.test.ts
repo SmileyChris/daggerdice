@@ -13,6 +13,13 @@ describe('SessionClient - Integration Tests', () => {
       clear: vi.fn(),
     });
 
+    // Mock document
+    vi.stubGlobal('document', {
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      hidden: false,
+    });
+
     // Mock window properties
     Object.defineProperty(window, 'location', {
       writable: true,
@@ -21,6 +28,12 @@ describe('SessionClient - Integration Tests', () => {
         host: 'localhost:3000',
         hostname: 'localhost',
       },
+    });
+
+    // Mock window event listeners
+    Object.defineProperty(window, 'addEventListener', {
+      writable: true,
+      value: vi.fn(),
     });
 
     client = new SessionClient();
