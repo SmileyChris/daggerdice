@@ -10,6 +10,7 @@ import {
   generateSessionId, 
   sanitizePlayerName, 
   getSessionIdFromUrl, 
+  extractSessionIdFromUrl,
   normalizeSessionId,
   isValidSessionId,
   isSessionEnvironmentSupported,
@@ -161,6 +162,9 @@ function diceRoller() {
     connectionStatus: 'disconnected' as 'disconnected' | 'connecting' | 'connected' | 'error',
     initialized: false,
     connectionMonitorInterval: null as number | null,
+    
+    // Streamer mode state
+    streamerMode: false,
     
     // Version display
     appVersion: __APP_VERSION__,
@@ -563,11 +567,32 @@ function diceRoller() {
       this.showSessionUI = !this.showSessionUI;
     },
 
+    toggleStreamerMode() {
+      this.streamerMode = !this.streamerMode;
+      // Save preference to localStorage
+      if (this.streamerMode) {
+        localStorage.setItem('daggerdice_streamer_mode', 'true');
+      } else {
+        localStorage.removeItem('daggerdice_streamer_mode');
+      }
+    },
+
     get isJoinSessionValid() {
       return !this.joinSessionId.trim() || isValidSessionId(this.joinSessionId.trim());
     },
 
     handleRoomIdChange() {
+      const input = this.joinSessionId.trim();
+      
+      // If input looks like a URL, try to extract session ID from it
+      if (input.includes('/room/') || input.startsWith('http')) {
+        const extractedId = extractSessionIdFromUrl(input);
+        if (extractedId) {
+          this.joinSessionId = extractedId;
+          return;
+        }
+      }
+      
       // Convert to uppercase
       this.joinSessionId = this.joinSessionId.toUpperCase();
       
@@ -622,8 +647,10 @@ function diceRoller() {
           savePlayerName(sanitizedName);
           saveLastSessionId(sessionId);
           
-          // Update URL without page reload
-          history.pushState({}, '', `/room/${sessionId}`);
+          // Update URL without page reload (unless in streamer mode)
+          if (!this.streamerMode) {
+            history.pushState({}, '', `/room/${sessionId}`);
+          }
           
           // Start heartbeat and connection monitoring
           this.sessionClient.startHeartbeat();
@@ -690,8 +717,10 @@ function diceRoller() {
           savePlayerName(sanitizedName);
           saveLastSessionId(normalizedSessionId);
           
-          // Update URL without page reload and use normalized ID
-          history.pushState({}, '', `/room/${normalizedSessionId}`);
+          // Update URL without page reload and use normalized ID (unless in streamer mode)
+          if (!this.streamerMode) {
+            history.pushState({}, '', `/room/${normalizedSessionId}`);
+          }
           
           // Start heartbeat
           this.sessionClient.startHeartbeat();
@@ -738,8 +767,10 @@ function diceRoller() {
         }
       }
       
-      // Return to solo URL
-      history.pushState({}, '', '/');
+      // Return to solo URL (unless in streamer mode)
+      if (!this.streamerMode) {
+        history.pushState({}, '', '/');
+      }
     },
 
     async copySessionLink() {
@@ -891,6 +922,9 @@ function diceRoller() {
         this.joinSessionId = lastSessionId;
       }
 
+      // Load saved streamer mode preference
+      this.streamerMode = localStorage.getItem('daggerdice_streamer_mode') === 'true';
+
       // Load saved roll history (only for solo play)
       if (!this.sessionMode || this.sessionMode === 'solo') {
         this.rollHistory = getSavedRollHistory();
@@ -979,6 +1013,11 @@ function diceRoller() {
       const urlSessionId = getSessionIdFromUrl();
       if (urlSessionId && this.sessionFeaturesAvailable) {
         this.joinSessionId = urlSessionId;
+        
+        // If streamer mode is active, clear the URL immediately to hide room code
+        if (this.streamerMode) {
+          history.replaceState({}, '', '/');
+        }
         
         if (this.playerName.trim()) {
           // Auto-join if we have a saved name

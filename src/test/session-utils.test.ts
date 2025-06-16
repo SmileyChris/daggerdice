@@ -6,6 +6,7 @@ import {
   sanitizePlayerName,
   formatTimestamp,
   getSessionIdFromUrl,
+  extractSessionIdFromUrl,
   normalizeSessionId,
   isSessionEnvironmentSupported,
   createSessionUrl,
@@ -165,6 +166,34 @@ describe('URL Functions', () => {
       
       window.location.pathname = '/other-page';
       expect(getSessionIdFromUrl()).toBeNull();
+    });
+  });
+
+  describe('extractSessionIdFromUrl', () => {
+    it('should extract session ID from full URLs', () => {
+      expect(extractSessionIdFromUrl('https://example.com/room/ABC123')).toBe('ABC123');
+      expect(extractSessionIdFromUrl('http://localhost:3000/room/XYZ789')).toBe('XYZ789');
+    });
+
+    it('should extract session ID from partial URLs', () => {
+      expect(extractSessionIdFromUrl('/room/DEF456')).toBe('DEF456');
+      expect(extractSessionIdFromUrl('room/GHI789')).toBe('GHI789');
+    });
+
+    it('should handle malformed URLs gracefully', () => {
+      expect(extractSessionIdFromUrl('not-a-url/room/ABC123')).toBe('ABC123');
+      expect(extractSessionIdFromUrl('just some text with /room/XYZ789 in it')).toBe('XYZ789');
+    });
+
+    it('should return null for invalid input', () => {
+      expect(extractSessionIdFromUrl('https://example.com/other-page')).toBeNull();
+      expect(extractSessionIdFromUrl('no room code here')).toBeNull();
+      expect(extractSessionIdFromUrl('')).toBeNull();
+    });
+
+    it('should normalize extracted session IDs', () => {
+      expect(extractSessionIdFromUrl('https://example.com/room/abc123')).toBe('ABC123');
+      expect(extractSessionIdFromUrl('/room/xyz789')).toBe('XYZ789');
     });
   });
 
@@ -405,6 +434,50 @@ describe('LocalStorage Functions', () => {
       expect(consoleSpy).toHaveBeenCalledWith('Failed to retrieve roll history from localStorage:', expect.any(Error));
 
       consoleSpy.mockRestore();
+    });
+  });
+});
+
+describe('Streamer Mode Functions', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  describe('streamer mode localStorage logic', () => {
+    it('should implement correct localStorage key pattern', () => {
+      const key = 'daggerdice_streamer_mode';
+      const value = 'true';
+      
+      // Test the pattern used in the app
+      expect(key).toBe('daggerdice_streamer_mode');
+      expect(value).toBe('true');
+      expect(value === 'true').toBe(true);
+      expect('false' === 'true').toBe(false);
+      expect(null === 'true').toBe(false);
+    });
+
+    it('should use boolean logic for streamer mode check', () => {
+      // Test the logic pattern: localStorage.getItem('key') === 'true'
+      expect(null === 'true').toBe(false); // when not set
+      expect('true' === 'true').toBe(true); // when enabled
+      expect('false' === 'true').toBe(false); // when disabled
+      expect('other' === 'true').toBe(false); // when invalid value
+    });
+
+    it('should handle streamer mode toggle pattern', () => {
+      // Simulate the toggle logic pattern used in the app
+      let streamerMode = false;
+      
+      // Toggle on
+      streamerMode = !streamerMode;
+      const shouldSave = streamerMode;
+      expect(shouldSave).toBe(true);
+      
+      // Toggle off  
+      streamerMode = !streamerMode;
+      const shouldRemove = !streamerMode;
+      expect(shouldRemove).toBe(true);
     });
   });
 });

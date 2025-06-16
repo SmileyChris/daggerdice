@@ -94,6 +94,24 @@ export function getSessionIdFromUrl(): string | null {
 }
 
 /**
+ * Extracts session ID from any URL string
+ */
+export function extractSessionIdFromUrl(url: string): string | null {
+  try {
+    const urlObj = new URL(url);
+    const match = urlObj.pathname.match(/\/room\/([A-Za-z0-9]{6})/);
+    const sessionId = match ? match[1] : null;
+    return sessionId ? normalizeSessionId(sessionId) : null;
+  } catch {
+    // If URL parsing fails, try to extract from plain text
+    // Handle both /room/ and room/ patterns
+    const match = url.match(/\/?room\/([A-Za-z0-9]{6})/);
+    const sessionId = match ? match[1] : null;
+    return sessionId ? normalizeSessionId(sessionId) : null;
+  }
+}
+
+/**
  * Normalizes a session ID to uppercase and validates length
  */
 export function normalizeSessionId(sessionId: string): string | null {

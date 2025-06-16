@@ -872,14 +872,21 @@
             />
           </div>
 
+          <div class="streamer-mode-toggle">
+            <button @click="toggleStreamerMode()" class="session-btn streamer-btn">
+              <span x-text="streamerMode ? '🙈 Hide Room Details' : '👁️ Show Room Details'"></span>
+            </button>
+          </div>
+
           <div class="session-input">
             <input
               x-model="joinSessionId"
-              placeholder="Room ID (optional)"
+              placeholder="Room ID or room link (optional)"
               class="session-id-input"
-              type="search"
-              maxlength="6"
+              :type="streamerMode ? 'password' : 'search'"
+              :autocomplete="streamerMode ? 'new-password' : 'off'"
               @input="handleRoomIdChange()"
+              @paste="setTimeout(() => handleRoomIdChange(), 0)"
               @keyup.enter="joinSessionId.trim() ? joinSession() : createSession()"
             />
           </div>
@@ -913,7 +920,8 @@
           <div class="session-details">
             <div class="session-id-display">
               <strong>Room:</strong>
-              <span x-text="sessionId" class="session-id"></span>
+              <span x-text="sessionId" class="session-id" x-show="!streamerMode"></span>
+              <span x-show="streamerMode" class="session-id">••••••</span>
               <button
                 @click="copySessionLink()"
                 class="copy-btn"
@@ -923,7 +931,7 @@
               </button>
             </div>
 
-            <div class="qr-code-container" x-show="sessionId">
+            <div class="qr-code-container" x-show="sessionId && !streamerMode">
               <div class="qr-code-section">
                 <strong>Scan to Join:</strong>
                 <div class="qr-code-wrapper">
@@ -948,6 +956,7 @@
                 >🔴 Disconnected</span
               >
               <span x-show="connectionStatus === 'error'">❌ Error</span>
+              <span x-show="streamerMode" class="streamer-indicator">🙈 Room Details Hidden</span>
             </div>
           </div>
 
