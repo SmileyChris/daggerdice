@@ -1,0 +1,94 @@
+{
+  "name": "DaggerDice - Daggerheart RPG Dice Roller",
+  "short_name": "DaggerDice",
+  "description": "A 3D dice rolling web application designed for the Daggerheart RPG system, featuring Hope/Fear mechanics and real-time multiplayer sessions.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#6e8efb",
+  "background_color": "#6e8efb",
+  "categories": ["games", "utilities", "entertainment"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192-maskable.png",
+      "sizes": "192x192", 
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png", 
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Roll Check Dice",
+      "short_name": "Check Roll",
+      "description": "Roll Hope & Fear dice for skill checks",
+      "url": "/?roll=check",
+      "icons": [
+        {
+          "src": "/icons/shortcut-check.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Roll Damage Dice", 
+      "short_name": "Damage Roll",
+      "description": "Roll damage dice for combat",
+      "url": "/?roll=damage",
+      "icons": [
+        {
+          "src": "/icons/shortcut-damage.png", 
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Multiplayer Session",
+      "short_name": "Multiplayer",
+      "description": "Join or create a multiplayer session",
+      "url": "/?action=multiplayer",
+      "icons": [
+        {
+          "src": "/icons/shortcut-multiplayer.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/mobile-check-roll.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Hope & Fear dice rolling for Daggerheart RPG"
+    },
+    {
+      "src": "/screenshots/desktop-multiplayer.png", 
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Multiplayer dice rolling session"
+    }
+  ]
+}

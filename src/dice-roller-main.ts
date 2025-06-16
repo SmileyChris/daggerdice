@@ -3,6 +3,12 @@ import DiceBox from '@3d-dice/dice-box';
 import Alpine from 'alpinejs';
 import './dice-roller.css';
 
+// PWA functionality
+if ('serviceWorker' in navigator) {
+  // For now, just register the manifest - no service worker
+  console.log('PWA manifest support available');
+}
+
 // Import session-related modules
 import { SessionClient } from './session/session-client.js';
 import type { Player, RollData, SharedRollHistoryItem } from './session/types.js';
