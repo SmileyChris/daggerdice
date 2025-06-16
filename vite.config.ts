@@ -1,8 +1,26 @@
 import { defineConfig } from 'vite'
 import { cloudflare } from '@cloudflare/vite-plugin'
+import { execSync } from 'child_process'
+
+function getVersion() {
+  const date = new Date()
+  const year = date.getFullYear()
+  const month = `${date.getMonth() + 1}`.padStart(2, '0')
+  const day = `${date.getDate()}`.padStart(2, '0')
+  
+  try {
+    const shortHash = execSync('git rev-parse --short HEAD').toString().trim()
+    return `${year}-${month}-${day}-${shortHash}`
+  } catch {
+    return `${year}-${month}-${day}`
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(getVersion())
+  },
   plugins: [
     cloudflare({
       // Configure the plugin to work with our Worker

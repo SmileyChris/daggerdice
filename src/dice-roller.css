@@ -2500,3 +2500,32 @@ button:disabled {
     font-size: 0.9rem;
   }
 }
+
+/* Version display styles */
+.desktop-version-display {
+  position: fixed;
+  bottom: 0px;
+  right: 16px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  font-family: monospace;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.version-info {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  font-family: monospace;
+}
+
+/* Hide desktop version on mobile */
+@media (max-width: 768px) {
+  .desktop-version-display {
+    display: none;
+  }
+}

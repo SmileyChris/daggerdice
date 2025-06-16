@@ -161,6 +161,9 @@ function diceRoller() {
     connectionStatus: 'disconnected' as 'disconnected' | 'connecting' | 'connected' | 'error',
     initialized: false,
     connectionMonitorInterval: null as number | null,
+    
+    // Version display
+    appVersion: __APP_VERSION__,
 
     setAdvantageType(type: 'none' | 'advantage' | 'disadvantage') {
       this.advantageType = type;
