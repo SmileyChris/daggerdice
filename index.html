@@ -1056,10 +1056,17 @@
                         x-if="!roll.rollType || roll.rollType === 'check'"
                       >
                         <span>
-                          <strong x-text="roll.total"></strong>
-                          <span
-                            x-text="roll.result.includes('hope') ? ' with hope' : roll.result.includes('fear') ? ' with fear' : ' Critical Success!'"
-                          ></span>
+                          <template x-if="roll.result.includes('Critical Success')">
+                            <span><strong>Critical Success!</strong></span>
+                          </template>
+                          <template x-if="!roll.result.includes('Critical Success')">
+                            <span>
+                              <strong x-text="roll.total"></strong>
+                              <span
+                                x-text="roll.result.includes('hope') ? ' with hope' : ' with fear'"
+                              ></span>
+                            </span>
+                          </template>
                         </span>
                       </template>
                       <template x-if="roll.rollType === 'damage'">
@@ -1103,12 +1110,11 @@
                       <span class="breakdown-text">
                         <span
                           x-text="roll.baseDiceCount + 'd' + roll.baseDiceType"
-                        ></span
-                        ><span x-show="roll.bonusDieEnabled"
-                          >, Bonus:
-                          <span
-                            x-text="'1d' + roll.bonusDieType"
-                          ></span></span
+                        ></span>
+                        <span x-show="roll.baseDiceValues && roll.baseDiceValues.length > 0">
+                          (<span x-text="roll.baseDiceValues.join(', ')"></span>)
+                        </span><span x-show="roll.bonusDieEnabled && roll.bonusDieValue !== undefined"
+                          >, Bonus d<span x-text="roll.bonusDieType"></span> (<span x-text="roll.bonusDieValue"></span>)</span
                         ><span x-show="roll.isCritical"
                           >, <span class="critical-text">Critical</span></span
                         ><span x-show="roll.hasResistance"
