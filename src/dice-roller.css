@@ -1270,8 +1270,8 @@ button:disabled {
     font-weight: 500;
     min-width: 70px;
     text-align: center;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-bottom: none;
+    border: none;
+    border-top: 4px solid rgba(255, 255, 255, 0.3);
     position: relative;
     flex: 1;
     font-size: 0.9rem;
@@ -1279,6 +1279,7 @@ button:disabled {
 
   .roll-type-selector.mobile-controls .roll-type-btn:hover {
     background: rgba(255, 255, 255, 0.1);
+    border-top: 4px solid rgba(200, 200, 200, 0.6);
   }
 
   /* Override desktop hover for mobile */
@@ -1286,6 +1287,7 @@ button:disabled {
   .roll-type-selector.mobile-controls .roll-type-btn.damage-tab:hover,
   .roll-type-selector.mobile-controls .roll-type-btn.gm-tab:hover {
     background: rgba(255, 255, 255, 0.1);
+    border-top: 4px solid rgba(200, 200, 200, 0.6);
     box-shadow: none;
   }
 
@@ -1371,23 +1373,38 @@ button:disabled {
   /* Mobile active tab styling */
   .roll-type-selector.mobile-controls .roll-type-btn.check-tab.active {
     background: rgba(0, 0, 0, 0.9);
-    border-color: #4caf50;
+    border-top: 4px solid #4caf50;
     color: white;
     box-shadow: none;
+  }
+
+  .roll-type-selector.mobile-controls .roll-type-btn.check-tab:active {
+    border: none;
+    border-top: 4px solid #4caf50;
   }
 
   .roll-type-selector.mobile-controls .roll-type-btn.damage-tab.active {
     background: rgba(0, 0, 0, 0.9);
-    border-color: #ff6b35;
+    border-top: 4px solid #ff6b35;
     color: white;
     box-shadow: none;
   }
 
+  .roll-type-selector.mobile-controls .roll-type-btn.damage-tab:active {
+    border: none;
+    border-top: 4px solid #ff6b35;
+  }
+
   .roll-type-selector.mobile-controls .roll-type-btn.gm-tab.active {
     background: rgba(0, 0, 0, 0.9);
-    border-color: #8e44ad;
+    border-top: 4px solid #8e44ad;
     color: white;
     box-shadow: none;
+  }
+
+  .roll-type-selector.mobile-controls .roll-type-btn.gm-tab:active {
+    border: none;
+    border-top: 4px solid #8e44ad;
   }
 
   /* Mobile dialogs (keep for history dialog) */
@@ -1929,51 +1946,33 @@ button:disabled {
   font-weight: bold;
   min-width: 90px;
   text-align: center;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-bottom: none;
+  border: none;
+  border-top: 4px solid rgba(255, 255, 255, 0.3);
   position: relative;
 }
 
-/* Shared colored borders for each roll type */
-.roll-type-btn.check-tab {
-  border-color: rgba(76, 175, 80, 0.6);
-}
-
-.roll-type-btn.damage-tab {
-  border-color: rgba(255, 107, 53, 0.6);
-}
-
-.roll-type-btn.gm-tab {
-  border-color: rgba(142, 68, 173, 0.6);
-}
+/* All buttons use neutral border by default - active state will override top border */
 
 .roll-type-btn:hover {
   background: rgba(255, 255, 255, 0.2);
+  border-top: 4px solid rgba(200, 200, 200, 0.6);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Enhanced colors when hovering */
-.roll-type-btn.check-tab:hover {
-  border-color: #4caf50;
-  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
-}
-
-.roll-type-btn.damage-tab:hover {
-  border-color: #ff6b35;
-  box-shadow: 0 4px 8px rgba(255, 107, 53, 0.3);
-}
-
-.roll-type-btn.gm-tab:hover {
-  border-color: #8e44ad;
-  box-shadow: 0 4px 8px rgba(142, 68, 173, 0.3);
-}
+/* Hover effects keep neutral borders - only active state gets colored borders */
 
 /* Desktop active state styling */
 .roll-type-selector.desktop-controls .roll-type-btn.check-tab.active {
   background: rgba(0, 0, 0, 0.5);
-  border-color: #4caf50;
+  border-top: 4px solid #4caf50;
   box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
   z-index: 10;
+}
+
+/* Desktop active click state styling */
+.roll-type-selector.desktop-controls .roll-type-btn.check-tab:active {
+  border: none;
+  border-top: 4px solid #4caf50;
 }
 
 .roll-type-selector.desktop-controls .roll-type-btn.check-tab.active::after {
@@ -1989,9 +1988,14 @@ button:disabled {
 
 .roll-type-selector.desktop-controls .roll-type-btn.damage-tab.active {
   background: rgba(0, 0, 0, 0.5);
-  border-color: #ff6b35;
+  border-top: 4px solid #ff6b35;
   box-shadow: 0 0 15px rgba(255, 107, 53, 0.3);
   z-index: 10;
+}
+
+.roll-type-selector.desktop-controls .roll-type-btn.damage-tab:active {
+  border: none;
+  border-top: 4px solid #ff6b35;
 }
 
 .roll-type-selector.desktop-controls .roll-type-btn.damage-tab.active::after {
@@ -2007,9 +2011,14 @@ button:disabled {
 
 .roll-type-selector.desktop-controls .roll-type-btn.gm-tab.active {
   background: rgba(0, 0, 0, 0.5);
-  border-color: #8e44ad;
+  border-top: 4px solid #8e44ad;
   box-shadow: 0 0 15px rgba(142, 68, 173, 0.3);
   z-index: 10;
+}
+
+.roll-type-selector.desktop-controls .roll-type-btn.gm-tab:active {
+  border: none;
+  border-top: 4px solid #8e44ad;
 }
 
 .roll-type-selector.desktop-controls .roll-type-btn.gm-tab.active::after {
