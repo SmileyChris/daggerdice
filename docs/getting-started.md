@@ -23,13 +23,27 @@ No downloads or installations required - DaggerDice runs directly in your web br
 
 ### 3. Basic Usage
 
+#### Desktop vs Mobile Experience
+
+**Desktop Mode:**
+- Full sidebar with all controls visible
+- Mouse and keyboard interaction
+- Roll history always visible in sidebar
+- Hover effects and desktop-optimized layout
+
+**Mobile Mode:**
+- Bottom drawer interface for touch-friendly navigation
+- Swipe and tap gestures optimized for mobile
+- Compact layout with collapsible sections
+- **Pro Tip**: Tap the top bar (where results are shown) to quickly show/hide your roll history
+
 #### Rolling Dice
 1. **Select Roll Type**: Choose Check, Damage, or GM rolls
 2. **Set Parameters**: Adjust modifiers, advantage/disadvantage, and other settings
 3. **Roll**: Click the "Roll" button or press Space
 4. **View Results**: See your results with full breakdown and history
 
-#### Keyboard Shortcuts
+#### Keyboard Shortcuts (Desktop)
 - **Space**: Roll dice
 - **C**: Switch to Check rolls (Hope & Fear)
 - **D**: Switch to Damage rolls
@@ -37,6 +51,8 @@ No downloads or installations required - DaggerDice runs directly in your web br
 - **H**: Toggle roll history
 - **M**: Open multiplayer menu
 - **?**: Show help dialog
+
+*Note: On mobile devices, use touch gestures instead. Tap the top result bar to toggle roll history.*
 
 ## Multiplayer Guide
 
@@ -138,6 +154,7 @@ No downloads or installations required - DaggerDice runs directly in your web br
 - Use landscape orientation for best experience
 - Tap targets are optimized for touch
 - Bottom drawer provides mobile-friendly navigation
+- **Quick Access**: Tap the top bar to instantly show/hide roll history
 
 ### Getting Help
 - **GitHub Issues**: [Report bugs or request features](https://github.com/smileychris/daggerdice/issues)
