@@ -2,24 +2,40 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 import { execSync } from "child_process";
 import { defineConfig } from "vite";
 
-function getVersion() {
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, "0");
-  const day = `${date.getDate()}`.padStart(2, "0");
-
+function getVersionFromLatestCommitUTC() {
   try {
-    const shortHash = execSync("git rev-parse --short HEAD").toString().trim();
-    return `${year}-${month}-${day}-${shortHash}`;
-  } catch {
-    return `${year}-${month}-${day}`;
+    // Get short hash of latest commit
+    const shortHash = execSync('git rev-parse --short HEAD')
+      .toString()
+      .trim();
+
+    // Get latest commit date in ISO 8601 UTC
+    const commitISO = execSync(
+      'git show -s --format=%cI HEAD'
+    ).toString().trim(); // e.g., 2025-06-16T18:42:10Z
+
+    const commitDateUTC = commitISO.substring(0, 10); // YYYY-MM-DD
+
+    // Build full UTC day range
+    const startUTC = `${commitDateUTC}T00:00:00Z`;
+    const endUTC = `${commitDateUTC}T23:59:59Z`;
+
+    // Count commits in that UTC day
+    const commitCount = execSync(
+      `git rev-list --count --since="${startUTC}" --until="${endUTC}" HEAD`
+    ).toString().trim();
+
+    return `${commitDateUTC}.${commitCount}.${shortHash}`;
+  } catch (e) {
+    console.warn('Git version generation failed:', e);
+    return 'unknown-version';
   }
 }
 
 // https://vite.dev/config/
 export default defineConfig({
   define: {
-    __APP_VERSION__: JSON.stringify(getVersion()),
+    __APP_VERSION__: JSON.stringify(getVersionFromLatestCommitUTC()),
   },
   plugins: [
     cloudflare({
