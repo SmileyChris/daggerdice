@@ -1,6 +1,6 @@
 # DaggerDice Documentation
 
-Welcome to the DaggerDice documentation! DaggerDice is a 3D dice rolling web application designed for tabletop RPG sessions, featuring Hope/Fear mechanics and real-time multiplayer collaboration.
+Welcome to the DaggerDice documentation! DaggerDice is a 3D dice rolling web application designed specifically for the Daggerheart RPG system, featuring Hope/Fear mechanics and real-time multiplayer collaboration.
 
 🎲 **[Launch DaggerDice](https://daggerdice.smileychris.workers.dev)** 🎲
 
@@ -48,13 +48,20 @@ Deep dive into the multiplayer system:
 
 DaggerDice is a modern web application that provides:
 
-- **🎲 Hope & Fear Dice System**: D12-based mechanics with critical success detection
-- **🎯 Multiple Roll Types**: Check, Damage, and GM rolls with full customization
-- **🌐 Real-time Multiplayer**: WebSocket-based sessions with automatic reconnection
-- **📱 Mobile Optimized**: Responsive design with touch-friendly interfaces
-- **🎬 Streamer Mode**: Privacy controls for content creators
-- **⚡ 3D Physics**: Realistic dice rolling with WebGL/WASM simulation
-- **🔧 Developer Friendly**: Open source with comprehensive documentation
+!!! hope "Daggerheart RPG Features"
+    - **🎲 Hope & Fear Dice System**: D12-based mechanics from Daggerheart with critical success detection
+    - **🎯 Multiple Roll Types**: Check, Damage, and GM rolls with full Daggerheart support
+    - **⚡ 3D Physics**: Realistic dice rolling with WebGL/WASM simulation
+
+!!! fear "Multiplayer & Social"
+    - **🌐 Real-time Multiplayer**: WebSocket-based sessions with automatic reconnection
+    - **📱 Mobile Optimized**: Responsive design with touch-friendly interfaces
+    - **🎬 Streamer Mode**: Privacy controls for content creators
+
+!!! note "Developer Features"
+    - **🔧 Open Source**: MIT licensed with comprehensive documentation
+    - **🚀 Modern Stack**: TypeScript, Alpine.js, Cloudflare Workers
+    - **🧪 Well Tested**: Comprehensive test suite with CI/CD
 
 ## Architecture Overview
 

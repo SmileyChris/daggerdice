@@ -14,16 +14,20 @@ nav:
 
 theme:
   name: material
+  logo: daggerdice-logo.png
+  favicon: favicon.png
   palette:
-    - scheme: default
-      primary: green
-      accent: red
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
-    - scheme: slate
-      primary: green
-      accent: red
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -37,8 +41,11 @@ theme:
     - content.action.edit
     - content.action.view
     - content.code.copy
+    - navigation.instant
+    - navigation.tracking
   icon:
     repo: fontawesome/brands/github
+  custom_dir: docs/overrides
 
 markdown_extensions:
   - toc:
@@ -69,3 +76,6 @@ extra:
       link: https://github.com/smileychris/daggerdice
     - icon: material/web
       link: https://daggerdice.smileychris.workers.dev
+
+extra_css:
+  - assets/stylesheets/extra.css

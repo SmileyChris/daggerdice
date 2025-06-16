@@ -1,0 +1,188 @@
+/* DaggerDice custom colors and styling to match the main app */
+
+:root {
+  /* Hope (Green) Colors - from app: #4caf50 */
+  --md-primary-fg-color: #4caf50;
+  --md-primary-fg-color--light: #81c784;
+  --md-primary-fg-color--dark: #388e3c;
+  
+  /* Fear (Red) Colors - from app: #f44336 */
+  --md-accent-fg-color: #f44336;
+  --md-accent-fg-color--transparent: rgba(244, 67, 54, 0.1);
+  
+  /* DaggerDice gradient background colors */
+  --daggerdice-gradient-start: #6e8efb;
+  --daggerdice-gradient-end: #a777e3;
+  
+  /* Advantage/Disadvantage colors */
+  --daggerdice-advantage: #90ee90;
+  --daggerdice-disadvantage: #ffb3ba;
+}
+
+/* Dark mode custom colors */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #66bb6a;
+  --md-primary-fg-color--light: #a5d6a7;
+  --md-primary-fg-color--dark: #4caf50;
+  
+  --md-accent-fg-color: #ef5350;
+  --md-accent-fg-color--transparent: rgba(239, 83, 80, 0.1);
+}
+
+/* Header gradient background inspired by DaggerDice */
+.md-header {
+  background: linear-gradient(135deg, var(--daggerdice-gradient-start), var(--daggerdice-gradient-end));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Logo styling */
+.md-header__button.md-logo img {
+  width: auto;
+  height: 2rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Navigation tabs with DaggerDice styling */
+.md-tabs {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.md-tabs__link {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.md-tabs__link--active {
+  color: white;
+  border-bottom-color: var(--md-accent-fg-color);
+}
+
+/* Hope/Fear themed admonitions */
+.md-typeset .admonition.hope {
+  border-color: var(--md-primary-fg-color);
+}
+
+.md-typeset .admonition.hope > .admonition-title {
+  background-color: rgba(76, 175, 80, 0.1);
+  border-color: var(--md-primary-fg-color);
+}
+
+.md-typeset .admonition.fear {
+  border-color: var(--md-accent-fg-color);
+}
+
+.md-typeset .admonition.fear > .admonition-title {
+  background-color: rgba(244, 67, 54, 0.1);
+  border-color: var(--md-accent-fg-color);
+}
+
+/* Code blocks with DaggerDice accent */
+.md-typeset .highlight .gp {
+  color: var(--md-primary-fg-color);
+}
+
+/* Tables with themed headers */
+.md-typeset table:not([class]) th {
+  background-color: rgba(110, 142, 251, 0.1);
+  border-bottom: 2px solid var(--md-primary-fg-color);
+}
+
+/* Footer with gradient background */
+.md-footer {
+  background: linear-gradient(135deg, 
+    rgba(110, 142, 251, 0.8), 
+    rgba(167, 119, 227, 0.8));
+  backdrop-filter: blur(10px);
+}
+
+/* Search highlighting */
+.md-search-result__meta {
+  color: var(--md-primary-fg-color);
+}
+
+/* Navigation sections */
+.md-nav__title {
+  font-weight: 600;
+}
+
+/* Buttons and links */
+.md-typeset .md-button {
+  background: linear-gradient(135deg, var(--md-primary-fg-color), var(--md-primary-fg-color--dark));
+  border: none;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.md-typeset .md-button:hover {
+  background: linear-gradient(135deg, var(--md-primary-fg-color--dark), var(--md-primary-fg-color));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.md-typeset .md-button--primary {
+  background: linear-gradient(135deg, var(--md-accent-fg-color), #d32f2f);
+  color: white;
+}
+
+.md-typeset .md-button--primary:hover {
+  background: linear-gradient(135deg, #d32f2f, #c62828);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+}
+
+/* Emoji and icons */
+.twemoji {
+  vertical-align: text-top;
+}
+
+/* Custom styling for dice-themed content */
+.dice-result {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  margin: 0 0.2rem;
+}
+
+.dice-result.hope {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: var(--md-primary-fg-color);
+  border: 1px solid var(--md-primary-fg-color);
+}
+
+.dice-result.fear {
+  background-color: rgba(244, 67, 54, 0.2);
+  color: var(--md-accent-fg-color);
+  border: 1px solid var(--md-accent-fg-color);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 76.1875em) {
+  .md-header__button.md-logo img {
+    height: 1.5rem;
+  }
+}
+
+/* Smooth transitions */
+* {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(110, 142, 251, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--md-primary-fg-color), var(--md-accent-fg-color));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--md-primary-fg-color--dark), #d32f2f);
+}

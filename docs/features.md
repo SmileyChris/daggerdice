@@ -1,35 +1,35 @@
 # DaggerDice Features
 
-## Core Dice System
+## Daggerheart RPG Dice System
 
 ### Hope & Fear Mechanics
-- **Hope Die**: Green-themed D12 representing positive outcomes and player agency
+- **Hope Die**: Green-themed D12 representing positive outcomes and player agency in Daggerheart
 - **Fear Die**: Red-themed D12 representing negative outcomes and complications
-- **Critical Success**: When Hope and Fear dice show equal values, regardless of total
-- **Advantage/Disadvantage**: Optional D6 that adds to or subtracts from the total
+- **Critical Success**: When Hope and Fear dice show equal values, regardless of total (With Hope!)
+- **Advantage/Disadvantage**: Optional D6 that adds to or subtracts from the total following Daggerheart mechanics
 - **Modifiers**: Numeric bonuses/penalties ranging from -20 to +20
 
 ### Multiple Roll Types
 
 #### Check Rolls (Hope & Fear)
-- Primary roll type for skill checks and saving throws
-- Two D12 dice rolled simultaneously
+- Primary roll type for skill checks and saving throws in Daggerheart
+- Two D12 dice rolled simultaneously following Daggerheart mechanics
 - Total calculated as: Hope + Fear + Advantage/Disadvantage + Modifier
-- Critical success when both dice show the same number
+- Critical success when both dice show the same number (With Hope!)
 
 #### Damage Rolls
-- **Base Dice**: Choose dice count and type (D4, D6, D8, D10, D12)
+- **Base Dice**: Choose dice count and type following Daggerheart's damage system (D4, D6, D8, D10, D12)
 - **Bonus Die**: Optional additional die for extra damage
 - **Critical Hits**: Option to double dice on critical success
 - **Resistance**: Option to halve damage for resistant targets
-- Supports complex damage calculations for various weapon types
+- Supports complex damage calculations for Daggerheart weapons and spells
 
 #### GM Rolls
-- **D20 System**: Standard D20 rolls for Game Master use
+- **D20 System**: Standard D20 rolls for Game Master use with traditional mechanics
 - **Advantage/Disadvantage**: Roll two D20s, take higher or lower result
 - **Modifiers**: Add bonuses or penalties to rolls
 - **Privacy Option**: Keep GM rolls hidden from other players
-- Flexible system for any D20-based mechanics
+- Flexible system for non-Daggerheart mechanics and traditional RPG elements
 
 ### 3D Physics Simulation
 - **Physics Engine**: Powered by @3d-dice/dice-box with WASM-based physics
@@ -157,4 +157,4 @@
 - **WebSocket Support**: Graceful degradation for older browsers
 - **HTTPS Security**: Secure connections for production use
 
-This comprehensive feature set makes DaggerDice a robust, accessible, and user-friendly dice rolling application suitable for both casual and serious tabletop RPG sessions.
+This comprehensive feature set makes DaggerDice a robust, accessible, and user-friendly dice rolling application designed specifically for Daggerheart RPG sessions, while also supporting traditional RPG mechanics for Game Masters.

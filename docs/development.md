@@ -2,7 +2,7 @@
 
 ## Project Architecture
 
-DaggerDice is a modern web application built with TypeScript, Alpine.js, and Cloudflare Workers, designed for real-time multiplayer dice rolling with 3D physics simulation.
+DaggerDice is a modern web application built with TypeScript, Alpine.js, and Cloudflare Workers, designed specifically for the Daggerheart RPG system with real-time multiplayer dice rolling and 3D physics simulation.
 
 ### Technology Stack
 - **Frontend**: Alpine.js, TypeScript, Vite
@@ -358,5 +358,41 @@ To add new WebSocket message types:
 - **Cloudflare Analytics**: Built-in performance metrics
 - **Real User Monitoring**: Available through Cloudflare dashboard
 - **Custom Metrics**: Add performance.mark() calls for critical paths
+
+## Documentation Development
+
+### Building Documentation Locally
+
+The project uses MkDocs with the Material theme for documentation:
+
+```bash
+# Install documentation dependencies
+pip install mkdocs-material pymdown-extensions
+
+# Serve documentation with live reload
+mkdocs serve
+
+# Build static documentation
+mkdocs build
+
+# Deploy to GitHub Pages (maintainers only)
+mkdocs gh-deploy
+```
+
+### Documentation Structure
+- **Source**: All documentation files are in the `docs/` directory
+- **Configuration**: `mkdocs.yml` contains site configuration and navigation
+- **Custom Styling**: `docs/overrides/assets/stylesheets/extra.css` provides DaggerDice theming
+- **Assets**: Logo and favicon are stored in the `docs/` directory
+
+### Documentation Guidelines
+- Use clear, concise language appropriate for the target audience
+- Include code examples and screenshots where helpful
+- Maintain consistent formatting and style
+- Test all links and code examples before committing
+- Follow the existing navigation structure and organization
+
+### Automatic Deployment
+Documentation automatically deploys to GitHub Pages when changes are pushed to the main branch via the GitHub Action workflow in `.github/workflows/docs.yml`.
 
 This development guide provides the foundation for contributing to DaggerDice. For specific technical details about the multiplayer system, refer to the [Multiplayer Technical Documentation](multiplayer-technical.md).

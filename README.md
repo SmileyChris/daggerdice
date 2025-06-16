@@ -1,16 +1,16 @@
 # DaggerDice
 
-A 3D dice rolling web application designed for tabletop RPGs, featuring the Hope/Fear mechanics and real-time multiplayer sessions.
+A 3D dice rolling web application designed for the Daggerheart RPG system, featuring Hope/Fear mechanics and real-time multiplayer sessions.
 
 🎲 **[Play DaggerDice](https://daggerdice.smileychris.workers.dev)** 🎲
 
 ## Features
 
-### Core Dice System
-- **Hope & Fear Dice**: Roll two D12 dice representing positive (Hope) and negative (Fear) outcomes
-- **Advantage/Disadvantage**: Optional D6 modifier that adds or subtracts from the total
+### Daggerheart RPG Dice System
+- **Hope & Fear Dice**: Roll two D12 dice representing positive (Hope) and negative (Fear) outcomes from Daggerheart
+- **Advantage/Disadvantage**: Optional D6 modifier following Daggerheart's mechanics
 - **Modifiers**: Numeric bonuses/penalties ranging from -20 to +20
-- **Critical Success**: Occurs when Hope and Fear dice show equal values
+- **Critical Success**: Occurs when Hope and Fear dice show equal values (With Hope!)
 - **3D Physics**: Realistic dice rolling with gravity, collision, and physics simulation
 
 ### Multiplayer Sessions
@@ -88,19 +88,19 @@ For detailed development instructions, see [Development Guide](docs/development.
 ### Roll Types
 
 #### Check Rolls (Hope & Fear)
-- **Hope Die**: Green D12 representing positive outcomes
-- **Fear Die**: Red D12 representing negative outcomes  
+- **Hope Die**: Green D12 representing positive outcomes in Daggerheart
+- **Fear Die**: Red D12 representing negative outcomes and complications
 - **Total**: Hope + Fear + Advantage/Disadvantage + Modifier
-- **Critical Success**: When Hope and Fear show the same value
+- **Critical Success**: When Hope and Fear show the same value (With Hope!)
 
 #### Damage Rolls
-- **Base Dice**: Multiple dice of various types (D4, D6, D8, D10, D12)
+- **Base Dice**: Multiple dice following Daggerheart's damage system (D4, D6, D8, D10, D12)
 - **Bonus Die**: Optional additional die for extra damage
 - **Critical**: Double dice on critical hits
 - **Resistance**: Halve damage when applicable
 
 #### GM Rolls
-- **D20 System**: Standard D20 rolls for Game Masters
+- **D20 System**: Standard D20 rolls for Game Masters using traditional mechanics
 - **Advantage/Disadvantage**: Roll two D20s, take higher/lower
 - **Modifiers**: Add bonuses or penalties
 - **Privacy**: Option to keep rolls hidden from players
@@ -122,6 +122,28 @@ For detailed development instructions, see [Development Guide](docs/development.
 ### For Developers
 - **[Development Guide](https://smileychris.github.io/daggerdice/development/)**: Setup, testing, and contribution guidelines
 - **[Multiplayer Technical](https://smileychris.github.io/daggerdice/multiplayer-technical/)**: WebSocket architecture and connection handling
+
+### Building Documentation Locally
+
+To build and serve the documentation locally for development:
+
+```bash
+# Install MkDocs and dependencies
+pip install mkdocs-material pymdown-extensions
+
+# Serve docs with live reload (recommended for development)
+mkdocs serve
+
+# Build static documentation site
+mkdocs build
+
+# Deploy to GitHub Pages (maintainers only)
+mkdocs gh-deploy
+```
+
+The documentation will be available at `http://localhost:8000` with automatic reloading when files change.
+
+**Note**: The documentation automatically deploys to GitHub Pages when changes are pushed to the main branch.
 
 ## Technology Stack
 

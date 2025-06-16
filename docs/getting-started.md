@@ -1,6 +1,6 @@
 # Getting Started with DaggerDice
 
-DaggerDice is a web-based 3D dice rolling application designed for tabletop RPG sessions, with a focus on Hope/Fear mechanics and real-time multiplayer collaboration.
+DaggerDice is a web-based 3D dice rolling application designed specifically for the Daggerheart RPG system, with a focus on Hope/Fear mechanics and real-time multiplayer collaboration.
 
 ## Quick Start (Users)
 
@@ -63,23 +63,23 @@ No downloads or installations required - DaggerDice runs directly in your web br
 
 ## Roll Types Explained
 
-### Check Rolls (Hope & Fear)
-- **Hope Die**: Green D12 for positive outcomes
-- **Fear Die**: Red D12 for negative outcomes
-- **Total**: Hope + Fear + Advantage/Disadvantage + Modifier
-- **Critical Success**: When Hope and Fear show the same value
+!!! hope "Check Rolls (Hope & Fear)"
+    - **Hope Die**: <span class="dice-result hope">Green D12</span> for positive outcomes in Daggerheart
+    - **Fear Die**: <span class="dice-result fear">Red D12</span> for negative outcomes and complications
+    - **Total**: Hope + Fear + Advantage/Disadvantage + Modifier
+    - **Critical Success**: When Hope and Fear show the same value (With Hope!)
 
-### Damage Rolls
-- **Base Dice**: Choose number and type (D4, D6, D8, D10, D12)
-- **Bonus Die**: Optional extra damage die
-- **Critical**: Double dice on critical hits
-- **Resistance**: Halve damage when applicable
+!!! note "Damage Rolls"
+    - **Base Dice**: Choose number and type following Daggerheart's damage system (D4, D6, D8, D10, D12)
+    - **Bonus Die**: Optional extra damage die
+    - **Critical**: Double dice on critical hits
+    - **Resistance**: Halve damage when applicable
 
-### GM Rolls
-- **D20 System**: Standard D20 mechanics
-- **Advantage/Disadvantage**: Roll two D20s, take higher/lower
-- **Privacy**: Option to keep rolls hidden from players
-- **Modifiers**: Add bonuses or penalties
+!!! abstract "GM Rolls"
+    - **D20 System**: Standard D20 mechanics for traditional RPG elements
+    - **Advantage/Disadvantage**: Roll two D20s, take higher/lower
+    - **Privacy**: Option to keep rolls hidden from players
+    - **Modifiers**: Add bonuses or penalties
 
 ## Tips for New Users
 
