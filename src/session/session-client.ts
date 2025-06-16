@@ -34,6 +34,18 @@ export class SessionClient {
     window.addEventListener('beforeunload', () => {
       this.sendLeaveAnnouncementSync();
     });
+
+    // Listen for window focus to attempt reconnection
+    window.addEventListener('focus', () => {
+      this.handleWindowFocus();
+    });
+
+    // Listen for visibility change to attempt reconnection
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        this.handleWindowFocus();
+      }
+    });
   }
 
   private sendLeaveAnnouncementSync(): void {
@@ -50,6 +62,20 @@ export class SessionClient {
       } catch (error) {
         console.warn('Failed to send leave announcement on page unload:', error);
       }
+    }
+  }
+
+  private handleWindowFocus(): void {
+    // Only attempt reconnection if we're in error/disconnected state and have session info
+    if ((this.connectionState === 'error' || this.connectionState === 'disconnected') && 
+        this.sessionId && this.playerName && !this.manualDisconnect) {
+      console.log('Window focused, attempting reconnection from', this.connectionState, 'state');
+      
+      // Reset reconnect attempts when user focuses window (give them a fresh start)
+      this.reconnectAttempts = 0;
+      
+      // Attempt reconnection
+      this.attemptReconnect(this.playerName);
     }
   }
 
@@ -73,6 +99,17 @@ export class SessionClient {
 
   public getConnectionState(): ConnectionState {
     return this.connectionState;
+  }
+
+  public triggerReconnect(): void {
+    if (this.sessionId && this.playerName && !this.manualDisconnect) {
+      console.log('Manual reconnection triggered');
+      // Reset reconnect attempts for manual trigger
+      this.reconnectAttempts = 0;
+      this.attemptReconnect(this.playerName);
+    } else {
+      console.warn('Cannot trigger reconnect - missing session info or manual disconnect');
+    }
   }
 
   public getPlayerId(): string | null {
@@ -172,17 +209,32 @@ export class SessionClient {
           // For now, just log it - the server should handle cleanup on connection loss
         }
         
-        this.connectionState = 'disconnected';
+        // Determine next state based on whether we'll attempt reconnection
+        const willReconnect = event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts && !this.manualDisconnect;
+        
+        if (willReconnect) {
+          // Show connecting state immediately when we're going to reconnect
+          console.log('Connection lost, will attempt reconnection - setting state to connecting');
+          this.connectionState = 'connecting';
+        } else if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+          console.log('Max reconnection attempts reached, giving up');
+          this.connectionState = 'error';
+          this.eventHandlers.onError?.('Connection failed after multiple attempts');
+        } else {
+          // Manual disconnect or clean close - set to disconnected
+          this.connectionState = 'disconnected';
+        }
+        
         this.eventHandlers.onDisconnected?.();
         
-        // Attempt to reconnect if not manually closed
-        if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts && !this.manualDisconnect) {
-          this.connectionState = 'connecting';
+        // Schedule reconnection attempt if needed
+        if (willReconnect) {
+          console.log('Scheduling reconnection attempt', this.reconnectAttempts + 1, 'of', this.maxReconnectAttempts);
           setTimeout(() => {
             this.attemptReconnect(playerName);
           }, this.reconnectDelay * Math.pow(2, this.reconnectAttempts));
-        } else {
-          // No reconnection, reset state
+        } else if (!willReconnect && event.code === 1000) {
+          // Clean close (manual disconnect) - reset state
           this.resetConnectionState();
         }
       };
@@ -225,8 +277,13 @@ export class SessionClient {
 
   private async attemptReconnect(playerName: string): Promise<void> {
     if (!this.sessionId || this.reconnectAttempts >= this.maxReconnectAttempts || this.manualDisconnect) {
-      console.log('Stopping reconnection attempts');
-      this.resetConnectionState();
+      console.log('Stopping reconnection attempts - sessionId:', !!this.sessionId, 'attempts:', this.reconnectAttempts, 'manual:', this.manualDisconnect);
+      if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+        this.connectionState = 'error';
+        this.eventHandlers.onError?.('Connection failed after multiple attempts');
+      } else {
+        this.resetConnectionState();
+      }
       return;
     }
 
@@ -235,7 +292,6 @@ export class SessionClient {
     
     // Update status to show we're trying to reconnect
     this.connectionState = 'connecting';
-    // Note: No specific event handler for 'connecting' state, UI will check connectionState
     
     try {
       const success = await this.connect(this.sessionId, playerName);
@@ -246,17 +302,19 @@ export class SessionClient {
         throw new Error('Reconnection failed');
       }
     } catch (error) {
-      console.error('Reconnection failed:', error);
-      this.connectionState = 'error';
-      this.eventHandlers.onError?.('Reconnection failed');
+      console.error(`Reconnection attempt ${this.reconnectAttempts} failed:`, error);
       
       // If we haven't exceeded max attempts, try again
       if (this.reconnectAttempts < this.maxReconnectAttempts && !this.manualDisconnect) {
+        this.connectionState = 'connecting'; // Keep showing connecting state during attempts
+        console.log(`Scheduling next reconnection attempt in ${this.reconnectDelay * Math.pow(2, this.reconnectAttempts)}ms`);
         setTimeout(() => {
           this.attemptReconnect(playerName);
         }, this.reconnectDelay * Math.pow(2, this.reconnectAttempts));
       } else {
-        this.resetConnectionState();
+        console.log('Max reconnection attempts reached or manual disconnect');
+        this.connectionState = 'error';
+        this.eventHandlers.onError?.('Connection failed after multiple attempts');
       }
     }
   }
