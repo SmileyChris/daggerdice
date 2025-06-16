@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "concurrently \"npx vite build --watch\" \"npm run dev:worker\"",
+    "start": "npm run dev",
     "dev": "vite",
     "build": "vite build",
     "test": "vitest",
@@ -27,7 +27,6 @@
     "@typescript-eslint/eslint-plugin": "^8.34.0",
     "@typescript-eslint/parser": "^8.34.0",
     "@vitest/ui": "3.1.4",
-    "concurrently": "^9.1.2",
     "eslint": "^9.28.0",
     "eslint-plugin-import": "^2.31.0",
     "happy-dom": "^17.6.3",

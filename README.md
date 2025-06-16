@@ -31,7 +31,7 @@ A 3D dice rolling web application for tabletop RPGs with Hope/Fear mechanics and
 # Install dependencies
 npm install
 
-# Start development server
+# Start development server (frontend + worker)
 npm start
 
 # Build for production
@@ -159,11 +159,11 @@ Session behavior is managed through environment detection and falls back gracefu
 ## Development Commands
 
 ```bash
-npm run dev          # Start development server with hot reload
+npm start            # Start development server (alias for npm run dev)
+npm run dev          # Start frontend and worker development servers with hot reload
 npm run build        # Build for production
 npm run preview      # Preview production build locally
 npm run deploy       # Build and deploy to Cloudflare
-npm run dev:worker   # Start Cloudflare Worker development server
 npm run verify       # Check deployment status
 npm test             # Run all tests
 npm run test:ui      # Run tests with interactive UI
