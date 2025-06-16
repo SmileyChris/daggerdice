@@ -841,44 +841,22 @@
         ></div>
       </div>
 
-      <!-- Desktop session panel backdrop -->
+      <!-- Unified Session Panel -->
       <div
-        class="desktop-session-backdrop"
-        x-show="showSessionUI && sessionFeaturesAvailable"
-        @click="toggleSessionUI()"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-300"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-      ></div>
-
-      <!-- Desktop session panel -->
-      <div
-        x-show="showSessionUI && sessionFeaturesAvailable"
-        class="session-panel desktop-session-panel"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 transform scale-95"
-        x-transition:enter-end="opacity-100 transform scale-100"
-        x-transition:leave="transition ease-in duration-300"
-        x-transition:leave-start="opacity-100 transform scale-100"
-        x-transition:leave-end="opacity-0 transform scale-95"
+        class="session-panel"
+        :class="{ 'visible': showSessionUI && sessionFeaturesAvailable }"
         @keydown.escape.window="showSessionUI && toggleSessionUI()"
       >
-        <!-- Close button for desktop -->
-        <button
-          @click="toggleSessionUI()"
-          class="desktop-dialog-close"
-          title="Close"
-        >
-          ✕
-        </button>
-        <!-- Solo mode: session creation/joining -->
-        <div x-show="sessionMode === 'solo'" class="session-join">
-          <h3>Multiplayer Room</h3>
+        <div class="dialog-header">
+          <h3 x-show="sessionMode === 'solo'">Multiplayer Room</h3>
+          <h3 x-show="sessionMode === 'multiplayer'">Room Info</h3>
+          <button @click="toggleSessionUI()" class="dialog-close">✕</button>
+        </div>
 
-          <div class="session-input">
+        <div class="dialog-content">
+          <!-- Solo mode: session creation/joining -->
+          <div x-show="sessionMode === 'solo'" class="session-join">
+            <div class="session-input">
             <input
               x-model="playerName"
               placeholder="Your name"
@@ -986,163 +964,23 @@
             </div>
           </div>
 
-          <button @click="leaveSession()" class="session-btn leave-btn">
-            Leave Room
-          </button>
-        </div>
-      </div>
-
-      <!-- Mobile session panel -->
-      <div
-        x-show="showSessionUI && sessionFeaturesAvailable"
-        class="session-panel mobile-session-panel"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="transform translate-y-full"
-        x-transition:enter-end="transform translate-y-0"
-        x-transition:leave="transition ease-in duration-300"
-        x-transition:leave-start="transform translate-y-0"
-        x-transition:leave-end="transform translate-y-full"
-      >
-        <!-- Session panel header -->
-        <div class="dialog-header">
-          <h3 x-show="sessionMode === 'solo'">Multiplayer Room</h3>
-          <h3 x-show="sessionMode === 'multiplayer'">Room Info</h3>
-          <button @click="toggleSessionUI()" class="dialog-close">✕</button>
-        </div>
-
-        <!-- Solo mode: session creation/joining -->
-        <div x-show="sessionMode === 'solo'" class="session-join">
-          <div class="dialog-content">
-            <div class="session-input">
-              <input
-                x-model="playerName"
-                placeholder="Your name"
-                required
-                maxlength="20"
-                class="player-name-input"
-                @keyup.enter="joinSessionId.trim() ? joinSession() : createSession()"
-              />
-            </div>
-
-            <div class="session-input">
-              <input
-                x-model="joinSessionId"
-                placeholder="Room ID (optional)"
-                class="session-id-input"
-                type="search"
-                maxlength="6"
-                @input="handleRoomIdChange()"
-                @keyup.enter="joinSessionId.trim() ? joinSession() : createSession()"
-              />
-            </div>
-
-            <div class="session-action">
-              <button
-                @click="joinSessionId.trim() ? joinSession() : createSession()"
-                :disabled="!playerName.trim() || connectionStatus === 'connecting' || !isJoinSessionValid"
-                class="session-btn primary-btn"
-              >
-                <span x-show="connectionStatus === 'connecting'">
-                  <span
-                    x-text="joinSessionId.trim() ? 'Joining...' : 'Creating...'"
-                  ></span>
-                </span>
-                <span x-show="connectionStatus !== 'connecting'">
-                  <span
-                    x-text="joinSessionId.trim() ? 'Join Room' : 'Create New Room'"
-                  ></span>
-                </span>
-              </button>
-            </div>
-
-            <div x-show="connectionStatus === 'error'" class="session-error">
-              Connection failed. Please try again.
-            </div>
-          </div>
-        </div>
-
-        <!-- Multiplayer mode: room info -->
-        <div x-show="sessionMode === 'multiplayer'" class="session-info">
-          <div class="dialog-content">
-            <div class="session-details">
-              <div class="session-id-display">
-                <strong>Room:</strong>
-                <span x-text="sessionId" class="session-id"></span>
-                <button
-                  @click="copySessionLink()"
-                  class="copy-btn"
-                  title="Copy room link"
-                >
-                  📋
-                </button>
-              </div>
-
-              <div class="qr-code-container" x-show="sessionId">
-                <div class="qr-code-section">
-                  <strong>Scan to Join:</strong>
-                  <div class="qr-code-wrapper">
-                    <img 
-                      :src="generateQRCode(sessionId)" 
-                      alt="QR Code to join room"
-                      class="qr-code"
-                      x-show="sessionId"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div class="connection-status" :class="connectionStatus">
-                <span x-show="connectionStatus === 'connected'"
-                  >🟢 Connected</span
-                >
-                <span x-show="connectionStatus === 'connecting'"
-                  >🟡 Connecting...</span
-                >
-                <span x-show="connectionStatus === 'disconnected'"
-                  >🔴 Disconnected</span
-                >
-                <span x-show="connectionStatus === 'error'">❌ Error</span>
-              </div>
-            </div>
-
-            <div class="players-list">
-              <strong
-                >Players (<span x-text="connectedPlayers.length + 1"></span
-                >):</strong
-              >
-              <div class="players-container">
-                <div class="player-item self">
-                  <span x-text="playerName + ' (you)'"></span>
-                </div>
-                <template x-for="player in connectedPlayers" :key="player.id">
-                  <div class="player-item">
-                    <span x-text="player.name"></span>
-                    <span x-show="!player.isActive" class="inactive"
-                      >(away)</span
-                    >
-                  </div>
-                </template>
-              </div>
-            </div>
-
+          <div class="session-actions">
+            <button @click="toggleSessionUI()" class="session-btn secondary-btn desktop-only">
+              OK
+            </button>
             <button @click="leaveSession()" class="session-btn leave-btn">
               Leave Room
             </button>
           </div>
         </div>
+        </div>
       </div>
 
-      <!-- Session panel backdrop for mobile -->
+      <!-- Session panel backdrop -->
       <div
-        class="dialog-backdrop mobile-session-backdrop"
-        x-show="showSessionUI && sessionFeaturesAvailable"
+        class="dialog-backdrop session-backdrop"
+        :class="{ 'visible': showSessionUI && sessionFeaturesAvailable }"
         @click="toggleSessionUI()"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-300"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
       ></div>
 
       <button
