@@ -13,6 +13,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run test:workers` - Run Cloudflare Workers tests in watch mode
 - `npm run test:workers:run` - Run Workers tests once
 - `npm run test:all` - Run both frontend and Workers tests
+- `npm run lint` - Run ESLint on TypeScript and JavaScript files
+- `npm run lint:fix` - Fix ESLint issues automatically
+- `npm run deploy` - Build and deploy to Cloudflare Workers
 
 ## Project Architecture
 
@@ -51,16 +54,29 @@ Alpine.js manages all reactive state:
 - `isRolling`: Prevents multiple simultaneous rolls
 - `showHistory`: Controls history panel visibility
 
+### Multiplayer Architecture
+
+Built on Cloudflare Durable Objects for real-time session management:
+- **WebSocket Relay**: `SessionDurableObject` handles peer-to-peer message relay
+- **Session Client**: `/src/session/session-client.ts` manages WebSocket connections with auto-reconnection
+- **Message Types**: Join/leave announcements, roll sharing, player responses, and heartbeat
+- **Session Management**: 6-character room codes, URL-based joining, persistent player names
+- **Deployment**: Cloudflare Workers serve both static assets and WebSocket API
+
 ### Build Configuration
 
 - **Vite**: Modern build tool with TypeScript support
 - **TypeScript**: Strict typing with custom global declarations for DiceBox
 - **Asset handling**: Static assets served from `/public/assets/`
 - **Module imports**: ES modules with proper Alpine.js and DiceBox integration
+- **ESLint**: Configured for TypeScript with import validation and style enforcement
+- **Testing**: Separate configs for frontend (happy-dom) and Workers (Cloudflare pool)
 
-## Development workflow
+## Development Workflow
 
-- don't need to build after every action now
+- Run `npm run lint` and `npm run test:all` before committing changes
+- Update docs when features change or are added
+- Frontend and Workers tests run separately due to different environments
 
 ## CI/CD Pipeline
 

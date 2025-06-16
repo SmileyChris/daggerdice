@@ -14,10 +14,8 @@
     "test:workers:run": "vitest run --config vitest.workers.config.ts",
     "test:all": "npm run test:run && npm run test:workers:run",
     "lint": "eslint . --ext .ts,.js",
-    "lint:strict": "eslint . --ext .ts,.js --max-warnings 0",
     "lint:fix": "eslint . --ext .ts,.js --fix",
     "deploy": "npm run build && wrangler deploy",
-    "dev:worker": "wrangler dev",
     "verify": "curl -s -o /dev/null -w \"%{http_code}\" https://daggerdice.smileychris.workers.dev"
   },
   "devDependencies": {
