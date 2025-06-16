@@ -773,6 +773,9 @@ function diceRoller() {
       this.connectedPlayers = [];
       this.connectionStatus = 'disconnected';
       
+      // Reset temporary streamer mode override when leaving session
+      this.streamerModeTemporarilyDisabled = false;
+      
       // Load solo roll history when switching to solo mode
       this.rollHistory = getSavedRollHistory();
       
