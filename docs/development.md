@@ -367,7 +367,11 @@ The project uses MkDocs with the Material theme for documentation:
 
 ```bash
 # Install documentation dependencies
+# With pip
 pip install mkdocs-material pymdown-extensions
+
+# With uv (recommended for faster installs)
+uv tool install mkdocs --with mkdocs-material
 
 # Serve documentation with live reload
 mkdocs serve

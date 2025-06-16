@@ -39,7 +39,6 @@ A 3D dice rolling web application designed for the Daggerheart RPG system, featu
 
 ### For Developers
 
-**Quick Setup:**
 ```bash
 git clone https://github.com/smileychris/daggerdice.git
 cd daggerdice
@@ -47,7 +46,7 @@ npm install
 npm start
 ```
 
-For detailed development instructions, see [Development Guide](docs/development.md).
+See the [📋 Development Guide](https://smileychris.github.io/daggerdice/development/) for detailed setup, testing, and contribution guidelines.
 
 ## Browser Requirements
 
@@ -56,60 +55,20 @@ For detailed development instructions, see [Development Guide](docs/development.
 - **WebSocket**: Required for multiplayer sessions
 - **HTTPS**: Required for multiplayer in production
 
-## How to Use
+## Quick Guide
 
 ### Solo Play
-1. Open DaggerDice in your browser
-2. Choose your roll type (Check, Damage, or GM)
-3. Set any modifiers or advantage/disadvantage
-4. Click "Roll" or press Space
-5. View your results and history
+Start rolling immediately - no signup required! Choose your roll type and click "Roll" or press Space.
 
-### Multiplayer Sessions
-1. Click "🎲 Play with Friends"
-2. Enter your player name
-3. **Create Room**: Click "Create New Room" and share the URL/code
-4. **Join Room**: Enter a 6-character room code and click "Join"
-5. Roll dice together - everyone sees each other's results in real-time
-
-### Keyboard Shortcuts
-- **Space**: Roll dice
-- **C**: Switch to Check rolls
-- **D**: Switch to Damage rolls  
-- **G**: Switch to GM rolls
-- **H**: Toggle roll history
-- **M**: Open multiplayer menu
-- **?**: Show help
-- **Arrow Keys**: Adjust modifiers and settings
-- **Esc**: Close dialogs
-
-## Game Mechanics
+### Multiplayer
+Click "🎲 Play with Friends" to create or join a room with friends. Share the room code or URL to get everyone rolling together.
 
 ### Roll Types
+- **Check Rolls**: Hope & Fear D12s for Daggerheart skill checks
+- **Damage Rolls**: Configurable dice for combat damage
+- **GM Rolls**: Private D20 rolls for Game Masters
 
-#### Check Rolls (Hope & Fear)
-- **Hope Die**: Green D12 representing positive outcomes in Daggerheart
-- **Fear Die**: Red D12 representing negative outcomes and complications
-- **Total**: Hope + Fear + Advantage/Disadvantage + Modifier
-- **Critical Success**: When Hope and Fear show the same value (With Hope!)
-
-#### Damage Rolls
-- **Base Dice**: Multiple dice following Daggerheart's damage system (D4, D6, D8, D10, D12)
-- **Bonus Die**: Optional additional die for extra damage
-- **Critical**: Double dice on critical hits
-- **Resistance**: Halve damage when applicable
-
-#### GM Rolls
-- **D20 System**: Standard D20 rolls for Game Masters using traditional mechanics
-- **Advantage/Disadvantage**: Roll two D20s, take higher/lower
-- **Modifiers**: Add bonuses or penalties
-- **Privacy**: Option to keep rolls hidden from players
-
-### Special Features
-- **Advantage**: Add a D6 to your total (green theme)
-- **Disadvantage**: Subtract a D6 from your total (red theme)
-- **Modifiers**: Numeric bonuses/penalties from -20 to +20
-- **Streamer Mode**: Hide room codes and sensitive information
+For complete instructions, shortcuts, and mechanics, see the [📖 Full Documentation](https://smileychris.github.io/daggerdice).
 
 ## Documentation
 
@@ -123,27 +82,19 @@ For detailed development instructions, see [Development Guide](docs/development.
 - **[Development Guide](https://smileychris.github.io/daggerdice/development/)**: Setup, testing, and contribution guidelines
 - **[Multiplayer Technical](https://smileychris.github.io/daggerdice/multiplayer-technical/)**: WebSocket architecture and connection handling
 
-### Building Documentation Locally
-
-To build and serve the documentation locally for development:
-
+### Local Development
+Documentation development:
 ```bash
-# Install MkDocs and dependencies
-pip install mkdocs-material pymdown-extensions
+# With pip
+pip install mkdocs-material pymdown-extensions && mkdocs serve
 
-# Serve docs with live reload (recommended for development)
-mkdocs serve
-
-# Build static documentation site
-mkdocs build
-
-# Deploy to GitHub Pages (maintainers only)
-mkdocs gh-deploy
+# With uv (recommended)
+uv tool install mkdocs --with mkdocs-material && mkdocs serve
 ```
 
-The documentation will be available at `http://localhost:8000` with automatic reloading when files change.
+## Contributing
 
-**Note**: The documentation automatically deploys to GitHub Pages when changes are pushed to the main branch.
+Contributions welcome! See the [Development Guide](https://smileychris.github.io/daggerdice/development/) for guidelines.
 
 ## Technology Stack
 
@@ -152,23 +103,6 @@ The documentation will be available at `http://localhost:8000` with automatic re
 - **Multiplayer**: Cloudflare Durable Objects with WebSocket connections
 - **Deployment**: Cloudflare Workers & Pages
 
-## Contributing
-
-Contributions are welcome! Please see the [Development Guide](docs/development.md) for setup instructions and contribution guidelines.
-
-## Support
-
-- **Issues**: [GitHub Issues](../../issues)
-- **Questions**: Create a new issue with the "question" label
-- **Bug Reports**: Include browser version and reproduction steps
-
 ## License
 
-MIT License - see LICENSE file for details.
-
-## Credits
-
-- **3D Dice Engine**: [@3d-dice/dice-box](https://www.npmjs.com/package/@3d-dice/dice-box)
-- **Frontend**: [Alpine.js](https://alpinejs.dev/)
-- **Build Tool**: [Vite](https://vitejs.dev/)
-- **Hosting**: [Cloudflare Workers](https://workers.cloudflare.com/)
+MIT License - Built with [@3d-dice/dice-box](https://www.npmjs.com/package/@3d-dice/dice-box), [Alpine.js](https://alpinejs.dev/), and [Cloudflare Workers](https://workers.cloudflare.com/).
