@@ -501,6 +501,7 @@ function diceRoller() {
             d20Value2: this.d20Value2,
             gmAdvantageType: this.gmAdvantageType,
             gmModifier: this.gmModifier,
+            gmPrivate: this.gmPrivateRolls,
             total: totalValue,
             result: resultText
           };
@@ -537,7 +538,7 @@ function diceRoller() {
           this.sessionClient.setRollHistory(this.rollHistory);
           
           // Broadcast to other players (only broadcast if not a private GM roll)
-          if (!(this.rollType === 'gm' && this.gmPrivateRolls)) {
+          if (!(this.rollType === 'gm' && rollData.gmPrivate)) {
             this.sessionClient.broadcastRoll(rollData);
           }
         }
@@ -611,6 +612,9 @@ function diceRoller() {
           // Use session client's state as source of truth
           this.connectionStatus = this.sessionClient.getConnectionState();
           
+          // Clear roll history when creating multiplayer room
+          this.rollHistory = [];
+          
           // Save player name and session ID
           savePlayerName(sanitizedName);
           saveLastSessionId(sessionId);
@@ -675,6 +679,9 @@ function diceRoller() {
           this.playerName = sanitizedName;
           // Use session client's state as source of truth
           this.connectionStatus = this.sessionClient.getConnectionState();
+          
+          // Clear roll history when joining multiplayer
+          this.rollHistory = [];
           
           // Save player name and session ID
           savePlayerName(sanitizedName);

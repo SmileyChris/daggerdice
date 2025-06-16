@@ -402,10 +402,12 @@ return false;
               console.log('History keeper check for new player:', message.player.id, 'Am I keeper?', isKeeper, 'History length:', this.localRollHistory.length);
               
               if (isKeeper && this.localRollHistory.length > 0) {
-                console.log('Sending history share to new player:', message.player.name, 'History items:', this.localRollHistory.length);
+                // Filter out private GM rolls (keep public GM rolls and all other rolls)
+                const publicHistory = this.localRollHistory.filter(roll => !(roll.rollType === 'gm' && roll.gmPrivate));
+                console.log('Sending history share to new player:', message.player.name, 'Total items:', this.localRollHistory.length, 'Public items:', publicHistory.length);
                 this.sendMessage({
                   type: 'HISTORY_SHARE',
-                  rollHistory: this.localRollHistory
+                  rollHistory: publicHistory
                 });
               } else if (!isKeeper) {
                 console.log('Not the history keeper, someone else should send history');

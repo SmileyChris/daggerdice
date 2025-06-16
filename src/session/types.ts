@@ -35,6 +35,7 @@ export interface RollData {
   d20Value2?: number;
   gmAdvantageType?: "none" | "advantage" | "disadvantage";
   gmModifier?: number;
+  gmPrivate?: boolean;
 }
 
 export interface SharedRollHistoryItem extends RollData {
