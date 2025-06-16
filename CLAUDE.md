@@ -4,9 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Common Development Commands
 
-- `npm run dev` - Start development server with hot reload
+- `npm start` - Build frontend in watch mode and run worker development server concurrently
+- `npm run dev` - Start frontend development server with hot reload
+- `npm run dev:worker` - Start Cloudflare Worker development server
 - `npm run build` - Build for production
-- `npm run preview` - Preview production build locally
 - `npm run test` - Run frontend tests in watch mode
 - `npm run test:run` - Run frontend tests once
 - `npm run test:ui` - Run frontend tests with interactive UI
