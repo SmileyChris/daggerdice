@@ -2024,12 +2024,20 @@ button:disabled {
   accent-color: #4caf50;
 }
 
+/* Check Roll Controls */
+.check-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 3rem;
+}
+
 /* GM Roll Controls */
 .gm-controls {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 2rem;
+  gap: 3rem;
 }
 
 /* Mobile roll type selector in dialog */

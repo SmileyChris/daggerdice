@@ -107,53 +107,53 @@
       <div class="controls desktop-controls">
         <div class="modifiers">
           <!-- Check Roll Controls -->
-          <!-- Check Roll Modifier Controls -->
-          <div x-show="rollType === 'check'" class="modifier-controls">
-            <label>Modifier:</label>
-            <button
-              @click="modifier = Math.max(modifier - 1, -20)"
-              class="modifier-btn"
-              :disabled="isRolling"
-            >
-              -
-            </button>
-            <span class="modifier-display" x-text="modifier"></span>
-            <button
-              @click="modifier = Math.min(modifier + 1, 20)"
-              class="modifier-btn"
-              :disabled="isRolling"
-            >
-              +
-            </button>
-          </div>
-
-          <div x-show="rollType === 'check'" class="advantage-controls">
-            <label>Roll Type:</label>
-            <div class="toggle-buttons">
+          <div x-show="rollType === 'check'" class="check-controls">
+            <div class="modifier-controls">
+              <label>Modifier:</label>
               <button
-                @click="setAdvantageType('none')"
-                :class="{ 'active': advantageType === 'none' }"
-                class="toggle-btn"
+                @click="modifier = Math.max(modifier - 1, -20)"
+                class="modifier-btn"
                 :disabled="isRolling"
               >
-                Standard
+                -
               </button>
+              <span class="modifier-display" x-text="modifier"></span>
               <button
-                @click="setAdvantageType('advantage')"
-                :class="{ 'active': advantageType === 'advantage' }"
-                class="toggle-btn"
+                @click="modifier = Math.min(modifier + 1, 20)"
+                class="modifier-btn"
                 :disabled="isRolling"
               >
-                Advantage
+                +
               </button>
-              <button
-                @click="setAdvantageType('disadvantage')"
-                :class="{ 'active': advantageType === 'disadvantage' }"
-                class="toggle-btn"
-                :disabled="isRolling"
-              >
-                Disadvantage
-              </button>
+            </div>
+            <div class="advantage-controls">
+              <label>Roll Type:</label>
+              <div class="toggle-buttons">
+                <button
+                  @click="setAdvantageType('none')"
+                  :class="{ 'active': advantageType === 'none' }"
+                  class="toggle-btn"
+                  :disabled="isRolling"
+                >
+                  Standard
+                </button>
+                <button
+                  @click="setAdvantageType('advantage')"
+                  :class="{ 'active': advantageType === 'advantage' }"
+                  class="toggle-btn"
+                  :disabled="isRolling"
+                >
+                  Advantage
+                </button>
+                <button
+                  @click="setAdvantageType('disadvantage')"
+                  :class="{ 'active': advantageType === 'disadvantage' }"
+                  class="toggle-btn"
+                  :disabled="isRolling"
+                >
+                  Disadvantage
+                </button>
+              </div>
             </div>
           </div>
 
