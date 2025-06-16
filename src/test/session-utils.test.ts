@@ -418,7 +418,9 @@ describe('LocalStorage Functions', () => {
     });
 
     it('should handle localStorage errors gracefully', () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
+        // Intentionally empty for testing error handling
+      });
       vi.mocked(localStorage.setItem).mockImplementation(() => {
         throw new Error('Storage error');
       });
@@ -454,12 +456,12 @@ describe('Streamer Mode Functions', () => {
       expect(value).toBe('true');
       expect(value === 'true').toBe(true);
       expect('false' === 'true').toBe(false);
-      expect(null === 'true').toBe(false);
+      expect((null as string | null) === 'true').toBe(false);
     });
 
     it('should use boolean logic for streamer mode check', () => {
       // Test the logic pattern: localStorage.getItem('key') === 'true'
-      expect(null === 'true').toBe(false); // when not set
+      expect((null as string | null) === 'true').toBe(false); // when not set
       expect('true' === 'true').toBe(true); // when enabled
       expect('false' === 'true').toBe(false); // when disabled
       expect('other' === 'true').toBe(false); // when invalid value

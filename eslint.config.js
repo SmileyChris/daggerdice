@@ -32,6 +32,7 @@ export default [
         history: 'readonly',
         alert: 'readonly',
         crypto: 'readonly',
+        confirm: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
         setInterval: 'readonly',
@@ -53,7 +54,9 @@ export default [
         Fetcher: 'readonly',
         Env: 'readonly',
         // Node.js types
-        NodeJS: 'readonly'
+        NodeJS: 'readonly',
+        // Vite build defines
+        __APP_VERSION__: 'readonly'
       }
     },
     plugins: {

@@ -241,7 +241,7 @@ describe('Streamer Mode Features', () => {
       // Mock window.confirm to return true
       vi.stubGlobal('confirm', vi.fn(() => true));
       
-      let streamerMode = true;
+      const streamerMode = true;
       let streamerModeTemporarilyDisabled = false;
       
       const temporarilyShowRoomDetails = () => {
@@ -275,7 +275,7 @@ describe('Streamer Mode Features', () => {
       // Mock window.confirm to return false
       vi.stubGlobal('confirm', vi.fn(() => false));
       
-      let streamerMode = true;
+      const streamerMode = true;
       let streamerModeTemporarilyDisabled = false;
       
       const temporarilyShowRoomDetails = () => {
@@ -309,7 +309,7 @@ describe('Streamer Mode Features', () => {
       // Mock window.confirm to track calls
       vi.stubGlobal('confirm', vi.fn(() => true));
       
-      let streamerMode = false;
+      const streamerMode = false;
       let streamerModeTemporarilyDisabled = false;
       
       const temporarilyShowRoomDetails = () => {
@@ -330,7 +330,7 @@ describe('Streamer Mode Features', () => {
     });
 
     it('should reset temporary override when dialog is closed', () => {
-      let streamerMode = true;
+      const streamerMode = true;
       let streamerModeTemporarilyDisabled = true; // Start with override active
       let showSessionUI = true;
       

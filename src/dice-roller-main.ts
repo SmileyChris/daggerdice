@@ -144,7 +144,7 @@ function diceRoller() {
     gmModifier: 0,
     d20Value: 0,
     d20Value2: 0, // Second d20 for advantage/disadvantage
-    gmAdvantageType: "none" as "none" | "advantage" | "disadvantage",
+    gmAdvantageType: 'none' as 'none' | 'advantage' | 'disadvantage',
     gmPrivateRolls: false,
     
     // Keyboard shortcuts
@@ -177,9 +177,9 @@ function diceRoller() {
       }
     },
 
-    setGMAdvantageType(type: "none" | "advantage" | "disadvantage") {
+    setGMAdvantageType(type: 'none' | 'advantage' | 'disadvantage') {
       this.gmAdvantageType = type;
-      if (type === "none") {
+      if (type === 'none') {
         this.d20Value2 = 0;
       }
     },
@@ -195,11 +195,11 @@ function diceRoller() {
       if (document.startViewTransition) {
         document.startViewTransition(() => {
           this.rollType = type;
-          this.result = "";
+          this.result = '';
         });
       } else {
         this.rollType = type;
-        this.result = "";
+        this.result = '';
       }
     },
 
