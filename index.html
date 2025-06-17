@@ -781,33 +781,6 @@
                 </div>
               </div>
 
-              <!-- Base dice count controls -->
-              <div class="dialog-section">
-                <label>Base Dice Count:</label>
-                <div class="modifier-controls-dialog">
-                  <button
-                    @click="setBaseDiceCount(baseDiceCount - 1)"
-                    class="modifier-btn-dialog"
-                    title="Decrease dice count"
-                    :disabled="isRolling"
-                  >
-                    -
-                  </button>
-                  <span
-                    class="modifier-display-dialog"
-                    x-text="baseDiceCount"
-                  ></span>
-                  <button
-                    @click="setBaseDiceCount(baseDiceCount + 1)"
-                    class="modifier-btn-dialog"
-                    title="Increase dice count"
-                    :disabled="isRolling"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-
               <div class="dialog-section">
                 <label>
                   <input

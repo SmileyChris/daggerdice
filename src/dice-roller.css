@@ -1367,7 +1367,7 @@ button:disabled {
 
   /* Mobile base dice controls */
   .mobile-base-dice-controls {
-    background: black;
+    background: rgba(0, 0, 0, 0.9);
     padding: 0.75rem 1rem 0;
   }
 
@@ -2123,9 +2123,11 @@ button:disabled {
 
 .damage-main-controls {
   display: flex;
-  gap: 1rem;
+  gap: 3rem;
   flex-wrap: wrap;
   align-items: flex-start;
+  justify-content: center;
+  align-items: center;
 }
 
 .dice-selection {
