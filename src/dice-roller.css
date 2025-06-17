@@ -291,7 +291,7 @@ button:disabled {
     border-radius: 15px 15px 0 0;
     transform: translateY(100%);
   }
-  
+
   .roll-history-panel.visible {
     transform: translateY(0);
   }
@@ -306,7 +306,7 @@ button:disabled {
     max-height: calc(100vh - 10rem);
     transform: translateX(100%);
   }
-  
+
   .roll-history-panel.visible {
     transform: translateX(0);
   }
@@ -337,7 +337,6 @@ button:disabled {
 .history-toggle:hover {
   background-color: rgba(0, 0, 0, 0.9);
   border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
@@ -370,7 +369,7 @@ button:disabled {
     margin-bottom: 0.5rem;
     border-radius: 5px;
   }
-  
+
   .history-item:last-child {
     margin-bottom: 0;
   }
@@ -472,7 +471,6 @@ button:disabled {
 .session-toggle-btn:hover {
   background-color: rgba(0, 0, 0, 0.9);
   border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
@@ -480,7 +478,11 @@ button:disabled {
 .session-panel {
   position: fixed;
   z-index: 40;
-  background: linear-gradient(135deg, rgba(20, 20, 30, 0.98), rgba(10, 10, 20, 0.98));
+  background: linear-gradient(
+    135deg,
+    rgba(20, 20, 30, 0.98),
+    rgba(10, 10, 20, 0.98)
+  );
   border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -508,7 +510,7 @@ button:disabled {
     transform: translateY(100%);
     box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.6);
   }
-  
+
   .session-panel.visible {
     transform: translateY(0);
   }
@@ -525,13 +527,11 @@ button:disabled {
     border-radius: 16px;
     padding: 2rem;
     transform: translate(-50%, -50%) scale(0.95);
-    box-shadow: 
-      0 20px 60px rgba(0, 0, 0, 0.8),
-      0 8px 32px rgba(0, 0, 0, 0.4),
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 8px 32px rgba(0, 0, 0, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
     overflow-y: auto;
   }
-  
+
   .session-panel.visible {
     transform: translate(-50%, -50%) scale(1);
   }
@@ -594,7 +594,6 @@ button:disabled {
 .multiplayer-top-btn:hover {
   background: rgba(0, 0, 0, 0.9);
   border-color: rgba(255, 255, 255, 0.4);
-  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
@@ -662,11 +661,11 @@ button:disabled {
     padding: 0 0 1rem 0;
     border-bottom: none;
   }
-  
+
   .session-panel .dialog-close {
     display: none;
   }
-  
+
   .session-panel .dialog-content {
     padding: 0;
   }
@@ -743,7 +742,6 @@ button:disabled {
 
 .create-btn:hover:not(:disabled) {
   background: linear-gradient(135deg, #218838, #1fa886);
-  transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
 }
 
@@ -755,7 +753,6 @@ button:disabled {
 
 .join-btn:hover:not(:disabled) {
   background: linear-gradient(135deg, #0056b3, #004085);
-  transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
 }
 
@@ -767,7 +764,6 @@ button:disabled {
 
 .leave-btn:hover {
   background: linear-gradient(135deg, #c82333, #bd2130);
-  transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
 }
 
@@ -779,6 +775,8 @@ button:disabled {
 .session-actions {
   display: flex;
   gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
 }
 
 .session-actions .session-btn {
@@ -794,7 +792,6 @@ button:disabled {
 
 .secondary-btn:hover:not(:disabled) {
   background: linear-gradient(135deg, #5a6268, #545b62);
-  transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3);
 }
 
@@ -806,11 +803,11 @@ button:disabled {
   .desktop-only {
     display: none;
   }
-  
+
   .session-actions {
     display: block;
   }
-  
+
   .session-actions .session-btn {
     width: 100%;
     margin-bottom: 0.75rem;
@@ -835,34 +832,139 @@ button:disabled {
   text-align: center;
 }
 
-.session-details {
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+/* Room title in header */
+.room-title {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
-.session-id-display {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.room-name-line {
   margin-bottom: 0.5rem;
 }
 
-.session-id {
-  font-family: monospace;
-  background-color: rgba(255, 255, 255, 0.1);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
+.room-code-line {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
 }
 
-.session-short-code {
-  opacity: 0.7;
-  font-size: 0.85em;
+.room-code-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.room-title .room-friendly-name {
+  background: linear-gradient(135deg, #ffffff, #e0e7ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.room-title .room-code {
+  color: #ffffff;
+  font-family: "Courier New", monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.room-hidden {
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+  cursor: pointer;
+}
+
+.room-hidden:hover {
+  color: #ffffff;
+}
+
+/* Floating QR code */
+.qr-code-float {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  background: white;
+  padding: 0.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile: adjust QR position for smaller dialogs */
+@media (max-width: 768px) {
+  .qr-code-float {
+    top: 1rem;
+    right: 1rem;
+  }
+}
+
+.qr-code {
+  width: 80px;
+  height: 80px;
+  display: block;
+  border-radius: 4px;
+}
+
+/* Room controls */
+.room-controls {
+  margin-bottom: 1.5rem;
 }
 
 .session-id-hidden {
+  color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.session-id-hidden:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* Players section */
+.players-section {
+  margin-bottom: 1.5rem;
+}
+
+.players-section h4 {
+  margin: 0 0 1rem 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Connection status */
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.connection-status.connected {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.connection-status.connecting {
+  background: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+}
+
+.connection-status.disconnected,
+.connection-status.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
   transition: all 0.2s ease;
   border: 1px solid transparent;
 }
@@ -873,86 +975,43 @@ button:disabled {
   transform: scale(1.05);
 }
 
-.qr-code-container {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.qr-code-section {
-  text-align: center;
-}
-
-.qr-code-section strong {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.qr-code-wrapper {
-  display: inline-block;
-  padding: 8px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.qr-code {
-  display: block;
-  width: 120px;
-  height: 120px;
-  margin: 0 auto;
-}
-
+/* Copy button */
 .copy-btn {
-  background-color: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  background: rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  color: #10b981;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
+  font-weight: 500;
   transition: all 0.2s ease;
 }
 
 .copy-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(52, 211, 153, 0.25);
+  border-color: rgba(52, 211, 153, 0.5);
+  color: #ffffff;
 }
 
-.connection-status {
-  font-size: 0.9rem;
-  font-weight: 500;
+.copy-btn:active {
+  background: rgba(52, 211, 153, 0.3);
 }
 
-.connection-status.connected {
-  color: #28a745;
-}
-
-.connection-status.connecting {
-  color: #ffc107;
-}
-
-.connection-status.disconnected,
-.connection-status.error {
-  color: #dc3545;
-}
-
+/* Players list */
 .players-list {
-  margin-bottom: 1rem;
+  /* Remove all extra styling */
 }
 
-.players-container {
-  margin-top: 0.5rem;
-}
-
+/* Player items */
 .player-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .player-item:last-child {
@@ -960,8 +1019,14 @@ button:disabled {
 }
 
 .player-item.self {
-  font-weight: bold;
-  color: #28a745;
+  font-weight: 600;
+  color: #6e8efb;
+}
+
+.player-item .inactive {
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+  font-size: 0.8rem;
 }
 
 /* Streamer Mode Styles */
@@ -999,7 +1064,7 @@ button:disabled {
 }
 
 .toggle-slider::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 2px;
   left: 2px;
@@ -1082,7 +1147,7 @@ button:disabled {
     /* Visual feedback on tap */
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
   }
-  
+
   /* Hide desktop controls on mobile */
   .desktop-controls {
     display: none;
@@ -1204,7 +1269,6 @@ button:disabled {
 
   .bottom-roll-button:hover:not(:disabled) {
     background-color: #0056b3;
-    transform: translateY(-1px);
     box-shadow: none;
   }
 
@@ -1681,7 +1745,6 @@ button:disabled {
   .desktop-dialog-close {
     display: none !important;
   }
-
 }
 
 /* Extra small screens */
@@ -1777,7 +1840,6 @@ button:disabled {
     margin-bottom: 115px; /* Slightly less space for smaller bottom bar */
   }
 
-
   .mobile-dialog {
     bottom: 120px;
   }
@@ -1791,24 +1853,24 @@ button:disabled {
     display: flex;
     flex-direction: column;
   }
-  
+
   /* Desktop: hide close button, adjust layout */
   .roll-history-panel .dialog-header {
     padding: 0 0 1rem 0;
     border-bottom: none;
     flex-shrink: 0;
   }
-  
+
   .roll-history-panel .dialog-close {
     display: none;
   }
-  
+
   .roll-history-panel .dialog-content {
     padding: 0;
     flex: 1;
     overflow: hidden;
   }
-  
+
   .history-list {
     max-height: calc(100vh - 12rem);
   }
@@ -2209,7 +2271,6 @@ button:disabled {
   border-left: 3px solid #4caf50;
 }
 
-
 /* Toast styling for new roll types */
 .toast-dice .damage {
   color: #ff6b35;
@@ -2580,38 +2641,38 @@ button:disabled {
   .keyboard-help-overlay {
     padding: 16px;
   }
-  
+
   .keyboard-help-dialog {
     max-height: 85vh;
   }
-  
+
   .keyboard-help-header {
     padding: 16px 20px 12px;
   }
-  
+
   .keyboard-help-header h3 {
     font-size: 1.3rem;
   }
-  
+
   .keyboard-help-content {
     padding: 16px 20px 20px;
   }
-  
+
   .shortcut-section {
     margin-bottom: 20px;
   }
-  
+
   .shortcut-item {
     gap: 10px;
     margin-bottom: 10px;
   }
-  
+
   .shortcut-item kbd {
     min-width: 28px;
     padding: 3px 6px;
     font-size: 0.85rem;
   }
-  
+
   .shortcut-item span {
     font-size: 0.9rem;
   }
@@ -2640,7 +2701,6 @@ button:disabled {
   color: rgba(255, 255, 255, 0.9);
   background-color: rgba(255, 255, 255, 0.1);
 }
-
 
 /* Version display styles */
 .desktop-version-display {
@@ -2683,7 +2743,7 @@ button:disabled {
   .desktop-version-display {
     display: none;
   }
-  
+
   .desktop-github-link {
     display: none;
   }

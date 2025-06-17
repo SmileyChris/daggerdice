@@ -616,6 +616,15 @@ function diceRoller() {
       return this.sessionId ? getShortCode(this.sessionId) : '';
     },
 
+    get formattedRoomName() {
+      if (!this.sessionId) return '';
+      // Convert "kind-monk" to "Kind Monk Room"
+      return this.sessionId
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ') + ' Room';
+    },
+
     handleRoomIdChange() {
       const input = this.joinSessionId.trim();
       

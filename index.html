@@ -2,16 +2,25 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
     <link rel="icon" href="/src/assets/favicon.png" />
     <title>DaggerDice - Daggerheart RPG Dice Roller</title>
-    <meta name="description" content="A 3D dice rolling web application designed for the Daggerheart RPG system, featuring Hope/Fear mechanics and real-time multiplayer sessions." />
-    <meta name="keywords" content="daggerheart, rpg, dice, roller, hope, fear, multiplayer, tabletop, gaming, d12" />
+    <meta
+      name="description"
+      content="A 3D dice rolling web application designed for the Daggerheart RPG system, featuring Hope/Fear mechanics and real-time multiplayer sessions."
+    />
+    <meta
+      name="keywords"
+      content="daggerheart, rpg, dice, roller, hope, fear, multiplayer, tabletop, gaming, d12"
+    />
     <meta name="author" content="DaggerDice" />
-    
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
-    
+
     <!-- Mobile browser theme colors and PWA settings -->
     <meta name="theme-color" content="#6e8efb" />
     <meta name="msapplication-navbutton-color" content="#6e8efb" />
@@ -19,32 +28,66 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="DaggerDice" />
     <meta name="mobile-web-app-capable" content="yes" />
-    
+
     <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    
+
     <!-- Additional PWA icons -->
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
-    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
-    
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/icons/icon-192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="/icons/icon-512.png"
+    />
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://daggerdice.smileychris.workers.dev/" />
-    <meta property="og:title" content="DaggerDice - Daggerheart RPG Dice Roller" />
-    <meta property="og:description" content="Roll Hope & Fear dice for Daggerheart RPG with realistic 3D physics and multiplayer sessions. Perfect for tabletop gaming." />
-    <meta property="og:image" content="https://daggerdice.smileychris.workers.dev/icons/icon-512.png" />
+    <meta
+      property="og:url"
+      content="https://daggerdice.smileychris.workers.dev/"
+    />
+    <meta
+      property="og:title"
+      content="DaggerDice - Daggerheart RPG Dice Roller"
+    />
+    <meta
+      property="og:description"
+      content="Roll Hope & Fear dice for Daggerheart RPG with realistic 3D physics and multiplayer sessions. Perfect for tabletop gaming."
+    />
+    <meta
+      property="og:image"
+      content="https://daggerdice.smileychris.workers.dev/icons/icon-512.png"
+    />
     <meta property="og:image:width" content="512" />
     <meta property="og:image:height" content="512" />
     <meta property="og:site_name" content="DaggerDice" />
-    
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://daggerdice.smileychris.workers.dev/" />
-    <meta property="twitter:title" content="DaggerDice - Daggerheart RPG Dice Roller" />
-    <meta property="twitter:description" content="Roll Hope & Fear dice for Daggerheart RPG with realistic 3D physics and multiplayer sessions." />
-    <meta property="twitter:image" content="https://daggerdice.smileychris.workers.dev/icons/icon-512.png" />
-    
+    <meta
+      property="twitter:url"
+      content="https://daggerdice.smileychris.workers.dev/"
+    />
+    <meta
+      property="twitter:title"
+      content="DaggerDice - Daggerheart RPG Dice Roller"
+    />
+    <meta
+      property="twitter:description"
+      content="Roll Hope & Fear dice for Daggerheart RPG with realistic 3D physics and multiplayer sessions."
+    />
+    <meta
+      property="twitter:image"
+      content="https://daggerdice.smileychris.workers.dev/icons/icon-512.png"
+    />
+
     <!-- Microsoft Tiles -->
     <meta name="msapplication-TileColor" content="#6e8efb" />
     <meta name="msapplication-TileImage" content="/icons/icon-192.png" />
@@ -76,7 +119,11 @@
         <button @click="toggleSessionUI()" class="multiplayer-top-btn">
           <span x-show="sessionMode === 'solo'">🎲 Play with Friends</span>
           <span x-show="sessionMode === 'multiplayer'">
-            <span x-show="connectionStatus === 'connected'" :class="{ 'connection-waiting': connectionStatus === 'connected' && connectedPlayers.length === 0 }">🟢</span>
+            <span
+              x-show="connectionStatus === 'connected'"
+              :class="{ 'connection-waiting': connectionStatus === 'connected' && connectedPlayers.length === 0 }"
+              >🟢</span
+            >
             <span x-show="connectionStatus === 'connecting'">🟡</span>
             <span
               x-show="connectionStatus === 'disconnected' || connectionStatus === 'error'"
@@ -94,8 +141,11 @@
         :class="{ 'no-result': !result, 'has-result': result }"
       >
         <!-- Mobile tap area for history (invisible overlay) -->
-        <div class="mobile-history-tap-area" @click="showHistory = !showHistory"></div>
-        
+        <div
+          class="mobile-history-tap-area"
+          @click="showHistory = !showHistory"
+        ></div>
+
         <!-- Logo section - shows logo-text when no result -->
         <div class="logo-container" x-show="!result">
           <img
@@ -356,8 +406,8 @@
             <!-- Private Rolls Checkbox (multiplayer only) -->
             <div x-show="sessionMode === 'multiplayer'" class="gm-options">
               <label>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   x-model="gmPrivateRolls"
                   :disabled="isRolling"
                 />
@@ -504,7 +554,9 @@
                   <!-- Damage roll modifiers -->
                   <template x-if="rollType === 'damage'">
                     <span>
-                      <span x-show="bonusDieEnabled">+d<span x-text="bonusDieType"></span></span>
+                      <span x-show="bonusDieEnabled"
+                        >+d<span x-text="bonusDieType"></span
+                      ></span>
                       <span x-show="isCritical"> C</span>
                       <span x-show="hasResistance"> R</span>
                     </span>
@@ -532,7 +584,11 @@
                 :class="connectionStatus"
                 title="Multiplayer Session"
               >
-                <span x-show="connectionStatus === 'connected'" :class="{ 'connection-waiting': connectionStatus === 'connected' && connectedPlayers.length === 0 }">🟢</span>
+                <span
+                  x-show="connectionStatus === 'connected'"
+                  :class="{ 'connection-waiting': connectionStatus === 'connected' && connectedPlayers.length === 0 }"
+                  >🟢</span
+                >
                 <span x-show="connectionStatus === 'connecting'">🟡</span>
                 <span
                   x-show="connectionStatus === 'disconnected' || connectionStatus === 'error'"
@@ -791,11 +847,14 @@
                 </div>
               </div>
               <!-- Private Rolls Checkbox (multiplayer only) -->
-              <div x-show="sessionMode === 'multiplayer'" class="dialog-section">
+              <div
+                x-show="sessionMode === 'multiplayer'"
+                class="dialog-section"
+              >
                 <div class="dialog-checkbox-group">
                   <label class="dialog-checkbox-label">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       x-model="gmPrivateRolls"
                       :disabled="isRolling"
                     />
@@ -851,7 +910,11 @@
                 <span class="action-btn-icon">
                   <span x-show="sessionMode === 'solo'">🎲</span>
                   <span x-show="sessionMode === 'multiplayer'">
-                    <span x-show="connectionStatus === 'connected'" :class="{ 'connection-waiting': connectionStatus === 'connected' && connectedPlayers.length === 0 }">🟢</span>
+                    <span
+                      x-show="connectionStatus === 'connected'"
+                      :class="{ 'connection-waiting': connectionStatus === 'connected' && connectedPlayers.length === 0 }"
+                      >🟢</span
+                    >
                     <span x-show="connectionStatus === 'connecting'">🟡</span>
                     <span
                       x-show="connectionStatus === 'disconnected' || connectionStatus === 'error'"
@@ -867,7 +930,7 @@
                 </span>
               </button>
             </div>
-            
+
             <!-- Version info with GitHub link -->
             <div class="version-info">
               <a
@@ -877,15 +940,21 @@
                 class="github-link-mobile"
                 title="View on GitHub"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                  />
                 </svg>
               </a>
               <span x-text="appVersion"></span>
             </div>
           </div>
         </div>
-
 
         <!-- Backdrop to close dialogs -->
         <div
@@ -909,147 +978,170 @@
       >
         <div class="dialog-header">
           <h3 x-show="sessionMode === 'solo'">Multiplayer Room</h3>
-          <h3 x-show="sessionMode === 'multiplayer'">Room Info</h3>
+          <div x-show="sessionMode === 'multiplayer'" class="room-title">
+            <div class="room-name-line" x-show="!effectiveStreamerMode">
+              <span
+                class="room-friendly-name"
+                x-text="formattedRoomName"
+              ></span>
+            </div>
+            <div class="room-code-line">
+              <div x-show="!effectiveStreamerMode">
+                <span class="room-code-label">Code:</span>
+                <span class="room-code" x-text="sessionShortCode"></span>
+              </div>
+              <div x-show="effectiveStreamerMode">
+                <span
+                  class="room-hidden"
+                  @click="temporarilyShowRoomDetails()"
+                  title="Click to temporarily reveal room details"
+                  >🙈 Room Hidden</span
+                >
+              </div>
+              <div class="connection-status" :class="connectionStatus">
+                <span x-show="connectionStatus === 'connected'"
+                  >🟢 Connected</span
+                >
+                <span x-show="connectionStatus === 'connecting'"
+                  >🟡 Connecting...</span
+                >
+                <span x-show="connectionStatus === 'disconnected'"
+                  >🔴 Disconnected</span
+                >
+                <span x-show="connectionStatus === 'error'">❌ Error</span>
+              </div>
+            </div>
+          </div>
           <button @click="toggleSessionUI()" class="dialog-close">✕</button>
         </div>
 
         <div class="dialog-content">
           <!-- Solo mode: session creation/joining -->
-          <form x-show="sessionMode === 'solo'" class="session-join" autocomplete="off" @submit.prevent="(!playerName.trim() || connectionStatus === 'connecting' || !isJoinSessionValid) ? null : (joinSessionId.trim() ? joinSession() : createSession())">
+          <form
+            x-show="sessionMode === 'solo'"
+            class="session-join"
+            autocomplete="off"
+            @submit.prevent="(!playerName.trim() || connectionStatus === 'connecting' || !isJoinSessionValid) ? null : (joinSessionId.trim() ? joinSession() : createSession())"
+          >
             <div class="session-input">
-            <input
-              x-model="playerName"
-              placeholder="Your name"
-              required
-              maxlength="20"
-              class="player-name-input"
-            />
-          </div>
-
-          <div class="streamer-mode-toggle">
-            <label class="toggle-switch">
-              <input 
-                type="checkbox" 
-                @change="toggleStreamerMode()" 
-                :checked="streamerMode"
+              <input
+                x-model="playerName"
+                placeholder="Your name"
+                required
+                maxlength="20"
+                class="player-name-input"
               />
-              <span class="toggle-slider"></span>
-              <span class="toggle-label">Hide Room Details</span>
-            </label>
-          </div>
+            </div>
 
-          <div class="session-input">
-            <input
-              x-model="joinSessionId"
-              placeholder="Room ID or room link (optional)"
-              class="session-id-input"
-              :type="effectiveStreamerMode ? 'password' : 'search'"
-              autocomplete="new-password"
-              @input="handleRoomIdChange()"
-              @paste="setTimeout(() => handleRoomIdChange(), 0)"
-            />
-          </div>
+            <div class="streamer-mode-toggle">
+              <label class="toggle-switch">
+                <input
+                  type="checkbox"
+                  @change="toggleStreamerMode()"
+                  :checked="streamerMode"
+                />
+                <span class="toggle-slider"></span>
+                <span class="toggle-label">Hide Room Details</span>
+              </label>
+            </div>
 
-          <div class="session-action">
-            <button
-              type="submit"
-              :disabled="!playerName.trim() || connectionStatus === 'connecting' || !isJoinSessionValid"
-              class="session-btn primary-btn"
+            <div class="session-input">
+              <input
+                x-model="joinSessionId"
+                placeholder="Room ID or room link (optional)"
+                class="session-id-input"
+                :type="effectiveStreamerMode ? 'password' : 'search'"
+                autocomplete="new-password"
+                @input="handleRoomIdChange()"
+                @paste="setTimeout(() => handleRoomIdChange(), 0)"
+              />
+            </div>
+
+            <div class="session-action">
+              <button
+                type="submit"
+                :disabled="!playerName.trim() || connectionStatus === 'connecting' || !isJoinSessionValid"
+                class="session-btn primary-btn"
+              >
+                <span x-show="connectionStatus === 'connecting'">
+                  <span
+                    x-text="joinSessionId.trim() ? 'Joining...' : 'Creating...'"
+                  ></span>
+                </span>
+                <span x-show="connectionStatus !== 'connecting'">
+                  <span
+                    x-text="joinSessionId.trim() ? 'Join Room' : 'Create New Room'"
+                  ></span>
+                </span>
+              </button>
+            </div>
+
+            <div x-show="connectionStatus === 'error'" class="session-error">
+              Connection failed. Please try again.
+            </div>
+          </form>
+
+          <!-- Multiplayer mode: room info -->
+          <div x-show="sessionMode === 'multiplayer'" class="session-info">
+            <!-- QR Code in top right -->
+            <div
+              class="qr-code-float"
+              x-show="sessionId && !effectiveStreamerMode"
             >
-              <span x-show="connectionStatus === 'connecting'">
-                <span
-                  x-text="joinSessionId.trim() ? 'Joining...' : 'Creating...'"
-                ></span>
-              </span>
-              <span x-show="connectionStatus !== 'connecting'">
-                <span
-                  x-text="joinSessionId.trim() ? 'Join Room' : 'Create New Room'"
-                ></span>
-              </span>
-            </button>
-          </div>
+              <img
+                :src="generateQRCode(sessionId)"
+                alt="QR Code to join room"
+                class="qr-code"
+                x-show="sessionId"
+                title="Scan to join room"
+              />
+            </div>
 
-          <div x-show="connectionStatus === 'error'" class="session-error">
-            Connection failed. Please try again.
-          </div>
-        </form>
-
-        <!-- Multiplayer mode: room info -->
-        <div x-show="sessionMode === 'multiplayer'" class="session-info">
-          <div class="session-details">
-            <div class="session-id-display">
-              <strong>Room code:</strong>
-              <span x-show="!effectiveStreamerMode" class="session-id" x-text="sessionShortCode"></span>
-              <span 
-                x-show="effectiveStreamerMode" 
-                class="session-id session-id-hidden" 
-                @click="temporarilyShowRoomDetails()"
-                title="Click to temporarily reveal room details"
-              >🙈 ••••••</span>
+            <!-- Copy link controls -->
+            <div class="room-controls">
               <button
                 @click="copySessionLink()"
                 class="copy-btn"
                 title="Copy room link"
+                x-show="!effectiveStreamerMode"
               >
-                📋
+                📋 Copy Link
               </button>
             </div>
 
-            <div class="qr-code-container" x-show="sessionId && !effectiveStreamerMode">
-              <div class="qr-code-section">
-                <strong>Scan to Join:</strong>
-                <div class="qr-code-wrapper">
-                  <img 
-                    :src="generateQRCode(sessionId)" 
-                    alt="QR Code to join room"
-                    class="qr-code"
-                    x-show="sessionId"
-                  />
+            <!-- Players list -->
+            <div class="players-section">
+              <h4>
+                Players (<span x-text="connectedPlayers.length + 1"></span>)
+              </h4>
+
+              <div class="players-list">
+                <div class="player-item self">
+                  <span x-text="playerName + ' (you)'"></span>
                 </div>
+                <template x-for="player in connectedPlayers" :key="player.id">
+                  <div class="player-item">
+                    <span x-text="player.name"></span>
+                    <span x-show="!player.isActive" class="inactive"
+                      >(away)</span
+                    >
+                  </div>
+                </template>
               </div>
             </div>
 
-            <div class="connection-status" :class="connectionStatus">
-              <span x-show="connectionStatus === 'connected'"
-                >🟢 Connected</span
+            <div class="session-actions">
+              <button
+                @click="toggleSessionUI()"
+                class="session-btn secondary-btn desktop-only"
               >
-              <span x-show="connectionStatus === 'connecting'"
-                >🟡 Connecting...</span
-              >
-              <span x-show="connectionStatus === 'disconnected'"
-                >🔴 Disconnected</span
-              >
-              <span x-show="connectionStatus === 'error'">❌ Error</span>
+                OK
+              </button>
+              <button @click="leaveSession()" class="session-btn leave-btn">
+                Leave Room
+              </button>
             </div>
           </div>
-
-          <div class="players-list">
-            <strong
-              >Players (<span x-text="connectedPlayers.length + 1"></span
-              >):</strong
-            >
-            <div class="players-container">
-              <div class="player-item self">
-                <span x-text="playerName + ' (you)'"></span>
-              </div>
-              <template x-for="player in connectedPlayers" :key="player.id">
-                <div class="player-item">
-                  <span x-text="player.name"></span>
-                  <span x-show="!player.isActive" class="inactive">(away)</span>
-                </div>
-              </template>
-            </div>
-          </div>
-
-          <div class="session-actions">
-            <button @click="toggleSessionUI()" class="session-btn secondary-btn desktop-only">
-              OK
-            </button>
-            <button @click="leaveSession()" class="session-btn leave-btn">
-              Leave Room
-            </button>
-          </div>
-        </div>
         </div>
       </div>
 
@@ -1069,15 +1161,10 @@
       </button>
 
       <!-- Unified Roll History Dialog -->
-      <div
-        class="roll-history-panel"
-        :class="{ 'visible': showHistory }"
-      >
+      <div class="roll-history-panel" :class="{ 'visible': showHistory }">
         <div class="dialog-header">
           <h3>Roll History</h3>
-          <button @click="showHistory = false" class="dialog-close">
-            ✕
-          </button>
+          <button @click="showHistory = false" class="dialog-close">✕</button>
         </div>
 
         <div class="dialog-content">
@@ -1109,10 +1196,14 @@
                         x-if="!roll.rollType || roll.rollType === 'check'"
                       >
                         <span>
-                          <template x-if="roll.result.includes('Critical Success')">
+                          <template
+                            x-if="roll.result.includes('Critical Success')"
+                          >
                             <span><strong>Critical Success!</strong></span>
                           </template>
-                          <template x-if="!roll.result.includes('Critical Success')">
+                          <template
+                            x-if="!roll.result.includes('Critical Success')"
+                          >
                             <span>
                               <strong x-text="roll.total"></strong>
                               <span
@@ -1164,17 +1255,20 @@
                         <span
                           x-text="roll.baseDiceCount + 'd' + roll.baseDiceType"
                         ></span>
-                        <span x-show="roll.baseDiceValues && roll.baseDiceValues.length > 0">
-                          (<span x-text="roll.baseDiceValues.join(', ')"></span>)
-                        </span><span x-show="roll.bonusDieEnabled && roll.bonusDieValue !== undefined"
-                          >, Bonus d<span x-text="roll.bonusDieType"></span> (<span x-text="roll.bonusDieValue"></span>)</span
+                        <span
+                          x-show="roll.baseDiceValues && roll.baseDiceValues.length > 0"
+                        >
+                          (<span x-text="roll.baseDiceValues.join(', ')"></span
+                          >) </span
+                        ><span
+                          x-show="roll.bonusDieEnabled && roll.bonusDieValue !== undefined"
+                          >, Bonus d<span x-text="roll.bonusDieType"></span>
+                          (<span x-text="roll.bonusDieValue"></span>)</span
                         ><span x-show="roll.isCritical"
                           >, <span class="critical-text">Critical</span></span
                         ><span x-show="roll.hasResistance"
                           >,
-                          <span class="resistance-text"
-                            >Resistance</span
-                          ></span
+                          <span class="resistance-text">Resistance</span></span
                         >
                       </span>
                     </template>
@@ -1186,7 +1280,11 @@
                           <span x-text="roll.d20Value"></span>
                         </span>
                         <span x-show="roll.gmAdvantageType !== 'none'">
-                          <span x-text="roll.d20Value"></span> and <span x-text="roll.d20Value2"></span> w/ <span x-text="roll.gmAdvantageType === 'advantage' ? 'Adv.' : 'Dis.'"></span>
+                          <span x-text="roll.d20Value"></span> and
+                          <span x-text="roll.d20Value2"></span> w/
+                          <span
+                            x-text="roll.gmAdvantageType === 'advantage' ? 'Adv.' : 'Dis.'"
+                          ></span>
                         </span>
                         <span x-show="roll.gmModifier !== 0"
                           >, Modifier:
@@ -1204,113 +1302,115 @@
           </div>
         </div>
       </div>
-      
+
       <!-- Keyboard Shortcuts Help Dialog -->
-    <div 
-      class="keyboard-help-overlay"
-      x-show="showKeyboardHelp"
-      @click.self="showKeyboardHelp = false"
-      x-transition:enter="transition ease-out duration-200"
-      x-transition:enter-start="opacity-0"
-      x-transition:enter-end="opacity-100"
-      x-transition:leave="transition ease-in duration-150"
-      x-transition:leave-start="opacity-100"
-      x-transition:leave-end="opacity-0"
-    >
-      <div class="keyboard-help-dialog">
-        <div class="keyboard-help-header">
-          <h3>Keyboard Shortcuts</h3>
-          <button 
-            @click="showKeyboardHelp = false"
-            class="close-dialog-btn"
-            title="Close"
-          >
-            ✕
-          </button>
-        </div>
-        
-        <div class="keyboard-help-content">
-          <div class="shortcut-section">
-            <h4>Roll Types</h4>
-            <div class="shortcut-item">
-              <kbd>C</kbd>
-              <span>Switch to Check rolls</span>
-            </div>
-            <div class="shortcut-item">
-              <kbd>D</kbd>
-              <span>Switch to Damage rolls</span>
-            </div>
-            <div class="shortcut-item">
-              <kbd>G</kbd>
-              <span>Switch to GM rolls</span>
-            </div>
+      <div
+        class="keyboard-help-overlay"
+        x-show="showKeyboardHelp"
+        @click.self="showKeyboardHelp = false"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+      >
+        <div class="keyboard-help-dialog">
+          <div class="keyboard-help-header">
+            <h3>Keyboard Shortcuts</h3>
+            <button
+              @click="showKeyboardHelp = false"
+              class="close-dialog-btn"
+              title="Close"
+            >
+              ✕
+            </button>
           </div>
 
-          <div class="shortcut-section">
-            <h4>Modifiers</h4>
-            <div class="shortcut-item">
-              <kbd>←</kbd>
-              <span>Decrease modifier/dice count</span>
+          <div class="keyboard-help-content">
+            <div class="shortcut-section">
+              <h4>Roll Types</h4>
+              <div class="shortcut-item">
+                <kbd>C</kbd>
+                <span>Switch to Check rolls</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>D</kbd>
+                <span>Switch to Damage rolls</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>G</kbd>
+                <span>Switch to GM rolls</span>
+              </div>
             </div>
-            <div class="shortcut-item">
-              <kbd>→</kbd>
-              <span>Increase modifier/dice count</span>
-            </div>
-            <div class="shortcut-item">
-              <kbd>↑</kbd>
-              <span>Increase dice type (Damage)</span>
-            </div>
-            <div class="shortcut-item">
-              <kbd>↓</kbd>
-              <span>Decrease dice type (Damage)</span>
-            </div>
-          </div>
 
-          <div class="shortcut-section">
-            <h4>Actions</h4>
-            <div class="shortcut-item">
-              <kbd>Space</kbd>
-              <span>Roll dice</span>
+            <div class="shortcut-section">
+              <h4>Modifiers</h4>
+              <div class="shortcut-item">
+                <kbd>←</kbd>
+                <span>Decrease modifier/dice count</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>→</kbd>
+                <span>Increase modifier/dice count</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>↑</kbd>
+                <span>Increase dice type (Damage)</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>↓</kbd>
+                <span>Decrease dice type (Damage)</span>
+              </div>
             </div>
-            <div class="shortcut-item">
-              <kbd>H</kbd>
-              <span>Toggle roll history</span>
-            </div>
-            <div class="shortcut-item">
-              <kbd>M</kbd>
-              <span>Toggle multiplayer panel</span>
-            </div>
-            <div class="shortcut-item">
-              <kbd>?</kbd>
-              <span>Show this help</span>
-            </div>
-            <div class="shortcut-item">
-              <kbd>Esc</kbd>
-              <span>Close dialogs</span>
+
+            <div class="shortcut-section">
+              <h4>Actions</h4>
+              <div class="shortcut-item">
+                <kbd>Space</kbd>
+                <span>Roll dice</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>H</kbd>
+                <span>Toggle roll history</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>M</kbd>
+                <span>Toggle multiplayer panel</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>?</kbd>
+                <span>Show this help</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>Esc</kbd>
+                <span>Close dialogs</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    
-    <!-- Desktop GitHub link -->
-    <div class="desktop-github-link">
-      <a
-        href="https://github.com/SmileyChris/daggerdice"
-        target="_blank"
-        rel="noopener noreferrer"
-        title="View on GitHub"
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-        </svg>
-      </a>
-    </div>
-    
-    <!-- Desktop version display -->
-    <div class="desktop-version-display">
-      <span x-text="appVersion"></span>
-    </div>
+
+      <!-- Desktop GitHub link -->
+      <div class="desktop-github-link">
+        <a
+          href="https://github.com/SmileyChris/daggerdice"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="View on GitHub"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+            />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Desktop version display -->
+      <div class="desktop-version-display">
+        <span x-text="appVersion"></span>
+      </div>
     </div>
 
     <!-- Import the built JavaScript module -->
