@@ -29,8 +29,10 @@ import {
   clearSavedSessionData,
   clearLastSessionId,
   savePlayerName,
-  saveLastSessionId
+  saveLastSessionId,
+  getShortCode
 } from './session/utils.js';
+import { sessionIdToFriendlyName } from './session/room-names.js';
 
 // Type declarations for missing modules
 interface DiceBoxInstance {
@@ -601,11 +603,17 @@ function diceRoller() {
     },
 
     get isJoinSessionValid() {
-      return !this.joinSessionId.trim() || isValidSessionId(this.joinSessionId.trim());
+      const trimmed = this.joinSessionId.trim();
+      // Empty is valid (for creating room), non-empty must be valid (for joining)
+      return !trimmed || isValidSessionId(trimmed);
     },
 
     get effectiveStreamerMode() {
       return this.streamerMode && !this.streamerModeTemporarilyDisabled;
+    },
+
+    get sessionShortCode() {
+      return this.sessionId ? getShortCode(this.sessionId) : '';
     },
 
     handleRoomIdChange() {
@@ -620,21 +628,15 @@ function diceRoller() {
         }
       }
       
-      // Convert to uppercase
-      this.joinSessionId = this.joinSessionId.toUpperCase();
-      
       // Clear localStorage if room ID is empty
-      if (!this.joinSessionId.trim()) {
+      if (!input) {
         clearLastSessionId();
       }
     },
 
     async createSession() {
-      if (!this.playerName.trim()) {
-        alert('Please enter your name');
-        return;
-      }
-
+      // Form validation ensures player name is filled before button is enabled
+      
       // Prevent multiple concurrent connection attempts
       if (this.connectionStatus === 'connecting') {
         console.warn('Already connecting, please wait');
@@ -675,8 +677,17 @@ function diceRoller() {
           saveLastSessionId(sessionId);
           
           // Update URL without page reload (unless in streamer mode)
-          if (!this.streamerMode) {
-            history.pushState({}, '', `/room/${sessionId}`);
+          // Only update URL if we're not already in a room URL to prevent oscillation
+          if (!this.streamerMode && !window.location.pathname.startsWith('/room/')) {
+            // Convert short codes to friendly names for better UX
+            let urlSessionId = sessionId;
+            if (/^[0-9A-Z]{3}$/i.test(sessionId)) {
+              const friendlyName = sessionIdToFriendlyName(sessionId);
+              if (friendlyName !== sessionId) {
+                urlSessionId = friendlyName;
+              }
+            }
+            history.pushState({}, '', `/room/${urlSessionId}`);
           }
           
           // Start heartbeat and connection monitoring
@@ -688,14 +699,26 @@ function diceRoller() {
       } catch (error) {
         console.error('Failed to create session:', error);
         this.connectionStatus = 'error';
-        alert('Failed to create room. Please try again.');
+        
+        // Provide more specific error message
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        if (errorMessage.includes('WebSocket') || errorMessage.includes('connection')) {
+          alert('Failed to connect. Please check your internet connection and try again.');
+        } else if (errorMessage.includes('session')) {
+          alert('Failed to create room. Please try again or contact support if the problem persists.');
+        } else {
+          alert('Failed to create room. Please try again.');
+        }
+        
         this.leaveSession();
       }
     },
 
     async joinSession() {
-      if (!this.playerName.trim() || !this.joinSessionId.trim()) {
-        alert('Please enter your name and room ID');
+      // Form validation ensures these are valid before button is enabled
+      const normalizedSessionId = normalizeSessionId(this.joinSessionId);
+      if (!normalizedSessionId) {
+        console.error('Invalid session ID passed validation');
         return;
       }
 
@@ -712,13 +735,6 @@ function diceRoller() {
         this.sessionClient = null;
         // Small delay to ensure cleanup
         await new Promise(resolve => setTimeout(resolve, 100));
-      }
-
-      // Normalize session ID to uppercase
-      const normalizedSessionId = normalizeSessionId(this.joinSessionId);
-      if (!normalizedSessionId) {
-        alert('Room ID must be exactly 6 characters (letters and numbers only)');
-        return;
       }
 
       try {
@@ -745,8 +761,17 @@ function diceRoller() {
           saveLastSessionId(normalizedSessionId);
           
           // Update URL without page reload and use normalized ID (unless in streamer mode)
-          if (!this.streamerMode) {
-            history.pushState({}, '', `/room/${normalizedSessionId}`);
+          // Only update URL if we're not already in a room URL to prevent oscillation
+          if (!this.streamerMode && !window.location.pathname.startsWith('/room/')) {
+            // Convert short codes to friendly names for better UX
+            let urlSessionId = normalizedSessionId;
+            if (/^[0-9A-Z]{3}$/i.test(normalizedSessionId)) {
+              const friendlyName = sessionIdToFriendlyName(normalizedSessionId);
+              if (friendlyName !== normalizedSessionId) {
+                urlSessionId = friendlyName;
+              }
+            }
+            history.pushState({}, '', `/room/${urlSessionId}`);
           }
           
           // Start heartbeat
@@ -757,7 +782,17 @@ function diceRoller() {
       } catch (error) {
         console.error('Failed to join session:', error);
         this.connectionStatus = 'error';
-        alert('Failed to join room. Please check the room ID and try again.');
+        
+        // Provide more specific error message
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        if (errorMessage.includes('WebSocket') || errorMessage.includes('connection')) {
+          alert('Failed to connect to room. Please check your internet connection and try again.');
+        } else if (errorMessage.includes('session')) {
+          alert('Failed to join session. The room may not exist or may be full.');
+        } else {
+          alert('Failed to join room. Please try again or contact support if the problem persists.');
+        }
+        
         this.leaveSession();
       }
     },
@@ -808,7 +843,14 @@ function diceRoller() {
         return;
       }
       
-      const url = createSessionUrl(this.sessionId);
+      // Always use friendly name format for sharing URLs
+      let shareableSessionId = this.sessionId;
+      if (/^[0-9A-Z]{3}$/i.test(this.sessionId)) {
+        // If current sessionId is a short code, convert to friendly name
+        shareableSessionId = sessionIdToFriendlyName(this.sessionId);
+      }
+      
+      const url = createSessionUrl(shareableSessionId);
       const success = await copyToClipboard(url);
       
       if (success) {
@@ -1042,6 +1084,16 @@ function diceRoller() {
       // Auto-join if URL contains session ID and we have a saved name
       const urlSessionId = getSessionIdFromUrl();
       if (urlSessionId && this.sessionFeaturesAvailable) {
+        // Convert short codes to friendly names for better UX (unless in streamer mode)
+        if (!this.streamerMode && /^[0-9A-Z]{3}$/i.test(urlSessionId)) {
+          const friendlyName = sessionIdToFriendlyName(urlSessionId);
+          if (friendlyName !== urlSessionId) {
+            // Replace URL with friendly name version
+            history.replaceState({}, '', `/room/${friendlyName}`);
+          }
+        }
+        
+        // Use the original session ID for joining (maintains compatibility)
         this.joinSessionId = urlSessionId;
         
         // If streamer mode is active, clear the URL immediately to hide room code

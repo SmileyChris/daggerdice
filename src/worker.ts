@@ -3,6 +3,7 @@
 import type { 
   ClientMessage
 } from './session/types';
+import { friendlyNameToSessionId } from './session/room-names';
 
 // Environment interface  
 interface Env {
@@ -90,13 +91,25 @@ export default {
       
       const sessionId = sessionIdMatch[1];
       
-      // Validate session ID format (6 alphanumeric characters)
-      if (!/^[a-z0-9]{6}$/i.test(sessionId)) {
+      // Handle both friendly names and encoded codes
+      let internalSessionId: string;
+      
+      // If it's a friendly name format (word1-word2), convert to encoded code
+      if (/^[a-z]+-[a-z]+$/i.test(sessionId)) {
+        try {
+          internalSessionId = friendlyNameToSessionId(sessionId.toLowerCase());
+        } catch {
+          return new Response('Invalid friendly room name', { status: 400 });
+        }
+      } else if (/^[0-9A-Z]{3}$/i.test(sessionId)) {
+        // If it's a 3-character encoded code, use it directly
+        internalSessionId = sessionId.toUpperCase();
+      } else {
         return new Response('Invalid session ID format', { status: 400 });
       }
       
-      // Get or create the Durable Object for this session
-      const roomId = env.SESSION_ROOMS.idFromName(sessionId);
+      // Get or create the Durable Object for this session using the internal ID
+      const roomId = env.SESSION_ROOMS.idFromName(internalSessionId);
       const roomStub = env.SESSION_ROOMS.get(roomId);
       
       // Forward the request to the Durable Object

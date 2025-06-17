@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   generateSessionId,
   generatePlayerId,
+  getShortCode,
   isValidSessionId,
   sanitizePlayerName,
   formatTimestamp,
@@ -23,6 +24,7 @@ import {
   getSavedRollHistory,
   clearSavedRollHistory
 } from '../session/utils';
+import { ADJECTIVES_V1, NOUNS_V1 } from '../session/room-names.js';
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -56,10 +58,41 @@ beforeEach(() => {
 
 describe('Session ID Functions', () => {
   describe('generateSessionId', () => {
-    it('should generate a 6-character uppercase session ID', () => {
+    it('should generate a friendly session ID', () => {
       const sessionId = generateSessionId();
-      expect(sessionId).toHaveLength(6);
-      expect(sessionId).toMatch(/^[A-Z0-9]{6}$/);
+      expect(sessionId).toMatch(/^[a-z]+-[a-z]+$/);
+      
+      // Verify it contains words from our lists
+      const [word1, word2] = sessionId.split('-');
+      
+      // Could be either adjective-noun or noun-noun
+      const isAdjNoun = ADJECTIVES_V1.includes(word1) && NOUNS_V1.includes(word2);
+      const isNounNoun = NOUNS_V1.includes(word1) && NOUNS_V1.includes(word2);
+      
+      expect(isAdjNoun || isNounNoun).toBe(true);
+      
+      // If noun-noun, ensure they're different
+      if (isNounNoun) {
+        expect(word1).not.toBe(word2);
+      }
+    });
+  });
+
+  describe('getShortCode', () => {
+    it('should convert friendly names to short codes', () => {
+      const shortCode = getShortCode('brave-dragon');
+      expect(shortCode).toMatch(/^[0-9A-Z]{3}$/);
+      expect(shortCode).toHaveLength(3);
+    });
+
+    it('should return short codes as-is', () => {
+      const shortCode = getShortCode('4CQ');
+      expect(shortCode).toBe('4CQ');
+    });
+
+    it('should handle invalid inputs gracefully', () => {
+      const result = getShortCode('invalid-input');
+      expect(result).toBe('invalid-input');
     });
   });
 
@@ -72,31 +105,42 @@ describe('Session ID Functions', () => {
 
   describe('isValidSessionId', () => {
     it('should validate correct session IDs', () => {
-      expect(isValidSessionId('ABC123')).toBe(true);
-      expect(isValidSessionId('abc123')).toBe(true);
-      expect(isValidSessionId('123456')).toBe(true);
-      expect(isValidSessionId('ABCDEF')).toBe(true);
+      // 3-character encoded codes (using codes that can actually be generated)
+      const validCode = generateSessionId();
+      expect(isValidSessionId(validCode)).toBe(true);
+      
+      // Friendly names (using words that are actually in the lists)
+      expect(isValidSessionId('brave-dragon')).toBe(true);
+      expect(isValidSessionId('fire-wizard')).toBe(true);
     });
 
     it('should reject invalid session IDs', () => {
       expect(isValidSessionId('')).toBe(false);
-      expect(isValidSessionId('ABC12')).toBe(false); // too short
-      expect(isValidSessionId('ABC1234')).toBe(false); // too long
-      expect(isValidSessionId('ABC-12')).toBe(false); // special characters
+      expect(isValidSessionId('AB')).toBe(false); // too short
+      expect(isValidSessionId('ABCD')).toBe(false); // too long for code
+      expect(isValidSessionId('ABC-12')).toBe(false); // invalid format
+      expect(isValidSessionId('unknown-word')).toBe(false); // invalid words
+      expect(isValidSessionId('single')).toBe(false); // missing hyphen
       expect(isValidSessionId(null as unknown as string)).toBe(false);
       expect(isValidSessionId(undefined as unknown as string)).toBe(false);
     });
   });
 
   describe('normalizeSessionId', () => {
-    it('should normalize valid session IDs to uppercase', () => {
-      expect(normalizeSessionId('abc123')).toBe('ABC123');
-      expect(normalizeSessionId(' ABC123 ')).toBe('ABC123');
+    it('should normalize encoded codes to uppercase', () => {
+      expect(normalizeSessionId('4cq')).toBe('4CQ');
+      expect(normalizeSessionId(' 4CQ ')).toBe('4CQ');
+    });
+
+    it('should normalize friendly names to lowercase', () => {
+      expect(normalizeSessionId('BRAVE-DRAGON')).toBe('brave-dragon');
+      expect(normalizeSessionId(' Fire-Wizard ')).toBe('fire-wizard');
     });
 
     it('should return null for invalid session IDs', () => {
-      expect(normalizeSessionId('ABC12')).toBeNull();
+      expect(normalizeSessionId('AB')).toBeNull();
       expect(normalizeSessionId('ABC-12')).toBeNull();
+      expect(normalizeSessionId('unknown-word')).toBeNull();
       expect(normalizeSessionId('')).toBeNull();
       expect(normalizeSessionId(null as unknown as string)).toBeNull();
     });
@@ -156,8 +200,13 @@ describe('Timestamp Functions', () => {
 describe('URL Functions', () => {
   describe('getSessionIdFromUrl', () => {
     it('should extract session ID from room URL', () => {
-      window.location.pathname = '/room/ABC123';
-      expect(getSessionIdFromUrl()).toBe('ABC123');
+      // Test 3-character code
+      window.location.pathname = '/room/4CQ';
+      expect(getSessionIdFromUrl()).toBe('4CQ');
+      
+      // Test friendly name
+      window.location.pathname = '/room/brave-dragon';
+      expect(getSessionIdFromUrl()).toBe('brave-dragon');
     });
 
     it('should return null for non-room URLs', () => {
@@ -171,18 +220,22 @@ describe('URL Functions', () => {
 
   describe('extractSessionIdFromUrl', () => {
     it('should extract session ID from full URLs', () => {
-      expect(extractSessionIdFromUrl('https://example.com/room/ABC123')).toBe('ABC123');
-      expect(extractSessionIdFromUrl('http://localhost:3000/room/XYZ789')).toBe('XYZ789');
+      const validCode = generateSessionId();
+      expect(extractSessionIdFromUrl(`https://example.com/room/${validCode}`)).toBe(validCode);
+      expect(extractSessionIdFromUrl('http://localhost:3000/room/brave-dragon')).toBe('brave-dragon');
     });
 
     it('should extract session ID from partial URLs', () => {
-      expect(extractSessionIdFromUrl('/room/DEF456')).toBe('DEF456');
-      expect(extractSessionIdFromUrl('room/GHI789')).toBe('GHI789');
+      // Use a generated valid code
+      const validCode = generateSessionId();
+      expect(extractSessionIdFromUrl(`/room/${validCode}`)).toBe(validCode);
+      expect(extractSessionIdFromUrl('room/fire-wizard')).toBe('fire-wizard');
     });
 
     it('should handle malformed URLs gracefully', () => {
-      expect(extractSessionIdFromUrl('not-a-url/room/ABC123')).toBe('ABC123');
-      expect(extractSessionIdFromUrl('just some text with /room/XYZ789 in it')).toBe('XYZ789');
+      const validCode = generateSessionId();
+      expect(extractSessionIdFromUrl(`not-a-url/room/${validCode}`)).toBe(validCode);
+      expect(extractSessionIdFromUrl('just some text with /room/mystic-knight in it')).toBe('mystic-knight');
     });
 
     it('should return null for invalid input', () => {
@@ -192,8 +245,9 @@ describe('URL Functions', () => {
     });
 
     it('should normalize extracted session IDs', () => {
-      expect(extractSessionIdFromUrl('https://example.com/room/abc123')).toBe('ABC123');
-      expect(extractSessionIdFromUrl('/room/xyz789')).toBe('XYZ789');
+      const validCode = generateSessionId();
+      expect(extractSessionIdFromUrl(`https://example.com/room/${validCode.toLowerCase()}`)).toBe(validCode);
+      expect(extractSessionIdFromUrl('/room/BRAVE-DRAGON')).toBe('brave-dragon');
     });
   });
 
@@ -319,13 +373,13 @@ describe('LocalStorage Functions', () => {
 
   describe('saveLastSessionId and getLastSessionId', () => {
     it('should save and retrieve valid session IDs', () => {
-      vi.mocked(localStorage.getItem).mockReturnValue('ABC123');
+      vi.mocked(localStorage.getItem).mockReturnValue('4CQ');
       
-      saveLastSessionId('ABC123');
-      expect(localStorage.setItem).toHaveBeenCalledWith('daggerdice_last_session_id', 'ABC123');
+      saveLastSessionId('4CQ');
+      expect(localStorage.setItem).toHaveBeenCalledWith('daggerdice_last_session_id', '4CQ');
       
       const result = getLastSessionId();
-      expect(result).toBe('ABC123');
+      expect(result).toBe('4CQ');
     });
 
     it('should not save invalid session IDs', () => {

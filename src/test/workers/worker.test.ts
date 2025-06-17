@@ -22,14 +22,14 @@ describe('Worker Integration Tests', () => {
 
   describe('WebSocket API Endpoints', () => {
     it('should reject non-WebSocket requests to API endpoints', async () => {
-      const response = await SELF.fetch('https://example.com/api/room/ABC123');
+      const response = await SELF.fetch('https://example.com/api/room/ABC');
       expect(response.status).toBe(400);
       expect(await response.text()).toBe('Expected WebSocket');
     });
 
     it('should validate session ID format', async () => {
       // Test invalid session IDs
-      const invalidIds = ['ABC12', 'ABC1234', 'ABC-12', '123!@#'];
+      const invalidIds = ['AB', 'ABCD', 'ABC-12', '123!@#', 'invalid-', '-invalid'];
       
       for (const invalidId of invalidIds) {
         const response = await SELF.fetch(`https://example.com/api/room/${invalidId}`);
@@ -41,7 +41,7 @@ describe('Worker Integration Tests', () => {
     it('should accept valid session ID format', async () => {
       // Valid session IDs should get through format validation
       // but will fail at WebSocket upgrade check
-      const validIds = ['ABC123', 'abc123', '123456', 'ABCDEF'];
+      const validIds = ['ABC', 'abc', '123', 'brave-dragon', 'BRAVE-DRAGON'];
       
       for (const validId of validIds) {
         const response = await SELF.fetch(`https://example.com/api/room/${validId}`);

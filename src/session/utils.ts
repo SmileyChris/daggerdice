@@ -1,22 +1,66 @@
 // Session utility functions for DaggerDice multiplayer
 import type { SharedRollHistoryItem } from './types.js';
+import { 
+  decodeNameV1, 
+  friendlyNameToSessionId,
+  ADJECTIVES_V1,
+  NOUNS_V1
+} from './room-names.js';
 
 /**
- * Generates a simple 6-character session ID
- * Case-insensitive, uses numbers and letters for easy sharing
+ * Generates a friendly session ID using word pairs
+ * Returns the friendly name for user-facing URLs and display
+ * Supports both adjective-noun and noun-noun combinations
  */
 export function generateSessionId(): string {
-  // Use crypto.getRandomValues for randomness
-  const array = new Uint8Array(3); // 24 bits
-  crypto.getRandomValues(array);
+  // Randomly choose between adjective-noun and noun-noun patterns
+  const useNounNoun = Math.random() < 0.3; // 30% chance for noun-noun, 70% for adj-noun
   
-  // Convert to base36 (0-9, a-z) and ensure 6 characters
-  let sessionId = '';
-  for (let i = 0; i < array.length; i++) {
-    sessionId += array[i].toString(36).padStart(2, '0');
+  if (useNounNoun) {
+    // Generate noun-noun pair (ensuring they're different)
+    let noun1Index, noun2Index;
+    do {
+      noun1Index = Math.floor(Math.random() * NOUNS_V1.length);
+      noun2Index = Math.floor(Math.random() * NOUNS_V1.length);
+    } while (noun1Index === noun2Index);
+    
+    const noun1 = NOUNS_V1[noun1Index];
+    const noun2 = NOUNS_V1[noun2Index];
+    
+    return `${noun1}-${noun2}`;
+  } else {
+    // Generate adjective-noun pair
+    const adjIndex = Math.floor(Math.random() * ADJECTIVES_V1.length);
+    const nounIndex = Math.floor(Math.random() * NOUNS_V1.length);
+    
+    const adjective = ADJECTIVES_V1[adjIndex];
+    const noun = NOUNS_V1[nounIndex];
+    
+    return `${adjective}-${noun}`;
   }
-  
-  return sessionId.substring(0, 6).toUpperCase();
+}
+
+/**
+ * Converts a friendly session ID to its short code equivalent
+ * Useful for displaying compact codes in multiplayer dialogs
+ */
+export function getShortCode(sessionId: string): string {
+  try {
+    // If it's already a short code, return as-is
+    if (/^[0-9A-Z]{3}$/i.test(sessionId)) {
+      return sessionId.toUpperCase();
+    }
+    
+    // If it's a friendly name, convert to short code
+    if (/^[a-z]+-[a-z]+$/i.test(sessionId)) {
+      return friendlyNameToSessionId(sessionId);
+    }
+    
+    // Fallback: return original
+    return sessionId;
+  } catch {
+    return sessionId;
+  }
 }
 
 /**
@@ -33,15 +77,41 @@ export function generatePlayerId(): string {
 }
 
 /**
- * Validates a session ID format
+ * Validates a session ID format (supports both encoded codes and friendly names)
  */
 export function isValidSessionId(sessionId: string): boolean {
   if (!sessionId || typeof sessionId !== 'string') {
     return false;
   }
   
-  // Session IDs should be exactly 6 characters, alphanumeric only
-  return /^[a-z0-9]{6}$/i.test(sessionId);
+  const trimmed = sessionId.trim();
+  if (!trimmed) {
+    return false;
+  }
+  
+  // Check if it's a 3-character Crockford base32 code
+  if (/^[0-9A-Z]{3}$/i.test(trimmed)) {
+    try {
+      // Try to decode it to validate
+      decodeNameV1(trimmed.toUpperCase());
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  
+  // Check if it's a friendly name format (word1-word2)
+  if (/^[a-z]+-[a-z]+$/i.test(trimmed)) {
+    try {
+      // Try to encode it to validate words exist
+      friendlyNameToSessionId(trimmed);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  
+  return false;
 }
 
 /**
@@ -99,27 +169,40 @@ export function getSessionIdFromUrl(): string | null {
 export function extractSessionIdFromUrl(url: string): string | null {
   try {
     const urlObj = new URL(url);
-    const match = urlObj.pathname.match(/\/room\/([A-Za-z0-9]{6})/);
+    // Match both friendly names (word1-word2) and encoded codes (3 chars)
+    const match = urlObj.pathname.match(/\/room\/([a-z]+-[a-z]+|[A-Za-z0-9]{3})/i);
     const sessionId = match ? match[1] : null;
     return sessionId ? normalizeSessionId(sessionId) : null;
   } catch {
     // If URL parsing fails, try to extract from plain text
-    // Handle both /room/ and room/ patterns
-    const match = url.match(/\/?room\/([A-Za-z0-9]{6})/);
+    // Handle both /room/ and room/ patterns for both formats
+    const match = url.match(/\/?room\/([a-z]+-[a-z]+|[A-Za-z0-9]{3})/i);
     const sessionId = match ? match[1] : null;
     return sessionId ? normalizeSessionId(sessionId) : null;
   }
 }
 
 /**
- * Normalizes a session ID to uppercase and validates length
+ * Normalizes a session ID and validates format
  */
 export function normalizeSessionId(sessionId: string): string | null {
   if (!sessionId || typeof sessionId !== 'string') {
     return null;
   }
   
-  const normalized = sessionId.trim().toUpperCase();
+  const trimmed = sessionId.trim();
+  if (!trimmed) {
+    return null;
+  }
+  
+  // If it looks like a friendly name, keep it lowercase and validate
+  if (trimmed.includes('-')) {
+    const normalized = trimmed.toLowerCase();
+    return isValidSessionId(normalized) ? normalized : null;
+  }
+  
+  // If it looks like an encoded code, uppercase and validate  
+  const normalized = trimmed.toUpperCase();
   return isValidSessionId(normalized) ? normalized : null;
 }
 

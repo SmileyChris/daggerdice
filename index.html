@@ -915,7 +915,7 @@
 
         <div class="dialog-content">
           <!-- Solo mode: session creation/joining -->
-          <form x-show="sessionMode === 'solo'" class="session-join" autocomplete="off">
+          <form x-show="sessionMode === 'solo'" class="session-join" autocomplete="off" @submit.prevent="(!playerName.trim() || connectionStatus === 'connecting' || !isJoinSessionValid) ? null : (joinSessionId.trim() ? joinSession() : createSession())">
             <div class="session-input">
             <input
               x-model="playerName"
@@ -923,7 +923,6 @@
               required
               maxlength="20"
               class="player-name-input"
-              @keyup.enter="joinSessionId.trim() ? joinSession() : createSession()"
             />
           </div>
 
@@ -948,13 +947,12 @@
               autocomplete="new-password"
               @input="handleRoomIdChange()"
               @paste="setTimeout(() => handleRoomIdChange(), 0)"
-              @keyup.enter="joinSessionId.trim() ? joinSession() : createSession()"
             />
           </div>
 
           <div class="session-action">
             <button
-              @click="joinSessionId.trim() ? joinSession() : createSession()"
+              type="submit"
               :disabled="!playerName.trim() || connectionStatus === 'connecting' || !isJoinSessionValid"
               class="session-btn primary-btn"
             >
@@ -980,8 +978,8 @@
         <div x-show="sessionMode === 'multiplayer'" class="session-info">
           <div class="session-details">
             <div class="session-id-display">
-              <strong>Room:</strong>
-              <span x-text="sessionId" class="session-id" x-show="!effectiveStreamerMode"></span>
+              <strong>Room code:</strong>
+              <span x-show="!effectiveStreamerMode" class="session-id" x-text="sessionShortCode"></span>
               <span 
                 x-show="effectiveStreamerMode" 
                 class="session-id session-id-hidden" 

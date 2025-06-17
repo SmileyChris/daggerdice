@@ -61,8 +61,30 @@ Built on Cloudflare Durable Objects for real-time session management:
 - **WebSocket Relay**: `SessionDurableObject` handles peer-to-peer message relay
 - **Session Client**: `/src/session/session-client.ts` manages WebSocket connections with auto-reconnection
 - **Message Types**: Join/leave announcements, roll sharing, player responses, and heartbeat
-- **Session Management**: 6-character room codes, URL-based joining, persistent player names
+- **Session Management**: Friendly room names with mathematical encoding, URL-based joining, persistent player names
 - **Deployment**: Cloudflare Workers serve both static assets and WebSocket API
+
+### Friendly Room Names System
+
+DaggerDice uses a sophisticated room naming system that replaces cryptic codes with memorable RPG-themed names:
+
+- **Room Names**: Players create and join rooms with memorable names like `brave-dragon`, `mystic-knight`, `storm-giant`
+- **Mathematical Encoding**: Each friendly name maps to a unique 3-character code using Crockford Base32 encoding
+- **Dual Format Support**: Both friendly names (`brave-dragon`) and short codes (`4CQ`) work interchangeably
+- **Word Lists**: 80 RPG-themed adjectives and 80 nouns provide 6,400 unique combinations
+- **URL Conversion**: When users enter a room via short code URL (e.g., `/room/4CQ`), the system automatically converts the URL to show the friendly name (`/room/fire-wizard`) for better user experience, except in streamer mode
+- **Dual Display Strategy**: 
+  - **URLs**: Show friendly names (`/room/fire-wizard`) for readability and text sharing
+  - **Room Code Display**: Show compact codes (`4CQ`) in multiplayer dialogs for quick verbal sharing
+- **Implementation**: 
+  - Core logic in `/src/session/room-names.ts` with deterministic bijection functions
+  - Session utilities in `/src/session/utils.ts` handle generation and validation
+  - WebSocket API in `/src/worker.ts` accepts both formats and normalizes internally
+  - URL conversion in `/src/dice-roller-main.ts` automatically upgrades short code URLs to friendly names
+- **URL Sharing**: Users can share URLs like `daggerdice.com/room/fire-wizard` instead of `daggerdice.com/room/ABC123`
+- **Compatibility**: Maintains full backward compatibility with existing room systems
+
+**📚 Documentation**: See [`/docs/room-names-technical.md`](./docs/room-names-technical.md) for complete technical details and [`/docs/room-names-api.md`](./docs/room-names-api.md) for API reference.
 
 ### Build Configuration
 
@@ -80,9 +102,9 @@ The project has comprehensive test coverage across two testing layers:
 - **Coverage Target**: 80% threshold for branches, functions, lines, and statements
 
 ### Test Organization
-- **Frontend Tests**: Dice logic, session utilities, UI components, streamer mode
-- **Workers Tests**: WebSocket APIs, session validation, error handling
-- **Coverage**: Session utilities at 93%
+- **Frontend Tests**: Dice logic, session utilities, UI components, streamer mode, room name encoding
+- **Workers Tests**: WebSocket APIs, session validation, error handling, friendly name support
+- **Coverage**: Session utilities at 93%, room name encoding at 100%
 
 ## Development Workflow
 
@@ -96,8 +118,8 @@ The project has comprehensive test coverage across two testing layers:
 The project uses GitHub Actions for automated testing, with Cloudflare Workers handling deployment:
 
 - **GitHub Actions**: Automated testing on all pushes and pull requests
-  - **Frontend Tests**: Dice logic, session utilities, UI components, streamer mode
-  - **Workers Tests**: WebSocket APIs, session validation, error handling
+  - **Frontend Tests**: Dice logic, session utilities, UI components, streamer mode, room name encoding
+  - **Workers Tests**: WebSocket APIs, session validation, error handling, friendly name support
   - **Build Verification**: Ensures production builds succeed
   - **Security Audit**: Dependency vulnerability scanning
 - **Cloudflare Workers**: Automatic deployment from GitHub integration

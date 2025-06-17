@@ -22,14 +22,14 @@ describe('Cloudflare Workers Tests', () => {
 
   describe('WebSocket API Endpoints', () => {
     it('should reject non-WebSocket requests to API endpoints', async () => {
-      const response = await SELF.fetch('https://example.com/api/room/ABC123');
+      const response = await SELF.fetch('https://example.com/api/room/ABC');
       expect(response.status).toBe(400);
       expect(await response.text()).toBe('Expected WebSocket');
     });
 
     it('should validate session ID format', async () => {
       // Test invalid session IDs
-      const invalidIds = ['ABC12', 'ABC1234', 'ABC-12', '123!@#'];
+      const invalidIds = ['AB', 'ABCD', 'ABC-12', '123!@#', 'invalid-', '-invalid'];
       
       for (const invalidId of invalidIds) {
         const response = await SELF.fetch(`https://example.com/api/room/${invalidId}`);
@@ -41,7 +41,7 @@ describe('Cloudflare Workers Tests', () => {
     it('should accept valid session ID format', async () => {
       // Valid session IDs should get through format validation
       // but will fail at WebSocket upgrade check
-      const validIds = ['ABC123', 'abc123', '123456', 'ABCDEF'];
+      const validIds = ['ABC', 'abc', '123', 'brave-dragon', 'BRAVE-DRAGON'];
       
       for (const validId of validIds) {
         const response = await SELF.fetch(`https://example.com/api/room/${validId}`);
@@ -80,9 +80,11 @@ describe('Cloudflare Workers Tests', () => {
   describe('Session ID Validation', () => {
     it('should handle case insensitive session IDs', async () => {
       const testCases = [
-        { input: 'abc123', expected: 400 }, // lowercase valid format
-        { input: 'ABC123', expected: 400 }, // uppercase valid format
-        { input: 'AbC123', expected: 400 }, // mixed case valid format
+        { input: 'abc', expected: 400 }, // lowercase valid format
+        { input: 'ABC', expected: 400 }, // uppercase valid format
+        { input: 'AbC', expected: 400 }, // mixed case valid format
+        { input: 'brave-dragon', expected: 400 }, // friendly name
+        { input: 'BRAVE-DRAGON', expected: 400 }, // uppercase friendly name
       ];
 
       for (const { input, expected } of testCases) {
@@ -94,7 +96,7 @@ describe('Cloudflare Workers Tests', () => {
 
     it('should properly route to Durable Objects based on session ID', async () => {
       // Test that different session IDs are handled consistently
-      const sessionIds = ['SESS01', 'SESS02', 'SESS03'];
+      const sessionIds = ['ABC', 'DEF', 'GHJ', 'brave-dragon', 'clever-wizard'];
       
       for (const sessionId of sessionIds) {
         const response = await SELF.fetch(`https://example.com/api/room/${sessionId}`);

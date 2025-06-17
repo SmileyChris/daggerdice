@@ -112,11 +112,11 @@ describe('Streamer Mode Features', () => {
   describe('Room Code Input Parsing', () => {
     it('should extract room code from pasted URLs in input field', () => {
       const testCases = [
-        { input: 'https://daggerdice.com/room/ABC123', expected: 'ABC123' },
-        { input: 'http://localhost:3000/room/XYZ789', expected: 'XYZ789' },
-        { input: '/room/DEF456', expected: 'DEF456' },
-        { input: 'room/GHI789', expected: 'GHI789' },
-        { input: 'Check out this room: https://example.com/room/JKL012', expected: 'JKL012' },
+        { input: 'https://daggerdice.com/room/brave-dragon', expected: 'brave-dragon' },
+        { input: 'http://localhost:3000/room/fire-wizard', expected: 'fire-wizard' },
+        { input: '/room/mystic-knight', expected: 'mystic-knight' },
+        { input: 'room/shadow-mage', expected: 'shadow-mage' },
+        { input: 'Check out this room: https://example.com/room/storm-giant', expected: 'storm-giant' },
       ];
 
       testCases.forEach(({ input, expected }) => {
@@ -142,13 +142,13 @@ describe('Streamer Mode Features', () => {
         return input.toUpperCase();
       };
 
-      // Test URL parsing
-      expect(handleRoomIdChange('https://daggerdice.com/room/abc123')).toBe('ABC123');
-      expect(handleRoomIdChange('/room/def456')).toBe('DEF456');
+      // Test URL parsing (returns normalized friendly names)
+      expect(handleRoomIdChange('https://daggerdice.com/room/brave-dragon')).toBe('brave-dragon');
+      expect(handleRoomIdChange('/room/fire-wizard')).toBe('fire-wizard');
       
-      // Test regular room code input
-      expect(handleRoomIdChange('xyz789')).toBe('XYZ789');
-      expect(handleRoomIdChange('  abc123  ')).toBe('ABC123');
+      // Test regular room code input (converts to uppercase when not a URL)
+      expect(handleRoomIdChange('shadow-mage')).toBe('SHADOW-MAGE');
+      expect(handleRoomIdChange('  mystic-knight  ')).toBe('MYSTIC-KNIGHT');
     });
   });
 
