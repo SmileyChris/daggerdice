@@ -1136,12 +1136,16 @@ document.addEventListener('DOMContentLoaded', function () {
   console.log('DOM loaded, initializing dice-box');
 
   // Initialize dice-box with configuration
+  // Use smaller dice scale on mobile devices
+  const isMobile = window.innerWidth <= 768;
+  const diceScale = isMobile ? 7 : 10;
+  
   diceBox = new DiceBox({
     container: '#dice-box',
     assetPath: '/assets/',
     theme: 'default',
     themeColor: '#4caf50',
-    scale: 10,
+    scale: diceScale,
     gravity: 1.5,
     mass: 1,
     friction: 0.8,
