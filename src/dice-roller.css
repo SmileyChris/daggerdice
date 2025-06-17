@@ -2133,6 +2133,11 @@ button:disabled {
   align-items: center;
 }
 
+.dice-type-selector {
+  flex: 1;
+  min-width: 80px;
+}
+
 .dice-type-selector select,
 .dice-select {
   background: black;
