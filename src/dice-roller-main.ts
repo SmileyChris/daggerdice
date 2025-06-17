@@ -1097,6 +1097,19 @@ return '';
               }
             }
             break;
+          case '+':
+          case '=': // Handle both + and = keys (since + requires shift)
+            if (this.rollType === 'damage') {
+              e.preventDefault();
+              this.setBaseDiceCount(this.baseDiceCount + 1);
+            }
+            break;
+          case '-':
+            if (this.rollType === 'damage') {
+              e.preventDefault();
+              this.setBaseDiceCount(this.baseDiceCount - 1);
+            }
+            break;
         }
       });
       
