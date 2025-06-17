@@ -2123,11 +2123,9 @@ button:disabled {
 
 .damage-main-controls {
   display: flex;
-  gap: 3rem;
   flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: center;
   align-items: center;
+  justify-content: space-evenly;
 }
 
 .dice-selection {
