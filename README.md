@@ -2,32 +2,7 @@
 
 A 3D dice rolling web application designed for the Daggerheart RPG system, featuring Hope/Fear mechanics and real-time multiplayer sessions.
 
-🎲 **[Play DaggerDice](https://daggerdice.smileychris.workers.dev)** 🎲
-
-## Features
-
-### Daggerheart RPG Dice System
-- **Hope & Fear Dice**: Roll two D12 dice representing positive (Hope) and negative (Fear) outcomes from Daggerheart
-- **Advantage/Disadvantage**: Optional D6 modifier following Daggerheart's mechanics
-- **Modifiers**: Numeric bonuses/penalties ranging from -20 to +20
-- **Critical Success**: Occurs when Hope and Fear dice show equal values (With Hope!)
-- **3D Physics**: Realistic dice rolling with gravity, collision, and physics simulation
-
-### Multiplayer Sessions
-- **Real-time Collaboration**: Share rolls with friends in live sessions
-- **Easy Room Creation**: Create or join rooms using simple 6-character codes
-- **Shared Roll History**: See everyone's rolls in a combined history
-- **URL Sharing**: Invite players by sharing room links or QR codes
-- **Private GM Rolls**: Optional privacy for Game Master rolls
-- **Streamer Mode**: Hide room codes for content creators
-
-### Advanced Features
-- **Multiple Roll Types**: Check rolls (Hope/Fear), Damage rolls, and GM rolls
-- **Keyboard Shortcuts**: Full keyboard navigation support
-- **Mobile Optimized**: Touch-friendly interface with bottom drawer navigation
-- **Toast Notifications**: Live notifications when other players roll
-- **Roll History**: Track recent rolls with detailed breakdown
-- **Theme Support**: Multiple dice themes including "default" and "smooth"
+🎲 **[Launch DaggerDice](https://daggerdice.smileychris.workers.dev)** 🎲
 
 ## Getting Started
 
@@ -69,6 +44,31 @@ Click "🎲 Play with Friends" to create or join a room with friends. Share the 
 - **GM Rolls**: Private D20 rolls for Game Masters
 
 For complete instructions, shortcuts, and mechanics, see the [📖 Full Documentation](https://smileychris.github.io/daggerdice).
+
+## Features
+
+### Daggerheart RPG Dice System
+- **Hope & Fear Dice**: Roll two D12 dice representing positive (Hope) and negative (Fear) outcomes from Daggerheart
+- **Advantage/Disadvantage**: Optional D6 modifier following Daggerheart's mechanics
+- **Modifiers**: Numeric bonuses/penalties ranging from -20 to +20
+- **Critical Success**: Occurs when Hope and Fear dice show equal values (With Hope!)
+- **3D Physics**: Realistic dice rolling with gravity, collision, and physics simulation
+
+### Multiplayer Sessions
+- **Real-time Collaboration**: Share rolls with friends in live sessions
+- **Easy Room Creation**: Create or join rooms using simple 6-character codes
+- **Shared Roll History**: See everyone's rolls in a combined history
+- **URL Sharing**: Invite players by sharing room links or QR codes
+- **Private GM Rolls**: Optional privacy for Game Master rolls
+- **Streamer Mode**: Hide room codes for content creators
+
+### Advanced Features
+- **Multiple Roll Types**: Check rolls (Hope/Fear), Damage rolls, and GM rolls
+- **Keyboard Shortcuts**: Full keyboard navigation support
+- **Mobile Optimized**: Touch-friendly interface with bottom drawer navigation
+- **Toast Notifications**: Live notifications when other players roll
+- **Roll History**: Track recent rolls with detailed breakdown
+- **Theme Support**: Multiple dice themes including "default" and "smooth"
 
 ## Documentation
 
