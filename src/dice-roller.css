@@ -1688,7 +1688,8 @@ button:disabled {
 
   /* Adjust dice container for mobile bottom bar */
   .dice-container {
-    margin-bottom: 120px; /* Space for tab selector and bottom bar */
+    margin-bottom: 160px; /* Increased space for tab selector and bottom bar */
+    padding-bottom: 20px; /* Additional padding to keep dice visible */
   }
 
   /* Mobile: hide desktop-specific elements */
@@ -1837,7 +1838,8 @@ button:disabled {
 
   /* Adjust spacing for small screens */
   .dice-container {
-    margin-bottom: 115px; /* Slightly less space for smaller bottom bar */
+    margin-bottom: 150px; /* Increased space for smaller bottom bar */
+    padding-bottom: 15px; /* Additional padding to keep dice visible */
   }
 
   .mobile-dialog {
