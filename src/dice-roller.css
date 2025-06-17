@@ -2121,6 +2121,13 @@ button:disabled {
   gap: 1rem;
 }
 
+.damage-main-controls {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
 .dice-selection {
   display: flex;
   align-items: center;
