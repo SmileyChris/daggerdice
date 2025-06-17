@@ -27,6 +27,7 @@ export interface RollData {
   bonusDieEnabled?: boolean;
   bonusDieType?: 4 | 6 | 8 | 10 | 12;
   bonusDieValue?: number;
+  damageModifier?: number;
   isCritical?: boolean;
   hasResistance?: boolean;
   

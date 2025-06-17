@@ -263,6 +263,24 @@
 
           <!-- Damage Roll Controls -->
           <div x-show="rollType === 'damage'" class="damage-controls">
+            <div class="modifier-controls">
+              <label>Modifier:</label>
+              <button
+                @click="damageModifier = Math.max(damageModifier - 1, -20)"
+                class="modifier-btn"
+                :disabled="isRolling"
+              >
+                -
+              </button>
+              <span class="modifier-display" x-text="damageModifier"></span>
+              <button
+                @click="damageModifier = Math.min(damageModifier + 1, 20)"
+                class="modifier-btn"
+                :disabled="isRolling"
+              >
+                +
+              </button>
+            </div>
             <div class="dice-selection">
               <label>Base Dice:</label>
               <div class="dice-count-controls">
@@ -345,9 +363,9 @@
 
           <!-- Damage Roll Clear Button -->
           <button
-            @click="bonusDieEnabled = false; isCritical = false; hasResistance = false"
+            @click="damageModifier = 0; bonusDieEnabled = false; isCritical = false; hasResistance = false"
             class="modifier-clear-btn"
-            x-show="rollType === 'damage' && (bonusDieEnabled || isCritical || hasResistance) && !isRolling"
+            x-show="rollType === 'damage' && (damageModifier !== 0 || bonusDieEnabled || isCritical || hasResistance) && !isRolling"
             title="Clear modifiers (keeps base dice)"
           >
             🔄 Clear
@@ -527,7 +545,7 @@
                 <span class="section-btn-text">Mods</span>
                 <span
                   class="section-btn-value"
-                  x-show="(rollType === 'check' && (modifier !== 0 || advantageType !== 'none')) || (rollType === 'gm' && (gmModifier !== 0 || gmAdvantageType !== 'none')) || (rollType === 'damage' && (bonusDieEnabled || isCritical || hasResistance))"
+                  x-show="(rollType === 'check' && (modifier !== 0 || advantageType !== 'none')) || (rollType === 'gm' && (gmModifier !== 0 || gmAdvantageType !== 'none')) || (rollType === 'damage' && (damageModifier !== 0 || bonusDieEnabled || isCritical || hasResistance))"
                 >
                   <!-- Check roll modifiers -->
                   <template x-if="rollType === 'check'">
@@ -554,6 +572,10 @@
                   <!-- Damage roll modifiers -->
                   <template x-if="rollType === 'damage'">
                     <span>
+                      <span x-show="damageModifier > 0"
+                        >+<span x-text="damageModifier"></span
+                      ></span>
+                      <span x-show="damageModifier < 0" x-text="damageModifier"></span>
                       <span x-show="bonusDieEnabled"
                         >+d<span x-text="bonusDieType"></span
                       ></span>
@@ -721,13 +743,40 @@
               <!-- Clear button for Damage rolls -->
               <div class="dialog-section">
                 <button
-                  @click="bonusDieEnabled = false; isCritical = false; hasResistance = false"
+                  @click="damageModifier = 0; bonusDieEnabled = false; isCritical = false; hasResistance = false"
                   class="clear-all-btn"
-                  x-show="bonusDieEnabled || isCritical || hasResistance"
+                  x-show="damageModifier !== 0 || bonusDieEnabled || isCritical || hasResistance"
                   title="Clear options (keeps base dice)"
                 >
                   🔄 Clear
                 </button>
+              </div>
+
+              <!-- Damage modifier controls -->
+              <div class="dialog-section">
+                <label>Flat Modifier:</label>
+                <div class="modifier-controls-dialog">
+                  <button
+                    @click="damageModifier = Math.max(damageModifier - 1, -20)"
+                    class="modifier-btn-dialog"
+                    title="Decrease modifier"
+                    :disabled="isRolling"
+                  >
+                    -
+                  </button>
+                  <span
+                    class="modifier-display-dialog"
+                    x-text="damageModifier"
+                  ></span>
+                  <button
+                    @click="damageModifier = Math.min(damageModifier + 1, 20)"
+                    class="modifier-btn-dialog"
+                    title="Increase modifier"
+                    :disabled="isRolling"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
 
               <div class="dialog-section">
@@ -1264,6 +1313,13 @@
                           x-show="roll.bonusDieEnabled && roll.bonusDieValue !== undefined"
                           >, Bonus d<span x-text="roll.bonusDieType"></span>
                           (<span x-text="roll.bonusDieValue"></span>)</span
+                        ><span
+                          x-show="roll.damageModifier !== undefined && roll.damageModifier !== 0"
+                          >, Modifier:
+                          <span
+                            x-text="(roll.damageModifier > 0 ? '+' : '') + roll.damageModifier"
+                          ></span
+                        ></span
                         ><span x-show="roll.isCritical"
                           >, <span class="critical-text">Critical</span></span
                         ><span x-show="roll.hasResistance"

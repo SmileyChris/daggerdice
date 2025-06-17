@@ -145,6 +145,7 @@ function diceRoller() {
     baseDiceType: 6 as 4 | 6 | 8 | 10 | 12,
     bonusDieEnabled: false,
     bonusDieType: 6 as 4 | 6 | 8 | 10 | 12,
+    damageModifier: 0,
     isCritical: false,
     hasResistance: false,
     
@@ -423,10 +424,16 @@ function diceRoller() {
             damageTotal *= 2;
           }
 
+          // Add flat modifier
+          damageTotal += this.damageModifier;
+
           // Apply resistance (half damage, round down)
           if (this.hasResistance) {
             damageTotal = Math.floor(damageTotal / 2);
           }
+
+          // Ensure damage doesn't go below 0
+          damageTotal = Math.max(0, damageTotal);
 
           resultText = `${damageTotal} damage`;
           totalValue = damageTotal;
@@ -439,6 +446,7 @@ function diceRoller() {
             bonusDieEnabled: this.bonusDieEnabled,
             bonusDieType: this.bonusDieType,
             bonusDieValue: bonusDieValue,
+            damageModifier: this.damageModifier,
             isCritical: this.isCritical,
             hasResistance: this.hasResistance,
             total: damageTotal,
@@ -617,7 +625,9 @@ function diceRoller() {
     },
 
     get formattedRoomName() {
-      if (!this.sessionId) return '';
+      if (!this.sessionId) {
+return '';
+}
       // Convert "kind-monk" to "Kind Monk Room"
       return this.sessionId
         .split('-')
@@ -1055,7 +1065,7 @@ function diceRoller() {
             } else if (this.rollType === 'gm') {
               this.gmModifier = Math.max(this.gmModifier - 1, -20);
             } else if (this.rollType === 'damage') {
-              this.setBaseDiceCount(this.baseDiceCount - 1);
+              this.damageModifier = Math.max(this.damageModifier - 1, -20);
             }
             break;
           case 'arrowright':
@@ -1064,7 +1074,7 @@ function diceRoller() {
             } else if (this.rollType === 'gm') {
               this.gmModifier = Math.min(this.gmModifier + 1, 20);
             } else if (this.rollType === 'damage') {
-              this.setBaseDiceCount(this.baseDiceCount + 1);
+              this.damageModifier = Math.min(this.damageModifier + 1, 20);
             }
             break;
           case 'arrowup':
