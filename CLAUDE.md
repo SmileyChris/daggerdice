@@ -30,12 +30,31 @@ DaggerDice is a 3D dice rolling web application built with Vite, TypeScript, Alp
 
 ### Dice System Implementation
 
-The application rolls two D12 dice (Hope and Fear) with the following mechanics:
+The application supports multiple dice rolling modes:
+
+#### Hope/Fear System
 - **Hope die**: Green-themed D12 representing positive outcomes
 - **Fear die**: Red-themed D12 representing negative outcomes  
 - **Advantage/Disadvantage**: Optional D6 that adds/subtracts from total
 - **Modifiers**: Numeric bonuses/penalties (-20 to +20 range)
 - **Critical Success**: When Hope and Fear dice show equal values
+
+#### Damage Roll System
+- **Base Dice**: 1-10 dice of types d4, d6, d8, d10, or d12
+- **Bonus Die**: Optional additional die of any type
+- **Damage Modifier**: Flat damage bonus/penalty (-20 to +20)
+- **Critical Hits**: Manual toggle that calculates damage as: **max base dice damage + normal roll + modifier**
+  - Example: 2d6 critical with +3 modifier = 12 (max) + rolled damage + 3
+  - Bonus dice are NOT doubled, only added normally
+- **Resistance**: Halves final damage (rounded down)
+- **Display**: Critical hits show "(critical)" in roll results and red "Critical" indicator in roll breakdown
+
+#### GM Roll System
+- **D20 System**: Standard D20 rolls for Game Master use with traditional mechanics
+- **Advantage/Disadvantage**: Roll two D20s, take higher/lower result as appropriate
+- **Modifiers**: Numeric bonuses/penalties (-20 to +20 range)
+- **Privacy Option**: GM rolls can be kept hidden from other players in multiplayer sessions
+- **Display**: Purple-themed dice and UI elements to distinguish from player rolls
 
 ### 3D Dice Integration
 
@@ -125,3 +144,7 @@ The project uses GitHub Actions for automated testing, with Cloudflare Workers h
 - **Cloudflare Workers**: Automatic deployment from GitHub integration
   - Deploys automatically when main branch is updated
   - No additional secrets required (handled by Cloudflare)
+
+## Development Best Practices
+
+- When features are changed or fixed, make sure the documentation in docs/ matches

@@ -419,13 +419,17 @@ function diceRoller() {
             }
           }
 
-          // Apply critical (double damage)
+          // Apply critical (max base dice + normal roll + modifier)
           if (this.isCritical) {
-            damageTotal *= 2;
+            // Calculate max possible damage for base dice only
+            const maxBaseDamage = this.baseDiceCount * this.baseDiceType;
+            
+            // Critical = max base dice + normal roll + modifier
+            damageTotal = maxBaseDamage + damageTotal + this.damageModifier;
+          } else {
+            // Add flat modifier for non-critical hits
+            damageTotal += this.damageModifier;
           }
-
-          // Add flat modifier
-          damageTotal += this.damageModifier;
 
           // Apply resistance (half damage, round down)
           if (this.hasResistance) {
@@ -435,7 +439,7 @@ function diceRoller() {
           // Ensure damage doesn't go below 0
           damageTotal = Math.max(0, damageTotal);
 
-          resultText = `${damageTotal} damage`;
+          resultText = this.isCritical ? `${damageTotal} damage (critical)` : `${damageTotal} damage`;
           totalValue = damageTotal;
 
           rollData = {

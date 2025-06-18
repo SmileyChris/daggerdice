@@ -88,7 +88,7 @@ No downloads or installations required - DaggerDice runs directly in your web br
 !!! note "Damage Rolls"
     - **Base Dice**: Choose number and type following Daggerheart's damage system (D4, D6, D8, D10, D12)
     - **Bonus Die**: Optional extra damage die
-    - **Critical**: Double dice on critical hits
+    - **Critical**: Manual toggle - max base dice + normal roll + modifier
     - **Resistance**: Halve damage when applicable
 
 !!! abstract "GM Rolls"

@@ -20,7 +20,7 @@
 #### Damage Rolls
 - **Base Dice**: Choose dice count and type following Daggerheart's damage system (D4, D6, D8, D10, D12)
 - **Bonus Die**: Optional additional die for extra damage
-- **Critical Hits**: Option to double dice on critical success
+- **Critical Hits**: Manual toggle that calculates damage as max base dice + normal roll + modifier
 - **Resistance**: Option to halve damage for resistant targets
 - Supports complex damage calculations for Daggerheart weapons and spells
 
