@@ -108,15 +108,41 @@ function toastManager() {
 
     showRollToast(roll: SharedRollHistoryItem) {
       const resultText = roll.result.replace(/<[^>]*>/g, ''); // Strip HTML
+      let diceDetails = '';
+      
+      // Build dice details based on roll type
+      if (roll.rollType === 'check') {
+        // Hope/Fear check roll
+        diceDetails = `
+          <span class="hope">Hope: ${roll.hopeValue}</span>
+          <span class="fear">Fear: ${roll.fearValue}</span>
+          ${roll.advantageValue && roll.advantageValue !== 0 ? `<span class="${roll.advantageValue > 0 ? 'advantage' : 'disadvantage'}">${roll.advantageValue > 0 ? 'Adv' : 'Dis'}: ${Math.abs(roll.advantageValue)}</span>` : ''}
+          ${roll.modifier && roll.modifier !== 0 ? `<span>Mod: ${roll.modifier > 0 ? '+' : ''}${roll.modifier}</span>` : ''}
+        `;
+      } else if (roll.rollType === 'damage') {
+        // Damage roll
+        const diceStr = `${roll.baseDiceCount}d${roll.baseDiceType}`;
+        diceDetails = `
+          <span>Dice: ${diceStr}</span>
+          ${roll.bonusDieEnabled && roll.bonusDieType ? `<span>Bonus: d${roll.bonusDieType}</span>` : ''}
+          ${roll.damageModifier && roll.damageModifier !== 0 ? `<span>Mod: ${roll.damageModifier > 0 ? '+' : ''}${roll.damageModifier}</span>` : ''}
+          ${roll.isCritical ? '<span class="critical">Critical!</span>' : ''}
+          ${roll.hasResistance ? '<span>Resisted</span>' : ''}
+        `;
+      } else if (roll.rollType === 'gm') {
+        // GM roll
+        diceDetails = `
+          <span>d20: ${roll.d20Value}</span>
+          ${roll.gmAdvantageType && roll.gmAdvantageType !== 'none' && roll.d20Value2 ? `<span>${roll.gmAdvantageType === 'advantage' ? 'Adv' : 'Dis'}: ${roll.d20Value2}</span>` : ''}
+          ${roll.gmModifier && roll.gmModifier !== 0 ? `<span>Mod: ${roll.gmModifier > 0 ? '+' : ''}${roll.gmModifier}</span>` : ''}
+          ${roll.gmPrivate ? '<span>Private</span>' : ''}
+        `;
+      }
+      
       const content = `
         <div class="toast-player">${roll.playerName} rolled:</div>
         <div class="toast-result">${resultText}</div>
-        <div class="toast-dice">
-          <span class="hope">Hope: ${roll.hopeValue}</span>
-          <span class="fear">Fear: ${roll.fearValue}</span>
-          ${roll.advantageValue !== 0 ? `<span class="${roll.advantageValue > 0 ? 'advantage' : 'disadvantage'}">${roll.advantageValue > 0 ? 'Adv' : 'Dis'}: ${Math.abs(roll.advantageValue)}</span>` : ''}
-          ${roll.modifier !== 0 ? `<span>Mod: ${roll.modifier > 0 ? '+' : ''}${roll.modifier}</span>` : ''}
-        </div>
+        <div class="toast-dice">${diceDetails}</div>
       `;
       this.show('roll', content, 5000);
     }
