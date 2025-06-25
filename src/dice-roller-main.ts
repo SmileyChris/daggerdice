@@ -1003,12 +1003,16 @@ return '';
           console.error('Session error:', error);
           // Use the session client's connection state as source of truth
           this.connectionStatus = this.sessionClient?.getConnectionState() || 'error';
+          // Clear connected players on error - we can't see them while disconnected
+          this.connectedPlayers = [];
         },
         
         onDisconnected: () => {
           console.log('Disconnected from session');
           // Use the session client's connection state as source of truth
           this.connectionStatus = this.sessionClient?.getConnectionState() || 'disconnected';
+          // Clear connected players on disconnect - we can't see them while disconnected
+          this.connectedPlayers = [];
         }
       });
     },
