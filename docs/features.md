@@ -35,7 +35,9 @@
 - **Physics Engine**: Powered by @3d-dice/dice-box with WASM-based physics
 - **Realistic Rolling**: Gravity, friction, collision detection, and bounce effects
 - **Visual Themes**: Multiple dice appearances (default and smooth themes)
-- **Fallback System**: Automatic random number generation if 3D rendering fails
+- **Robust Fallback System**: Automatic random number generation if 3D rendering fails (WebGL unavailable, network issues, device limitations, etc.)
+- **Seamless Gameplay**: All game mechanics work identically whether using 3D dice or random fallback
+- **Error Handling**: Transparent fallback with console logging for debugging
 - **Performance Optimization**: Optimized for various device capabilities
 
 ## Multiplayer Features

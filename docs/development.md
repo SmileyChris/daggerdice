@@ -192,7 +192,7 @@ Alpine.data('diceRoller', () => ({
 ```
 
 #### 3D Dice Integration
-Uses @3d-dice/dice-box for physics simulation:
+Uses @3d-dice/dice-box for physics simulation with robust fallback:
 
 ```typescript
 const diceBox = new DiceBox({
@@ -203,7 +203,17 @@ const diceBox = new DiceBox({
   gravity: 1.5,
   // Physics settings...
 });
+
+// Robust error handling with fallback
+try {
+  rollResult = await window.diceBox.roll(diceArray);
+} catch (error) {
+  console.warn('3D dice roll failed, using random numbers:', error);
+  rollResult = null; // Triggers fallback logic
+}
 ```
+
+**Fallback System**: If 3D dice rendering fails (WebGL unavailable, network issues, device limitations), the system automatically generates random numbers using `Math.floor(Math.random() * sides) + 1` to ensure uninterrupted gameplay. All game mechanics work identically whether using 3D dice or random fallback.
 
 #### State Management
 - **Local State**: Alpine.js reactive data

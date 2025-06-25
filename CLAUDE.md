@@ -62,7 +62,9 @@ Uses @3d-dice/dice-box for 3D physics simulation:
 - Assets stored in `/public/assets/` including WASM files and themes
 - Two themes available: "default" (standard dice) and "smooth" (smoother appearance)
 - Physics configured for realistic dice rolling with gravity, friction, and collision
-- Fallback to random number generation if 3D rendering fails
+- **Robust Fallback System**: If 3D dice rendering fails (WebGL unavailable, network issues, etc.), the system automatically generates random numbers using `Math.floor(Math.random() * sides) + 1` to ensure gameplay continues uninterrupted
+- Fallback logging: Console warnings are logged when 3D dice fail and random fallback is used
+- All dice mechanics (Hope/Fear, damage with criticals, GM rolls with advantage/disadvantage) work identically whether using 3D dice or random fallback
 
 ### UI State Management
 

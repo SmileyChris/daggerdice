@@ -316,11 +316,15 @@ function diceRoller() {
             });
           }
 
-          rollResult = await window.diceBox.roll(diceArray);
+          try {
+            rollResult = await window.diceBox.roll(diceArray);
+            console.log('Roll result:', rollResult);
+          } catch (error) {
+            console.warn('3D dice roll failed, using random numbers:', error);
+            rollResult = null;
+          }
 
-          console.log('Roll result:', rollResult);
-
-          // Extract the values from the roll result
+          // Extract the values from the roll result or use random fallback
           if (rollResult && rollResult.length >= 2) {
             this.hopeValue = rollResult[0].value;
             this.fearValue = rollResult[1].value;
@@ -335,6 +339,7 @@ function diceRoller() {
             }
           } else {
             // Fallback to random values if dice-box fails
+            console.log('Using random fallback for check roll');
             this.hopeValue = Math.floor(Math.random() * 12) + 1;
             this.fearValue = Math.floor(Math.random() * 12) + 1;
 
@@ -413,7 +418,12 @@ function diceRoller() {
             });
           }
 
-          rollResult = await window.diceBox.roll(diceArray);
+          try {
+            rollResult = await window.diceBox.roll(diceArray);
+          } catch (error) {
+            console.warn('3D dice roll failed, using random numbers:', error);
+            rollResult = null;
+          }
 
           const baseDiceValues = [];
           let bonusDieValue = 0;
@@ -433,6 +443,7 @@ function diceRoller() {
             }
           } else {
             // Fallback to random values
+            console.log('Using random fallback for damage roll');
             for (let i = 0; i < this.baseDiceCount; i++) {
               const value = Math.floor(Math.random() * this.baseDiceType) + 1;
               baseDiceValues.push(value);
@@ -500,7 +511,12 @@ function diceRoller() {
             });
           }
 
-          rollResult = await window.diceBox.roll(diceArray);
+          try {
+            rollResult = await window.diceBox.roll(diceArray);
+          } catch (error) {
+            console.warn('3D dice roll failed, using random numbers:', error);
+            rollResult = null;
+          }
 
           if (rollResult && rollResult.length >= 1) {
             this.d20Value = rollResult[0].value;
@@ -513,6 +529,8 @@ function diceRoller() {
               this.d20Value2 = 0;
             }
           } else {
+            // Fallback to random values
+            console.log('Using random fallback for GM roll');
             this.d20Value = Math.floor(Math.random() * 20) + 1;
             if (this.gmAdvantageType !== 'none') {
               this.d20Value2 = Math.floor(Math.random() * 20) + 1;
