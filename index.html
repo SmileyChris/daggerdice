@@ -935,6 +935,18 @@
           </div>
 
           <div class="dialog-content">
+            <!-- Dark Mode Toggle -->
+            <div class="dialog-section">
+              <button
+                class="action-btn"
+                @click="toggleDarkMode(); showActions = false"
+                title="Toggle Dark Mode"
+              >
+                <span class="action-btn-icon" x-text="darkMode ? '☀️' : '🌙'"></span>
+                <span x-text="darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'"></span>
+              </button>
+            </div>
+
             <!-- History section -->
             <div class="dialog-section">
               <button
@@ -1202,6 +1214,15 @@
         :class="{ 'visible': showSessionUI && sessionFeaturesAvailable }"
         @click="toggleSessionUI()"
       ></div>
+
+      <!-- Dark mode toggle button -->
+      <button
+        class="dark-mode-toggle"
+        @click="toggleDarkMode()"
+        :title="darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+      >
+        <span x-text="darkMode ? '☀️' : '🌙'"></span>
+      </button>
 
       <button
         class="history-toggle"

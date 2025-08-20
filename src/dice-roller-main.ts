@@ -163,6 +163,9 @@ function diceRoller() {
     advantageValue: 0,
     modifier: 0,
 
+    // ===== DARK MODE STATE =====
+    darkMode: false,
+
     // ===== ROLL TYPE STATE =====
     rollType: 'check' as 'check' | 'damage' | 'gm',
     
@@ -627,6 +630,13 @@ function diceRoller() {
       this.showHistory = !this.showHistory;
     },
 
+    toggleDarkMode() {
+      this.darkMode = !this.darkMode;
+      const theme = this.darkMode ? 'dark' : 'light';
+      document.body.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+    },
+
     // ===== NEW SESSION METHODS (ADDITIVE) =====
     toggleSessionUI() {
       this.showSessionUI = !this.showSessionUI;
@@ -1054,6 +1064,18 @@ return '';
       this.initialized = true;
       
       console.log('Initializing Alpine component');
+
+      // Initialize dark mode based on saved preference or system preference
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        this.darkMode = savedTheme === 'dark';
+      } else {
+        // Check system preference
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        this.darkMode = prefersDark;
+      }
+      // Apply theme
+      document.body.setAttribute('data-theme', this.darkMode ? 'dark' : 'light');
       
       // Feature detection
       this.sessionFeaturesAvailable = isSessionEnvironmentSupported();
