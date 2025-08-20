@@ -136,10 +136,11 @@
         </button>
       </div>
 
-      <div
-        class="header"
-        :class="{ 'no-result': !result, 'has-result': result }"
-      >
+      <div class="header-wrapper">
+        <div
+          class="header"
+          :class="{ 'no-result': !result, 'has-result': result }"
+        >
         <!-- Mobile tap area for history (invisible overlay) -->
         <div
           class="mobile-history-tap-area"
@@ -163,6 +164,7 @@
             class="logo-only"
           />
           <h1 x-html="result"></h1>
+        </div>
         </div>
       </div>
 
