@@ -647,7 +647,7 @@ function diceRoller() {
     // Audio methods
     initAudio() {
       try {
-        this.rollAudio = new Audio('/src/assets/roll.mp3');
+        this.rollAudio = new Audio('/assets/roll.mp3');
         this.rollAudio.volume = 0.5; // Set default volume to 50%
         
         // Preload the audio file
