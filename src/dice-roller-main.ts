@@ -207,6 +207,10 @@ function diceRoller() {
     
     // Version display
     appVersion: __APP_VERSION__,
+    
+    // Audio state
+    rollAudio: null as HTMLAudioElement | null,
+    soundEnabled: true,
 
     setAdvantageType(type: 'none' | 'advantage' | 'disadvantage') {
       this.advantageType = type;
@@ -294,6 +298,9 @@ function diceRoller() {
 
       this.isRolling = true;
       this.result = '';
+      
+      // Play roll sound
+      this.playRollSound();
 
       try {
         let diceArray = [];
@@ -635,6 +642,55 @@ function diceRoller() {
       const theme = this.darkMode ? 'dark' : 'light';
       document.body.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
+    },
+    
+    // Audio methods
+    initAudio() {
+      try {
+        this.rollAudio = new Audio('/src/assets/roll.mp3');
+        this.rollAudio.volume = 0.5; // Set default volume to 50%
+        
+        // Preload the audio file
+        this.rollAudio.preload = 'auto';
+        this.rollAudio.load(); // Explicitly start loading
+        
+        // Load sound preference from localStorage
+        const savedSoundPreference = localStorage.getItem('daggerdice_sound_enabled');
+        if (savedSoundPreference !== null) {
+          this.soundEnabled = savedSoundPreference === 'true';
+        }
+      } catch (error) {
+        console.warn('Failed to initialize audio:', error);
+        this.rollAudio = null;
+      }
+    },
+    
+    playRollSound() {
+      if (!this.rollAudio || !this.soundEnabled) {
+        return;
+      }
+      
+      try {
+        // Reset to start in case of rapid rolls
+        this.rollAudio.currentTime = 0;
+        
+        // Play the sound
+        const playPromise = this.rollAudio.play();
+        
+        // Handle potential autoplay restrictions
+        if (playPromise !== undefined) {
+          playPromise.catch((error) => {
+            console.warn('Audio playback failed:', error);
+          });
+        }
+      } catch (error) {
+        console.warn('Error playing roll sound:', error);
+      }
+    },
+    
+    toggleSound() {
+      this.soundEnabled = !this.soundEnabled;
+      localStorage.setItem('daggerdice_sound_enabled', String(this.soundEnabled));
     },
 
     // ===== NEW SESSION METHODS (ADDITIVE) =====
@@ -1064,6 +1120,9 @@ return '';
       this.initialized = true;
       
       console.log('Initializing Alpine component');
+      
+      // Initialize audio
+      this.initAudio();
 
       // Initialize dark mode based on saved preference or system preference
       const savedTheme = localStorage.getItem('theme');
