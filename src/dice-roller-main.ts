@@ -1,42 +1,48 @@
 // Import Alpine.js and DiceBox from local node_modules
-import DiceBox from '@3d-dice/dice-box';
-import Alpine from 'alpinejs';
-import './dice-roller.css';
+import DiceBox from "@3d-dice/dice-box";
+import Alpine from "alpinejs";
+import "./dice-roller.css";
 
 // PWA functionality
-if ('serviceWorker' in navigator) {
+if ("serviceWorker" in navigator) {
   // For now, just register the manifest - no service worker
-  console.log('PWA manifest support available');
+  console.log("PWA manifest support available");
 }
 
 // Import session-related modules
-import { SessionClient } from './session/session-client.js';
-import type { Player, RollData, SharedRollHistoryItem } from './session/types.js';
-import { 
-  generateSessionId, 
-  sanitizePlayerName, 
-  getSessionIdFromUrl, 
-  extractSessionIdFromUrl,
-  normalizeSessionId,
-  isValidSessionId,
-  isSessionEnvironmentSupported,
-  saveRollHistory,
-  getSavedRollHistory,
-  createSessionUrl,
-  copyToClipboard,
-  getSavedPlayerName,
-  getLastSessionId,
-  clearSavedSessionData,
+import { sessionIdToFriendlyName } from "./session/room-names.js";
+import { SessionClient } from "./session/session-client.js";
+import type {
+  Player,
+  RollData,
+  SharedRollHistoryItem,
+} from "./session/types.js";
+import {
   clearLastSessionId,
-  savePlayerName,
+  clearSavedSessionData,
+  copyToClipboard,
+  createSessionUrl,
+  extractSessionIdFromUrl,
+  generateSessionId,
+  getLastSessionId,
+  getSavedPlayerName,
+  getSavedRollHistory,
+  getSessionIdFromUrl,
+  getShortCode,
+  isSessionEnvironmentSupported,
+  isValidSessionId,
+  normalizeSessionId,
+  sanitizePlayerName,
   saveLastSessionId,
-  getShortCode
-} from './session/utils.js';
-import { sessionIdToFriendlyName } from './session/room-names.js';
+  savePlayerName,
+  saveRollHistory,
+} from "./session/utils.js";
 
 // Type declarations for missing modules
 interface DiceBoxInstance {
-  roll: (dice: Array<{ sides: number; theme: string; themeColor: string }>) => Promise<Array<{ value: number }>>;
+  roll: (
+    dice: Array<{ sides: number; theme: string; themeColor: string }>
+  ) => Promise<Array<{ value: number }>>;
   init: () => Promise<void>;
 }
 
@@ -84,7 +90,7 @@ function toastManager() {
         id: this.nextId++,
         type,
         content,
-        visible: true
+        visible: true,
       };
 
       this.toasts.push(toast);
@@ -96,7 +102,7 @@ function toastManager() {
     },
 
     remove(id: number) {
-      const index = this.toasts.findIndex(t => t.id === id);
+      const index = this.toasts.findIndex((t) => t.id === id);
       if (index !== -1) {
         this.toasts[index].visible = false;
         // Remove from array after animation
@@ -107,45 +113,83 @@ function toastManager() {
     },
 
     showRollToast(roll: SharedRollHistoryItem) {
-      const resultText = roll.result.replace(/<[^>]*>/g, ''); // Strip HTML
-      let diceDetails = '';
-      
+      const resultText = roll.result.replace(/<[^>]*>/g, ""); // Strip HTML
+      let diceDetails = "";
+
       // Build dice details based on roll type
-      if (roll.rollType === 'check') {
+      if (roll.rollType === "check") {
         // Hope/Fear check roll
         diceDetails = `
           <span class="hope">Hope: ${roll.hopeValue}</span>
           <span class="fear">Fear: ${roll.fearValue}</span>
-          ${roll.advantageValue && roll.advantageValue !== 0 ? `<span class="${roll.advantageValue > 0 ? 'advantage' : 'disadvantage'}">${roll.advantageValue > 0 ? 'Adv' : 'Dis'}: ${Math.abs(roll.advantageValue)}</span>` : ''}
-          ${roll.modifier && roll.modifier !== 0 ? `<span>Mod: ${roll.modifier > 0 ? '+' : ''}${roll.modifier}</span>` : ''}
+          ${
+            roll.advantageValue && roll.advantageValue !== 0
+              ? `<span class="${
+                  roll.advantageValue > 0 ? "advantage" : "disadvantage"
+                }">${roll.advantageValue > 0 ? "Adv" : "Dis"}: ${Math.abs(
+                  roll.advantageValue
+                )}</span>`
+              : ""
+          }
+          ${
+            roll.modifier && roll.modifier !== 0
+              ? `<span>Mod: ${roll.modifier > 0 ? "+" : ""}${
+                  roll.modifier
+                }</span>`
+              : ""
+          }
         `;
-      } else if (roll.rollType === 'damage') {
+      } else if (roll.rollType === "damage") {
         // Damage roll
         const diceStr = `${roll.baseDiceCount}d${roll.baseDiceType}`;
         diceDetails = `
           <span>Dice: ${diceStr}</span>
-          ${roll.bonusDieEnabled && roll.bonusDieType ? `<span>Bonus: d${roll.bonusDieType}</span>` : ''}
-          ${roll.damageModifier && roll.damageModifier !== 0 ? `<span>Mod: ${roll.damageModifier > 0 ? '+' : ''}${roll.damageModifier}</span>` : ''}
-          ${roll.isCritical ? '<span class="critical">Critical!</span>' : ''}
-          ${roll.hasResistance ? '<span>Resisted</span>' : ''}
+          ${
+            roll.bonusDieEnabled && roll.bonusDieType
+              ? `<span>Bonus: d${roll.bonusDieType}</span>`
+              : ""
+          }
+          ${
+            roll.damageModifier && roll.damageModifier !== 0
+              ? `<span>Mod: ${roll.damageModifier > 0 ? "+" : ""}${
+                  roll.damageModifier
+                }</span>`
+              : ""
+          }
+          ${roll.isCritical ? '<span class="critical">Critical!</span>' : ""}
+          ${roll.hasResistance ? "<span>Resisted</span>" : ""}
         `;
-      } else if (roll.rollType === 'gm') {
+      } else if (roll.rollType === "gm") {
         // GM roll
         diceDetails = `
           <span>d20: ${roll.d20Value}</span>
-          ${roll.gmAdvantageType && roll.gmAdvantageType !== 'none' && roll.d20Value2 ? `<span>${roll.gmAdvantageType === 'advantage' ? 'Adv' : 'Dis'}: ${roll.d20Value2}</span>` : ''}
-          ${roll.gmModifier && roll.gmModifier !== 0 ? `<span>Mod: ${roll.gmModifier > 0 ? '+' : ''}${roll.gmModifier}</span>` : ''}
-          ${roll.gmPrivate ? '<span>Private</span>' : ''}
+          ${
+            roll.gmAdvantageType &&
+            roll.gmAdvantageType !== "none" &&
+            roll.d20Value2
+              ? `<span>${
+                  roll.gmAdvantageType === "advantage" ? "Adv" : "Dis"
+                }: ${roll.d20Value2}</span>`
+              : ""
+          }
+          ${
+            roll.gmModifier && roll.gmModifier !== 0
+              ? `<span>Mod: ${roll.gmModifier > 0 ? "+" : ""}${
+                  roll.gmModifier
+                }</span>`
+              : ""
+          }
+          ${roll.gmPrivate ? "<span>Private</span>" : ""}
         `;
       }
-      
+
       const content = `
         <div class="toast-player">${roll.playerName} rolled:</div>
         <div class="toast-result">${resultText}</div>
         <div class="toast-dice">${diceDetails}</div>
       `;
-      this.show('roll', content, 5000);
-    }
+      this.show("roll", content, 5000);
+    },
   };
 }
 
@@ -155,11 +199,11 @@ function diceRoller() {
     // ===== EXISTING STATE (UNCHANGED) =====
     hopeValue: 0,
     fearValue: 0,
-    result: '',
+    result: "",
     isRolling: false,
     rollHistory: [] as RollHistoryItem[],
     showHistory: false,
-    advantageType: 'none' as 'none' | 'advantage' | 'disadvantage',
+    advantageType: "none" as "none" | "advantage" | "disadvantage",
     advantageValue: 0,
     modifier: 0,
 
@@ -167,8 +211,8 @@ function diceRoller() {
     darkMode: false,
 
     // ===== ROLL TYPE STATE =====
-    rollType: 'check' as 'check' | 'damage' | 'gm',
-    
+    rollType: "check" as "check" | "damage" | "gm",
+
     // Damage roll state
     baseDiceCount: 1,
     baseDiceType: 6 as 4 | 6 | 8 | 10 | 12,
@@ -177,71 +221,75 @@ function diceRoller() {
     damageModifier: 0,
     isCritical: false,
     hasResistance: false,
-    
+
     // GM roll state
     gmModifier: 0,
     d20Value: 0,
     d20Value2: 0, // Second d20 for advantage/disadvantage
-    gmAdvantageType: 'none' as 'none' | 'advantage' | 'disadvantage',
+    gmAdvantageType: "none" as "none" | "advantage" | "disadvantage",
     gmPrivateRolls: false,
-    
+
     // Keyboard shortcuts
     showKeyboardHelp: false,
 
     // ===== NEW SESSION STATE (ADDITIVE) =====
-    sessionMode: 'solo' as 'solo' | 'multiplayer',
+    sessionMode: "solo" as "solo" | "multiplayer",
     sessionId: null as string | null,
-    playerName: '',
-    joinSessionId: '',
+    playerName: "",
+    joinSessionId: "",
     connectedPlayers: [] as Player[],
     sessionClient: null as SessionClient | null,
     showSessionUI: false,
     sessionFeaturesAvailable: true,
-    connectionStatus: 'disconnected' as 'disconnected' | 'connecting' | 'connected' | 'error',
+    connectionStatus: "disconnected" as
+      | "disconnected"
+      | "connecting"
+      | "connected"
+      | "error",
     initialized: false,
     connectionMonitorInterval: null as number | null,
-    
+
     // Streamer mode state
     streamerMode: false,
     streamerModeTemporarilyDisabled: false,
-    
+
     // Version display
     appVersion: __APP_VERSION__,
-    
+
     // Audio state
     rollAudio: null as HTMLAudioElement | null,
     soundEnabled: true,
 
-    setAdvantageType(type: 'none' | 'advantage' | 'disadvantage') {
+    setAdvantageType(type: "none" | "advantage" | "disadvantage") {
       this.advantageType = type;
-      if (type === 'none') {
+      if (type === "none") {
         this.advantageValue = 0;
       }
     },
 
-    setGMAdvantageType(type: 'none' | 'advantage' | 'disadvantage') {
+    setGMAdvantageType(type: "none" | "advantage" | "disadvantage") {
       this.gmAdvantageType = type;
-      if (type === 'none') {
+      if (type === "none") {
         this.d20Value2 = 0;
       }
     },
 
     // Roll type methods
-    setRollType(type: 'check' | 'damage' | 'gm') {
+    setRollType(type: "check" | "damage" | "gm") {
       // Only trigger transition if the roll type is actually changing
       if (this.rollType === type) {
         return;
       }
-      
+
       // Use View Transitions API if available
       if (document.startViewTransition) {
         document.startViewTransition(() => {
           this.rollType = type;
-          this.result = '';
+          this.result = "";
         });
       } else {
         this.rollType = type;
-        this.result = '';
+        this.result = "";
       }
     },
 
@@ -278,7 +326,7 @@ function diceRoller() {
     toggleModifiersDialog() {
       // For mobile modifiers dialog
       const dialogData = this.$data;
-      if ('showModifiers' in dialogData) {
+      if ("showModifiers" in dialogData) {
         dialogData.showModifiers = !dialogData.showModifiers;
       }
     },
@@ -286,7 +334,7 @@ function diceRoller() {
     toggleActionsDialog() {
       // For mobile actions dialog
       const dialogData = this.$data;
-      if ('showActions' in dialogData) {
+      if ("showActions" in dialogData) {
         dialogData.showActions = !dialogData.showActions;
       }
     },
@@ -297,40 +345,44 @@ function diceRoller() {
       }
 
       this.isRolling = true;
-      this.result = '';
-      
+      this.result = "";
+
       // Play roll sound
       this.playRollSound();
 
       try {
         let diceArray = [];
         let rollResult;
-        let resultText = '';
+        let resultText = "";
         let totalValue = 0;
-        let rollData: RollData = { rollType: this.rollType, total: 0, result: '' };
+        let rollData: RollData = {
+          rollType: this.rollType,
+          total: 0,
+          result: "",
+        };
 
-        if (this.rollType === 'check') {
+        if (this.rollType === "check") {
           // Check roll: Hope & Fear dice
           diceArray = [
-            { sides: 12, theme: 'default', themeColor: '#4caf50' }, // Hope die (green)
-            { sides: 12, theme: 'default', themeColor: '#f44336' }, // Fear die (red)
+            { sides: 12, theme: "default", themeColor: "#4caf50" }, // Hope die (green)
+            { sides: 12, theme: "default", themeColor: "#f44336" }, // Fear die (red)
           ];
 
           // Add advantage/disadvantage D6 if needed
-          if (this.advantageType !== 'none') {
+          if (this.advantageType !== "none") {
             diceArray.push({
               sides: 6,
-              theme: 'smooth',
+              theme: "smooth",
               themeColor:
-                this.advantageType === 'advantage' ? '#d2ffd2' : '#ffd2d2',
+                this.advantageType === "advantage" ? "#d2ffd2" : "#ffd2d2",
             });
           }
 
           try {
             rollResult = await window.diceBox.roll(diceArray);
-            console.log('Roll result:', rollResult);
+            console.log("Roll result:", rollResult);
           } catch (error) {
-            console.warn('3D dice roll failed, using random numbers:', error);
+            console.warn("3D dice roll failed, using random numbers:", error);
             rollResult = null;
           }
 
@@ -340,23 +392,23 @@ function diceRoller() {
             this.fearValue = rollResult[1].value;
 
             // Handle advantage/disadvantage D6
-            if (this.advantageType !== 'none' && rollResult.length >= 3) {
+            if (this.advantageType !== "none" && rollResult.length >= 3) {
               const d6Value = rollResult[2].value;
               this.advantageValue =
-                this.advantageType === 'advantage' ? d6Value : -d6Value;
+                this.advantageType === "advantage" ? d6Value : -d6Value;
             } else {
               this.advantageValue = 0;
             }
           } else {
             // Fallback to random values if dice-box fails
-            console.log('Using random fallback for check roll');
+            console.log("Using random fallback for check roll");
             this.hopeValue = Math.floor(Math.random() * 12) + 1;
             this.fearValue = Math.floor(Math.random() * 12) + 1;
 
-            if (this.advantageType !== 'none') {
+            if (this.advantageType !== "none") {
               const d6Value = Math.floor(Math.random() * 6) + 1;
               this.advantageValue =
-                this.advantageType === 'advantage' ? d6Value : -d6Value;
+                this.advantageType === "advantage" ? d6Value : -d6Value;
             } else {
               this.advantageValue = 0;
             }
@@ -367,29 +419,29 @@ function diceRoller() {
           const finalTotal = baseTotal + this.advantageValue + this.modifier;
 
           // Calculate result text
-          let modifierText = '';
+          let modifierText = "";
 
           if (this.advantageValue !== 0 || this.modifier !== 0) {
             const parts = [baseTotal.toString()];
             if (this.advantageValue !== 0) {
               parts.push(
-                `${this.advantageValue > 0 ? '+' : '-'} ${Math.abs(
+                `${this.advantageValue > 0 ? "+" : "-"} ${Math.abs(
                   this.advantageValue
                 )} ${this.advantageType}`
               );
             }
             if (this.modifier !== 0) {
               parts.push(
-                `${this.modifier > 0 ? '+' : '-'} ${Math.abs(
+                `${this.modifier > 0 ? "+" : "-"} ${Math.abs(
                   this.modifier
                 )} modifier`
               );
             }
-            modifierText = ` <small>(${parts.join(' ')})</small>`;
+            modifierText = ` <small>(${parts.join(" ")})</small>`;
           }
 
           if (this.hopeValue === this.fearValue) {
-            resultText = 'Critical Success!';
+            resultText = "Critical Success!";
           } else if (this.hopeValue > this.fearValue) {
             resultText = `${finalTotal} with hope${modifierText}`;
           } else {
@@ -398,7 +450,7 @@ function diceRoller() {
 
           totalValue = finalTotal;
           rollData = {
-            rollType: 'check',
+            rollType: "check",
             hopeValue: this.hopeValue,
             fearValue: this.fearValue,
             advantageValue: this.advantageValue,
@@ -407,15 +459,14 @@ function diceRoller() {
             total: finalTotal,
             result: resultText,
           };
-
-        } else if (this.rollType === 'damage') {
+        } else if (this.rollType === "damage") {
           // Damage roll
           diceArray = [];
           for (let i = 0; i < this.baseDiceCount; i++) {
             diceArray.push({
               sides: this.baseDiceType,
-              theme: 'default',
-              themeColor: '#ff9800'
+              theme: "default",
+              themeColor: "#ff9800",
             });
           }
 
@@ -423,15 +474,15 @@ function diceRoller() {
           if (this.bonusDieEnabled) {
             diceArray.push({
               sides: this.bonusDieType,
-              theme: 'smooth',
-              themeColor: '#ffd54f'
+              theme: "smooth",
+              themeColor: "#ffd54f",
             });
           }
 
           try {
             rollResult = await window.diceBox.roll(diceArray);
           } catch (error) {
-            console.warn('3D dice roll failed, using random numbers:', error);
+            console.warn("3D dice roll failed, using random numbers:", error);
             rollResult = null;
           }
 
@@ -447,13 +498,16 @@ function diceRoller() {
             }
 
             // Handle bonus die
-            if (this.bonusDieEnabled && rollResult.length > this.baseDiceCount) {
+            if (
+              this.bonusDieEnabled &&
+              rollResult.length > this.baseDiceCount
+            ) {
               bonusDieValue = rollResult[this.baseDiceCount].value;
               damageTotal += bonusDieValue;
             }
           } else {
             // Fallback to random values
-            console.log('Using random fallback for damage roll');
+            console.log("Using random fallback for damage roll");
             for (let i = 0; i < this.baseDiceCount; i++) {
               const value = Math.floor(Math.random() * this.baseDiceType) + 1;
               baseDiceValues.push(value);
@@ -470,7 +524,7 @@ function diceRoller() {
           if (this.isCritical) {
             // Calculate max possible damage for base dice only
             const maxBaseDamage = this.baseDiceCount * this.baseDiceType;
-            
+
             // Critical = max base dice + normal roll + modifier
             damageTotal = maxBaseDamage + damageTotal + this.damageModifier;
           } else {
@@ -486,11 +540,13 @@ function diceRoller() {
           // Ensure damage doesn't go below 0
           damageTotal = Math.max(0, damageTotal);
 
-          resultText = this.isCritical ? `${damageTotal} damage (critical)` : `${damageTotal} damage`;
+          resultText = this.isCritical
+            ? `${damageTotal} damage (critical)`
+            : `${damageTotal} damage`;
           totalValue = damageTotal;
 
           rollData = {
-            rollType: 'damage',
+            rollType: "damage",
             baseDiceCount: this.baseDiceCount,
             baseDiceType: this.baseDiceType,
             baseDiceValues: baseDiceValues,
@@ -501,48 +557,50 @@ function diceRoller() {
             isCritical: this.isCritical,
             hasResistance: this.hasResistance,
             total: damageTotal,
-            result: resultText
+            result: resultText,
           };
-
-        } else if (this.rollType === 'gm') {
+        } else if (this.rollType === "gm") {
           // GM roll: d20 with optional advantage/disadvantage
-          diceArray = [{
-            sides: 20,
-            theme: 'default',
-            themeColor: '#8e44ad'
-          }];
+          diceArray = [
+            {
+              sides: 20,
+              theme: "default",
+              themeColor: "#8e44ad",
+            },
+          ];
 
           // Add second d20 for advantage/disadvantage
-          if (this.gmAdvantageType !== 'none') {
+          if (this.gmAdvantageType !== "none") {
             diceArray.push({
               sides: 20,
-              theme: 'default', 
-              themeColor: this.gmAdvantageType === 'advantage' ? '#9b59b6' : '#6a0dad'
+              theme: "default",
+              themeColor:
+                this.gmAdvantageType === "advantage" ? "#9b59b6" : "#6a0dad",
             });
           }
 
           try {
             rollResult = await window.diceBox.roll(diceArray);
           } catch (error) {
-            console.warn('3D dice roll failed, using random numbers:', error);
+            console.warn("3D dice roll failed, using random numbers:", error);
             rollResult = null;
           }
 
           if (rollResult && rollResult.length >= 1) {
             this.d20Value = rollResult[0].value;
-            
-            if (this.gmAdvantageType !== 'none' && rollResult.length >= 2) {
+
+            if (this.gmAdvantageType !== "none" && rollResult.length >= 2) {
               this.d20Value2 = rollResult[1].value;
-            } else if (this.gmAdvantageType !== 'none') {
+            } else if (this.gmAdvantageType !== "none") {
               this.d20Value2 = Math.floor(Math.random() * 20) + 1;
             } else {
               this.d20Value2 = 0;
             }
           } else {
             // Fallback to random values
-            console.log('Using random fallback for GM roll');
+            console.log("Using random fallback for GM roll");
             this.d20Value = Math.floor(Math.random() * 20) + 1;
-            if (this.gmAdvantageType !== 'none') {
+            if (this.gmAdvantageType !== "none") {
               this.d20Value2 = Math.floor(Math.random() * 20) + 1;
             } else {
               this.d20Value2 = 0;
@@ -551,41 +609,48 @@ function diceRoller() {
 
           // Calculate final d20 value based on advantage/disadvantage
           let finalD20Value: number;
-          if (this.gmAdvantageType === 'advantage') {
+          if (this.gmAdvantageType === "advantage") {
             finalD20Value = Math.max(this.d20Value, this.d20Value2);
-          } else if (this.gmAdvantageType === 'disadvantage') {
+          } else if (this.gmAdvantageType === "disadvantage") {
             finalD20Value = Math.min(this.d20Value, this.d20Value2);
           } else {
             finalD20Value = this.d20Value;
           }
 
           totalValue = finalD20Value + this.gmModifier;
-          
+
           // Format result text
-          if (this.gmAdvantageType !== 'none') {
-            const advantageLabel = this.gmAdvantageType === 'advantage' ? 'Adv.' : 'Dis.';
+          if (this.gmAdvantageType !== "none") {
+            const advantageLabel =
+              this.gmAdvantageType === "advantage" ? "Adv." : "Dis.";
             if (this.gmModifier !== 0) {
-              resultText = `${totalValue} GM <small>(${this.d20Value} and ${this.d20Value2} w/ ${advantageLabel}, ${this.gmModifier > 0 ? '+' : ''}${this.gmModifier})</small>`;
+              resultText = `${totalValue} GM <small>(${this.d20Value} and ${
+                this.d20Value2
+              } w/ ${advantageLabel}, ${this.gmModifier > 0 ? "+" : ""}${
+                this.gmModifier
+              })</small>`;
             } else {
               resultText = `${finalD20Value} GM <small>(${this.d20Value} and ${this.d20Value2} w/ ${advantageLabel})</small>`;
             }
           } else {
             if (this.gmModifier !== 0) {
-              resultText = `${totalValue} GM <small>(${this.gmModifier > 0 ? '+' : ''}${this.gmModifier})</small>`;
+              resultText = `${totalValue} GM <small>(${
+                this.gmModifier > 0 ? "+" : ""
+              }${this.gmModifier})</small>`;
             } else {
               resultText = `${finalD20Value} GM`;
             }
           }
 
           rollData = {
-            rollType: 'gm',
+            rollType: "gm",
             d20Value: this.d20Value,
             d20Value2: this.d20Value2,
             gmAdvantageType: this.gmAdvantageType,
             gmModifier: this.gmModifier,
             gmPrivate: this.gmPrivateRolls,
             total: totalValue,
-            result: resultText
+            result: resultText,
           };
         }
 
@@ -595,39 +660,44 @@ function diceRoller() {
         // Create unified roll history item
         const historyItem: RollHistoryItem = {
           ...rollData,
-          playerId: this.sessionMode === 'multiplayer' && this.sessionClient ? this.sessionClient.getPlayerId() || '' : undefined,
-          playerName: this.sessionMode === 'multiplayer' ? this.playerName : undefined,
-          timestamp: this.sessionMode === 'multiplayer' ? Date.now() : undefined
+          playerId:
+            this.sessionMode === "multiplayer" && this.sessionClient
+              ? this.sessionClient.getPlayerId() || ""
+              : undefined,
+          playerName:
+            this.sessionMode === "multiplayer" ? this.playerName : undefined,
+          timestamp:
+            this.sessionMode === "multiplayer" ? Date.now() : undefined,
         };
 
-        console.log('Adding own roll to history:', historyItem);
+        console.log("Adding own roll to history:", historyItem);
         this.rollHistory.unshift(historyItem);
 
         // Limit history (20 for multiplayer, 10 for solo)
-        const maxHistory = this.sessionMode === 'multiplayer' ? 20 : 10;
+        const maxHistory = this.sessionMode === "multiplayer" ? 20 : 10;
         if (this.rollHistory.length > maxHistory) {
           this.rollHistory = this.rollHistory.slice(0, maxHistory);
         }
 
         // Save to localStorage for solo play
-        if (this.sessionMode === 'solo') {
+        if (this.sessionMode === "solo") {
           saveRollHistory(this.rollHistory);
         }
 
         // In multiplayer: broadcast and sync with session client
-        if (this.sessionMode === 'multiplayer' && this.sessionClient) {
+        if (this.sessionMode === "multiplayer" && this.sessionClient) {
           // Session client uses same history reference
           this.sessionClient.setRollHistory(this.rollHistory);
-          
+
           // Broadcast to other players (only broadcast if not a private GM roll)
-          if (!(this.rollType === 'gm' && rollData.gmPrivate)) {
+          if (!(this.rollType === "gm" && rollData.gmPrivate)) {
             this.sessionClient.broadcastRoll(rollData);
           }
         }
       } catch (error) {
-        console.error('Error rolling dice:', error);
+        console.error("Error rolling dice:", error);
         // Simplified fallback - just show error
-        this.result = 'Error rolling dice';
+        this.result = "Error rolling dice";
       } finally {
         this.isRolling = false;
       }
@@ -639,64 +709,69 @@ function diceRoller() {
 
     toggleDarkMode() {
       this.darkMode = !this.darkMode;
-      const theme = this.darkMode ? 'dark' : 'light';
-      document.body.setAttribute('data-theme', theme);
-      localStorage.setItem('theme', theme);
+      const theme = this.darkMode ? "dark" : "light";
+      document.body.setAttribute("data-theme", theme);
+      localStorage.setItem("theme", theme);
     },
-    
+
     // Audio methods
     initAudio() {
       try {
-        this.rollAudio = new Audio('/assets/roll.mp3');
+        this.rollAudio = new Audio("/assets/roll.mp3");
         this.rollAudio.volume = 0.5; // Set default volume to 50%
-        
+
         // Preload the audio file
-        this.rollAudio.preload = 'auto';
+        this.rollAudio.preload = "auto";
         this.rollAudio.load(); // Explicitly start loading
-        
+
         // Load sound preference from localStorage
-        const savedSoundPreference = localStorage.getItem('daggerdice_sound_enabled');
+        const savedSoundPreference = localStorage.getItem(
+          "daggerdice_sound_enabled"
+        );
         if (savedSoundPreference !== null) {
-          this.soundEnabled = savedSoundPreference === 'true';
+          this.soundEnabled = savedSoundPreference === "true";
         }
       } catch (error) {
-        console.warn('Failed to initialize audio:', error);
+        console.warn("Failed to initialize audio:", error);
         this.rollAudio = null;
       }
     },
-    
+
     playRollSound() {
       if (!this.rollAudio || !this.soundEnabled) {
         return;
       }
-      
+
       try {
         // Reset to start in case of rapid rolls
         this.rollAudio.currentTime = 0;
-        
+
         // Play the sound
         const playPromise = this.rollAudio.play();
-        
+
         // Handle potential autoplay restrictions
         if (playPromise !== undefined) {
           playPromise.catch((error) => {
-            console.warn('Audio playback failed:', error);
+            console.warn("Audio playback failed:", error);
           });
         }
       } catch (error) {
-        console.warn('Error playing roll sound:', error);
+        console.warn("Error playing roll sound:", error);
       }
     },
-    
+
     toggleSound() {
       this.soundEnabled = !this.soundEnabled;
-      localStorage.setItem('daggerdice_sound_enabled', String(this.soundEnabled));
+      localStorage.setItem(
+        "daggerdice_sound_enabled",
+        String(this.soundEnabled)
+      );
     },
 
     // ===== NEW SESSION METHODS (ADDITIVE) =====
     toggleSessionUI() {
       this.showSessionUI = !this.showSessionUI;
-      
+
       // Reset temporary streamer mode override when dialog is closed
       if (!this.showSessionUI) {
         this.streamerModeTemporarilyDisabled = false;
@@ -707,9 +782,9 @@ function diceRoller() {
       this.streamerMode = !this.streamerMode;
       // Save preference to localStorage
       if (this.streamerMode) {
-        localStorage.setItem('daggerdice_streamer_mode', 'true');
+        localStorage.setItem("daggerdice_streamer_mode", "true");
       } else {
-        localStorage.removeItem('daggerdice_streamer_mode');
+        localStorage.removeItem("daggerdice_streamer_mode");
       }
     },
 
@@ -717,8 +792,10 @@ function diceRoller() {
       if (!this.streamerMode) {
         return; // Streamer mode not active
       }
-      
-      const confirmed = confirm('Temporarily show room details? They will be hidden again when you close this dialog.');
+
+      const confirmed = confirm(
+        "Temporarily show room details? They will be hidden again when you close this dialog."
+      );
       if (confirmed) {
         this.streamerModeTemporarilyDisabled = true;
       }
@@ -735,32 +812,34 @@ function diceRoller() {
     },
 
     get sessionShortCode() {
-      return this.sessionId ? getShortCode(this.sessionId) : '';
+      return this.sessionId ? getShortCode(this.sessionId) : "";
     },
 
     get formattedRoomName() {
       if (!this.sessionId) {
-return '';
-}
+        return "";
+      }
       // Convert "kind-monk" to "Kind Monk Room"
-      return this.sessionId
-        .split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ') + ' Room';
+      return (
+        this.sessionId
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ") + " Room"
+      );
     },
 
     handleRoomIdChange() {
       const input = this.joinSessionId.trim();
-      
+
       // If input looks like a URL, try to extract session ID from it
-      if (input.includes('/room/') || input.startsWith('http')) {
+      if (input.includes("/room/") || input.startsWith("http")) {
         const extractedId = extractSessionIdFromUrl(input);
         if (extractedId) {
           this.joinSessionId = extractedId;
           return;
         }
       }
-      
+
       // Clear localStorage if room ID is empty
       if (!input) {
         clearLastSessionId();
@@ -769,49 +848,55 @@ return '';
 
     async createSession() {
       // Form validation ensures player name is filled before button is enabled
-      
+
       // Prevent multiple concurrent connection attempts
-      if (this.connectionStatus === 'connecting') {
-        console.warn('Already connecting, please wait');
+      if (this.connectionStatus === "connecting") {
+        console.warn("Already connecting, please wait");
         return;
       }
 
       // Disconnect existing session if any
       if (this.sessionClient) {
-        console.log('Disconnecting existing session client');
+        console.log("Disconnecting existing session client");
         this.sessionClient.disconnect();
         this.sessionClient = null;
         // Small delay to ensure cleanup
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
       try {
-        this.connectionStatus = 'connecting';
+        this.connectionStatus = "connecting";
         const sessionId = generateSessionId();
         const sanitizedName = sanitizePlayerName(this.playerName);
-        
+
         this.sessionClient = new SessionClient();
         this.setupSessionEventHandlers();
-        
-        const connected = await this.sessionClient.connect(sessionId, sanitizedName);
-        
+
+        const connected = await this.sessionClient.connect(
+          sessionId,
+          sanitizedName
+        );
+
         if (connected) {
-          this.sessionMode = 'multiplayer';
+          this.sessionMode = "multiplayer";
           this.sessionId = sessionId;
           this.playerName = sanitizedName;
           // Use session client's state as source of truth
           this.connectionStatus = this.sessionClient.getConnectionState();
-          
+
           // Clear roll history when creating multiplayer room
           this.rollHistory = [];
-          
+
           // Save player name and session ID
           savePlayerName(sanitizedName);
           saveLastSessionId(sessionId);
-          
+
           // Update URL without page reload (unless in streamer mode)
           // Only update URL if we're not already in a room URL to prevent oscillation
-          if (!this.streamerMode && !window.location.pathname.startsWith('/room/')) {
+          if (
+            !this.streamerMode &&
+            !window.location.pathname.startsWith("/room/")
+          ) {
             // Convert short codes to friendly names for better UX
             let urlSessionId = sessionId;
             if (/^[0-9A-Z]{3}$/i.test(sessionId)) {
@@ -820,29 +905,37 @@ return '';
                 urlSessionId = friendlyName;
               }
             }
-            history.pushState({}, '', `/room/${urlSessionId}`);
+            history.pushState({}, "", `/room/${urlSessionId}`);
           }
-          
+
           // Start heartbeat and connection monitoring
           this.sessionClient.startHeartbeat();
           this.startConnectionMonitoring();
         } else {
-          throw new Error('Failed to connect to session');
+          throw new Error("Failed to connect to session");
         }
       } catch (error) {
-        console.error('Failed to create session:', error);
-        this.connectionStatus = 'error';
-        
+        console.error("Failed to create session:", error);
+        this.connectionStatus = "error";
+
         // Provide more specific error message
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        if (errorMessage.includes('WebSocket') || errorMessage.includes('connection')) {
-          alert('Failed to connect. Please check your internet connection and try again.');
-        } else if (errorMessage.includes('session')) {
-          alert('Failed to create room. Please try again or contact support if the problem persists.');
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        if (
+          errorMessage.includes("WebSocket") ||
+          errorMessage.includes("connection")
+        ) {
+          alert(
+            "Failed to connect. Please check your internet connection and try again."
+          );
+        } else if (errorMessage.includes("session")) {
+          alert(
+            "Failed to create room. Please try again or contact support if the problem persists."
+          );
         } else {
-          alert('Failed to create room. Please try again.');
+          alert("Failed to create room. Please try again.");
         }
-        
+
         this.leaveSession();
       }
     },
@@ -851,51 +944,57 @@ return '';
       // Form validation ensures these are valid before button is enabled
       const normalizedSessionId = normalizeSessionId(this.joinSessionId);
       if (!normalizedSessionId) {
-        console.error('Invalid session ID passed validation');
+        console.error("Invalid session ID passed validation");
         return;
       }
 
       // Prevent multiple concurrent connection attempts
-      if (this.connectionStatus === 'connecting') {
-        console.warn('Already connecting, please wait');
+      if (this.connectionStatus === "connecting") {
+        console.warn("Already connecting, please wait");
         return;
       }
 
       // Disconnect existing session if any
       if (this.sessionClient) {
-        console.log('Disconnecting existing session client');
+        console.log("Disconnecting existing session client");
         this.sessionClient.disconnect();
         this.sessionClient = null;
         // Small delay to ensure cleanup
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
       try {
-        this.connectionStatus = 'connecting';
+        this.connectionStatus = "connecting";
         const sanitizedName = sanitizePlayerName(this.playerName);
-        
+
         this.sessionClient = new SessionClient();
         this.setupSessionEventHandlers();
-        
-        const connected = await this.sessionClient.connect(normalizedSessionId, sanitizedName);
-        
+
+        const connected = await this.sessionClient.connect(
+          normalizedSessionId,
+          sanitizedName
+        );
+
         if (connected) {
-          this.sessionMode = 'multiplayer';
+          this.sessionMode = "multiplayer";
           this.sessionId = normalizedSessionId;
           this.playerName = sanitizedName;
           // Use session client's state as source of truth
           this.connectionStatus = this.sessionClient.getConnectionState();
-          
+
           // Clear roll history when joining multiplayer
           this.rollHistory = [];
-          
+
           // Save player name and session ID
           savePlayerName(sanitizedName);
           saveLastSessionId(normalizedSessionId);
-          
+
           // Update URL without page reload and use normalized ID (unless in streamer mode)
           // Only update URL if we're not already in a room URL to prevent oscillation
-          if (!this.streamerMode && !window.location.pathname.startsWith('/room/')) {
+          if (
+            !this.streamerMode &&
+            !window.location.pathname.startsWith("/room/")
+          ) {
             // Convert short codes to friendly names for better UX
             let urlSessionId = normalizedSessionId;
             if (/^[0-9A-Z]{3}$/i.test(normalizedSessionId)) {
@@ -904,28 +1003,38 @@ return '';
                 urlSessionId = friendlyName;
               }
             }
-            history.pushState({}, '', `/room/${urlSessionId}`);
+            history.pushState({}, "", `/room/${urlSessionId}`);
           }
-          
+
           // Start heartbeat
           this.sessionClient.startHeartbeat();
         } else {
-          throw new Error('Failed to join session');
+          throw new Error("Failed to join session");
         }
       } catch (error) {
-        console.error('Failed to join session:', error);
-        this.connectionStatus = 'error';
-        
+        console.error("Failed to join session:", error);
+        this.connectionStatus = "error";
+
         // Provide more specific error message
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        if (errorMessage.includes('WebSocket') || errorMessage.includes('connection')) {
-          alert('Failed to connect to room. Please check your internet connection and try again.');
-        } else if (errorMessage.includes('session')) {
-          alert('Failed to join session. The room may not exist or may be full.');
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        if (
+          errorMessage.includes("WebSocket") ||
+          errorMessage.includes("connection")
+        ) {
+          alert(
+            "Failed to connect to room. Please check your internet connection and try again."
+          );
+        } else if (errorMessage.includes("session")) {
+          alert(
+            "Failed to join session. The room may not exist or may be full."
+          );
         } else {
-          alert('Failed to join room. Please try again or contact support if the problem persists.');
+          alert(
+            "Failed to join room. Please try again or contact support if the problem persists."
+          );
         }
-        
+
         this.leaveSession();
       }
     },
@@ -933,41 +1042,41 @@ return '';
     leaveSession(clearSavedData = false) {
       // Preserve current session ID for easy rejoining
       const currentSessionId = this.sessionId;
-      
+
       // Stop connection monitoring
       this.stopConnectionMonitoring();
-      
+
       if (this.sessionClient) {
         this.sessionClient.disconnect();
         this.sessionClient = null;
       }
-      
-      this.sessionMode = 'solo';
+
+      this.sessionMode = "solo";
       this.sessionId = null;
       this.connectedPlayers = [];
-      this.connectionStatus = 'disconnected';
-      
+      this.connectionStatus = "disconnected";
+
       // Reset temporary streamer mode override when leaving session
       this.streamerModeTemporarilyDisabled = false;
-      
+
       // Load solo roll history when switching to solo mode
       this.rollHistory = getSavedRollHistory();
-      
+
       // Clear saved session data if requested
       if (clearSavedData) {
         clearSavedSessionData();
-        this.playerName = '';
-        this.joinSessionId = '';
+        this.playerName = "";
+        this.joinSessionId = "";
       } else {
         // Keep the room ID populated for easy rejoining
         if (currentSessionId) {
           this.joinSessionId = currentSessionId;
         }
       }
-      
+
       // Return to solo URL (unless in streamer mode)
       if (!this.streamerMode) {
-        history.pushState({}, '', '/');
+        history.pushState({}, "", "/");
       }
     },
 
@@ -975,46 +1084,56 @@ return '';
       if (!this.sessionId) {
         return;
       }
-      
+
       // Always use friendly name format for sharing URLs
       let shareableSessionId = this.sessionId;
       if (/^[0-9A-Z]{3}$/i.test(this.sessionId)) {
         // If current sessionId is a short code, convert to friendly name
         shareableSessionId = sessionIdToFriendlyName(this.sessionId);
       }
-      
+
       const url = createSessionUrl(shareableSessionId);
       const success = await copyToClipboard(url);
-      
+
       if (success) {
         // You could show a toast notification here
-        console.log('Room link copied to clipboard');
+        console.log("Room link copied to clipboard");
       } else {
-        alert('Failed to copy link. Please copy manually: ' + url);
+        alert("Failed to copy link. Please copy manually: " + url);
       }
     },
 
     startConnectionMonitoring() {
       // Stop any existing monitoring
       this.stopConnectionMonitoring();
-      
+
       // Monitor connection health every 5 seconds
       this.connectionMonitorInterval = window.setInterval(() => {
-        if (this.sessionClient && this.sessionMode === 'multiplayer') {
+        if (this.sessionClient && this.sessionMode === "multiplayer") {
           const actualState = this.sessionClient.getConnectionState();
           if (this.connectionStatus !== actualState) {
-            console.log('Connection state mismatch detected. UI:', this.connectionStatus, 'Actual:', actualState);
+            console.log(
+              "Connection state mismatch detected. UI:",
+              this.connectionStatus,
+              "Actual:",
+              actualState
+            );
             this.connectionStatus = actualState;
           }
-          
+
           // Check connection health
-          if (actualState === 'connected' && !this.sessionClient.isConnectionHealthy()) {
-            console.warn('Connection appears unhealthy despite being marked as connected');
+          if (
+            actualState === "connected" &&
+            !this.sessionClient.isConnectionHealthy()
+          ) {
+            console.warn(
+              "Connection appears unhealthy despite being marked as connected"
+            );
           }
         }
       }, 5000);
     },
-    
+
     stopConnectionMonitoring() {
       if (this.connectionMonitorInterval) {
         clearInterval(this.connectionMonitorInterval);
@@ -1026,84 +1145,98 @@ return '';
       if (!this.sessionClient) {
         return;
       }
-      
+
       this.sessionClient.setEventHandlers({
         onConnected: (playerId: string) => {
-          console.log('Connected to session with player ID:', playerId);
+          console.log("Connected to session with player ID:", playerId);
           // Use the session client's connection state as source of truth
           this.connectionStatus = this.sessionClient.getConnectionState();
         },
-        
+
         onPlayerJoined: (player: Player) => {
-          console.log('Player joined:', player.name);
-          const existingIndex = this.connectedPlayers.findIndex(p => p.id === player.id);
+          console.log("Player joined:", player.name);
+          const existingIndex = this.connectedPlayers.findIndex(
+            (p) => p.id === player.id
+          );
           if (existingIndex === -1) {
             this.connectedPlayers.push(player);
           } else {
             this.connectedPlayers[existingIndex] = player;
           }
         },
-        
+
         onPlayerLeft: (playerId: string) => {
-          console.log('Player left:', playerId);
-          this.connectedPlayers = this.connectedPlayers.filter(p => p.id !== playerId);
+          console.log("Player left:", playerId);
+          this.connectedPlayers = this.connectedPlayers.filter(
+            (p) => p.id !== playerId
+          );
         },
-        
+
         onRollReceived: (roll: SharedRollHistoryItem) => {
-          console.log('Roll received from player:', roll.playerName, 'ID:', roll.playerId);
-          console.log('My player ID:', this.sessionClient?.getPlayerId());
+          console.log(
+            "Roll received from player:",
+            roll.playerName,
+            "ID:",
+            roll.playerId
+          );
+          console.log("My player ID:", this.sessionClient?.getPlayerId());
           // Only add incoming rolls from OTHER players to avoid duplicates of our own rolls
           if (roll.playerId !== this.sessionClient?.getPlayerId()) {
-            console.log('Adding received roll to history:', roll);
+            console.log("Adding received roll to history:", roll);
             this.rollHistory.unshift(roll);
-            console.log('Roll history after adding received roll:', this.rollHistory);
-            
+            console.log(
+              "Roll history after adding received roll:",
+              this.rollHistory
+            );
+
             // Show toast notification for the received roll
             if (globalToastManager) {
               globalToastManager.showRollToast(roll);
             }
-            
+
             // Sync with session client
             if (this.sessionClient) {
               this.sessionClient.setRollHistory(this.rollHistory);
             }
-            
+
             // Limit history to 20 items in multiplayer
             if (this.rollHistory.length > 20) {
               this.rollHistory = this.rollHistory.slice(0, 20);
             }
           } else {
-            console.log('Ignoring own roll (already added locally)');
+            console.log("Ignoring own roll (already added locally)");
           }
         },
-        
+
         onHistoryReceived: (rolls: SharedRollHistoryItem[]) => {
-          console.log('History received:', rolls.length, 'rolls');
+          console.log("History received:", rolls.length, "rolls");
           // Replace local history with session history
           this.rollHistory = [...rolls];
         },
-        
+
         onError: (error: string) => {
-          console.error('Session error:', error);
+          console.error("Session error:", error);
           // Use the session client's connection state as source of truth
-          this.connectionStatus = this.sessionClient?.getConnectionState() || 'error';
+          this.connectionStatus =
+            this.sessionClient?.getConnectionState() || "error";
           // Clear connected players on error - we can't see them while disconnected
           this.connectedPlayers = [];
         },
-        
+
         onDisconnected: () => {
-          console.log('Disconnected from session');
+          console.log("Disconnected from session");
           // Use the session client's connection state as source of truth
-          this.connectionStatus = this.sessionClient?.getConnectionState() || 'disconnected';
+          this.connectionStatus =
+            this.sessionClient?.getConnectionState() || "disconnected";
           // Clear connected players on disconnect - we can't see them while disconnected
           this.connectedPlayers = [];
-        }
+        },
       });
     },
 
     generateQRCode(sessionId: string): string {
       if (!sessionId) {
-        return '';
+        return "";
       }
       const roomUrl = createSessionUrl(sessionId);
       const encodedUrl = encodeURIComponent(roomUrl);
@@ -1114,31 +1247,36 @@ return '';
     init() {
       // Prevent multiple initializations
       if (this.initialized) {
-        console.warn('Alpine component already initialized, skipping');
+        console.warn("Alpine component already initialized, skipping");
         return;
       }
       this.initialized = true;
-      
-      console.log('Initializing Alpine component');
-      
+
+      console.log("Initializing Alpine component");
+
       // Initialize audio
       this.initAudio();
 
       // Initialize dark mode based on saved preference or system preference
-      const savedTheme = localStorage.getItem('theme');
+      const savedTheme = localStorage.getItem("theme");
       if (savedTheme) {
-        this.darkMode = savedTheme === 'dark';
+        this.darkMode = savedTheme === "dark";
       } else {
         // Check system preference
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
         this.darkMode = prefersDark;
       }
       // Apply theme
-      document.body.setAttribute('data-theme', this.darkMode ? 'dark' : 'light');
-      
+      document.body.setAttribute(
+        "data-theme",
+        this.darkMode ? "dark" : "light"
+      );
+
       // Feature detection
       this.sessionFeaturesAvailable = isSessionEnvironmentSupported();
-      
+
       // Load saved player name and last session ID
       this.playerName = getSavedPlayerName();
       const lastSessionId = getLastSessionId();
@@ -1147,71 +1285,75 @@ return '';
       }
 
       // Load saved streamer mode preference
-      this.streamerMode = localStorage.getItem('daggerdice_streamer_mode') === 'true';
+      this.streamerMode =
+        localStorage.getItem("daggerdice_streamer_mode") === "true";
 
       // Load saved roll history (only for solo play)
-      if (!this.sessionMode || this.sessionMode === 'solo') {
+      if (!this.sessionMode || this.sessionMode === "solo") {
         this.rollHistory = getSavedRollHistory();
       }
-      
+
       // Set up keyboard shortcuts
-      document.addEventListener('keydown', (e) => {
+      document.addEventListener("keydown", (e) => {
         // Don't trigger shortcuts when typing in inputs
-        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        if (
+          e.target instanceof HTMLInputElement ||
+          e.target instanceof HTMLTextAreaElement
+        ) {
           return;
         }
 
         // Handle shortcuts
-        switch(e.key.toLowerCase()) {
-          case ' ':
+        switch (e.key.toLowerCase()) {
+          case " ":
             e.preventDefault();
             this.rollDice();
             break;
-          case 'c':
-            this.setRollType('check');
+          case "c":
+            this.setRollType("check");
             break;
-          case 'd':
-            this.setRollType('damage');
+          case "d":
+            this.setRollType("damage");
             break;
-          case 'g':
-            this.setRollType('gm');
+          case "g":
+            this.setRollType("gm");
             break;
-          case 'h':
+          case "h":
             this.toggleHistory();
             break;
-          case 'm':
+          case "m":
             if (this.sessionFeaturesAvailable) {
               this.toggleSessionUI();
             }
             break;
-          case '?':
+          case "?":
             this.showKeyboardHelp = true;
             break;
-          case 'escape':
+          case "escape":
             this.showKeyboardHelp = false;
             this.showSessionUI = false;
             this.showHistory = false;
             break;
-          case 'arrowleft':
-            if (this.rollType === 'check') {
+          case "arrowleft":
+            if (this.rollType === "check") {
               this.modifier = Math.max(this.modifier - 1, -20);
-            } else if (this.rollType === 'gm') {
+            } else if (this.rollType === "gm") {
               this.gmModifier = Math.max(this.gmModifier - 1, -20);
-            } else if (this.rollType === 'damage') {
+            } else if (this.rollType === "damage") {
               this.damageModifier = Math.max(this.damageModifier - 1, -20);
             }
             break;
-          case 'arrowright':
-            if (this.rollType === 'check') {
+          case "arrowright":
+            if (this.rollType === "check") {
               this.modifier = Math.min(this.modifier + 1, 20);
-            } else if (this.rollType === 'gm') {
+            } else if (this.rollType === "gm") {
               this.gmModifier = Math.min(this.gmModifier + 1, 20);
-            } else if (this.rollType === 'damage') {
+            } else if (this.rollType === "damage") {
               this.damageModifier = Math.min(this.damageModifier + 1, 20);
             }
             break;
-          case 'arrowup':
-            if (this.rollType === 'damage') {
+          case "arrowup":
+            if (this.rollType === "damage") {
               // Cycle up through dice types: d4 -> d6 -> d8 -> d10 -> d12
               const diceTypes = [4, 6, 8, 10, 12];
               const currentIndex = diceTypes.indexOf(this.baseDiceType);
@@ -1220,8 +1362,8 @@ return '';
               }
             }
             break;
-          case 'arrowdown':
-            if (this.rollType === 'damage') {
+          case "arrowdown":
+            if (this.rollType === "damage") {
               // Cycle down through dice types: d12 -> d10 -> d8 -> d6 -> d4
               const diceTypes = [4, 6, 8, 10, 12];
               const currentIndex = diceTypes.indexOf(this.baseDiceType);
@@ -1230,22 +1372,22 @@ return '';
               }
             }
             break;
-          case '+':
-          case '=': // Handle both + and = keys (since + requires shift)
-            if (this.rollType === 'damage') {
+          case "+":
+          case "=": // Handle both + and = keys (since + requires shift)
+            if (this.rollType === "damage") {
               e.preventDefault();
               this.setBaseDiceCount(this.baseDiceCount + 1);
             }
             break;
-          case '-':
-            if (this.rollType === 'damage') {
+          case "-":
+            if (this.rollType === "damage") {
               e.preventDefault();
               this.setBaseDiceCount(this.baseDiceCount - 1);
             }
             break;
         }
       });
-      
+
       // Auto-join if URL contains session ID and we have a saved name
       const urlSessionId = getSessionIdFromUrl();
       if (urlSessionId && this.sessionFeaturesAvailable) {
@@ -1254,29 +1396,31 @@ return '';
           const friendlyName = sessionIdToFriendlyName(urlSessionId);
           if (friendlyName !== urlSessionId) {
             // Replace URL with friendly name version
-            history.replaceState({}, '', `/room/${friendlyName}`);
+            history.replaceState({}, "", `/room/${friendlyName}`);
           }
         }
-        
+
         // Use the original session ID for joining (maintains compatibility)
         this.joinSessionId = urlSessionId;
-        
+
         // If streamer mode is active, clear the URL immediately to hide room code
         if (this.streamerMode) {
-          history.replaceState({}, '', '/');
+          history.replaceState({}, "", "/");
         }
-        
+
         if (this.playerName.trim()) {
           // Auto-join if we have a saved name
-          console.log('Auto-joining session with saved name');
+          console.log("Auto-joining session with saved name");
           this.joinSession();
         } else {
           // Show UI to get player name and focus the name field
           this.showSessionUI = true;
-          
+
           // Focus the player name input after a short delay to ensure DOM is ready
           setTimeout(() => {
-            const nameInput = document.querySelector('.player-name-input') as HTMLInputElement;
+            const nameInput = document.querySelector(
+              ".player-name-input"
+            ) as HTMLInputElement;
             if (nameInput) {
               nameInput.focus();
             }
@@ -1288,29 +1432,29 @@ return '';
 }
 
 // Initialize dice-box when the page loads
-document.addEventListener('DOMContentLoaded', function () {
-  console.log('DOM loaded, initializing dice-box');
+document.addEventListener("DOMContentLoaded", function () {
+  console.log("DOM loaded, initializing dice-box");
 
   // Initialize dice-box with configuration
   // Use smaller dice scale on mobile devices
   const isMobile = window.innerWidth <= 768;
   const diceScale = isMobile ? 7 : 10;
-  
+
   diceBox = new DiceBox({
-    container: '#dice-box',
-    assetPath: '/assets/',
-    theme: 'default',
-    themeColor: '#4caf50',
+    container: "#dice-box",
+    assetPath: "/assets/",
+    theme: "default",
+    themeColor: "#4caf50",
     scale: diceScale,
-    gravity: 1.5,
+    gravity: 8,
     mass: 1,
     friction: 0.8,
     restitution: 0.5,
     angularDamping: 0.4,
     linearDamping: 0.5,
     spinForce: 6,
-    throwForce: 5,
-    startingHeight: 8,
+    throwForce: 2,
+    startingHeight: 12,
     settleTimeout: 5000,
     offscreen: false,
     delay: 10,
@@ -1323,10 +1467,10 @@ document.addEventListener('DOMContentLoaded', function () {
   diceBox
     .init()
     .then(() => {
-      console.log('Dice-box initialized successfully');
+      console.log("Dice-box initialized successfully");
     })
     .catch((error: unknown) => {
-      console.error('Failed to initialize dice-box:', error);
+      console.error("Failed to initialize dice-box:", error);
     });
 
   // Make diceBox available globally for Alpine.js
