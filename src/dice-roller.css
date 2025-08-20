@@ -2206,6 +2206,7 @@ button:disabled {
 .damage-main-controls {
   display: flex;
   flex-wrap: wrap;
+  gap: 3rem;
   align-items: center;
   justify-content: space-evenly;
 }
