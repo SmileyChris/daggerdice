@@ -1455,7 +1455,7 @@ document.addEventListener("DOMContentLoaded", function () {
     spinForce: 6,
     throwForce: 2,
     startingHeight: 12,
-    settleTimeout: 5000,
+    settleTimeout: 3000,
     offscreen: false,
     delay: 10,
     enableShadows: true,
