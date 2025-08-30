@@ -260,6 +260,15 @@ function diceRoller() {
     rollAudio: null as HTMLAudioElement | null,
     soundEnabled: true,
 
+    // Shake-to-roll state
+    shakeAvailable: false,
+    shakeEnabled: false,
+    shakeLast: 0,
+    shakeHandler: null as ((e: unknown) => void) | null,
+    _gX: 0,
+    _gY: 0,
+    _gZ: 0,
+
     setAdvantageType(type: "none" | "advantage" | "disadvantage") {
       this.advantageType = type;
       if (type === "none") {
@@ -766,6 +775,114 @@ function diceRoller() {
         "daggerdice_sound_enabled",
         String(this.soundEnabled)
       );
+    },
+
+    // ===== Shake-to-roll methods =====
+    isMotionAvailable() {
+      return (
+        typeof window !== 'undefined' &&
+        'ondevicemotion' in window &&
+        (window.isSecureContext ||
+          window.location.hostname === 'localhost' ||
+          window.location.hostname === '127.0.0.1')
+      );
+    },
+
+    async requestMotionPermissionIfNeeded() {
+      try {
+        // iOS 13+
+        const DME = (window as unknown as { DeviceMotionEvent?: { requestPermission?: () => Promise<string> } }).DeviceMotionEvent as { requestPermission?: () => Promise<string> } | undefined;
+        if (DME && typeof DME.requestPermission === 'function') {
+          const state = await DME.requestPermission();
+          if (state !== 'granted') {
+            throw new Error('Motion permission denied');
+          }
+        }
+      } catch (e) {
+        console.warn('Motion permission not granted or unavailable:', e);
+        throw e;
+      }
+    },
+
+    attachShakeListener() {
+      if (this.shakeHandler) {
+        return;
+      }
+      const THRESHOLD = 18; // m/s^2
+      const COOLDOWN_MS = 1000;
+      const ALPHA = 0.8; // high-pass filter factor
+      this.shakeLast = 0;
+      const self = this;
+      this.shakeHandler = function (event: unknown) {
+        const e = event as { acceleration?: { x: number | null; y: number | null; z: number | null }; accelerationIncludingGravity?: { x: number | null; y: number | null; z: number | null } };
+        let ax: number | null = null;
+        let ay: number | null = null;
+        let az: number | null = null;
+
+        if (e.acceleration && e.acceleration.x !== null) {
+          ax = e.acceleration.x;
+          ay = e.acceleration.y;
+          az = e.acceleration.z;
+        } else if (e.accelerationIncludingGravity) {
+          const ig = e.accelerationIncludingGravity;
+          // High-pass filter to remove gravity
+          self._gX = ALPHA * self._gX + (1 - ALPHA) * (ig.x || 0);
+          self._gY = ALPHA * self._gY + (1 - ALPHA) * (ig.y || 0);
+          self._gZ = ALPHA * self._gZ + (1 - ALPHA) * (ig.z || 0);
+          ax = (ig.x || 0) - self._gX;
+          ay = (ig.y || 0) - self._gY;
+          az = (ig.z || 0) - self._gZ;
+        } else {
+          return;
+        }
+
+        const m = Math.sqrt((ax || 0) ** 2 + (ay || 0) ** 2 + (az || 0) ** 2);
+        const now = Date.now();
+        if (m > THRESHOLD && now - self.shakeLast > COOLDOWN_MS) {
+          self.shakeLast = now;
+          if (!self.isRolling) {
+            self.rollDice();
+          }
+        }
+      };
+      window.addEventListener('devicemotion', this.shakeHandler as EventListener, { passive: true } as AddEventListenerOptions);
+    },
+
+    detachShakeListener() {
+      if (this.shakeHandler) {
+        window.removeEventListener('devicemotion', this.shakeHandler as EventListener);
+        this.shakeHandler = null;
+      }
+    },
+
+    initShake() {
+      this.shakeAvailable = this.isMotionAvailable();
+      const saved = localStorage.getItem('daggerdice_shake_to_roll');
+      this.shakeEnabled = saved === '1' || saved === 'true';
+      if (this.shakeAvailable && this.shakeEnabled) {
+        // Try to attach listener; on iOS, permission may be required and events may not fire until enabled again
+        this.attachShakeListener();
+      }
+    },
+
+    async enableShake() {
+      try {
+        await this.requestMotionPermissionIfNeeded();
+      } catch (e) {
+        // Permission denied; keep disabled
+        return;
+      }
+      this.shakeEnabled = true;
+      localStorage.setItem('daggerdice_shake_to_roll', '1');
+      if (this.shakeAvailable) {
+        this.attachShakeListener();
+      }
+    },
+
+    disableShake() {
+      this.shakeEnabled = false;
+      localStorage.setItem('daggerdice_shake_to_roll', '0');
+      this.detachShakeListener();
     },
 
     // ===== NEW SESSION METHODS (ADDITIVE) =====
@@ -1292,6 +1409,9 @@ function diceRoller() {
       if (!this.sessionMode || this.sessionMode === "solo") {
         this.rollHistory = getSavedRollHistory();
       }
+
+      // Initialize shake-to-roll
+      this.initShake();
 
       // Set up keyboard shortcuts
       document.addEventListener("keydown", (e) => {

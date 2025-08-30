@@ -949,6 +949,18 @@
               </button>
             </div>
 
+            <!-- Shake to Roll Toggle (only if available) -->
+            <div class="dialog-section" x-show="shakeAvailable">
+              <button
+                class="action-btn"
+                @click="(shakeEnabled ? disableShake() : enableShake()); showActions = false"
+                title="Shake your phone to roll"
+              >
+                <span class="action-btn-icon">📳</span>
+                <span x-text="shakeEnabled ? 'Disable Shake to Roll' : 'Enable Shake to Roll'"></span>
+              </button>
+            </div>
+
             <!-- History section -->
             <div class="dialog-section">
               <button
