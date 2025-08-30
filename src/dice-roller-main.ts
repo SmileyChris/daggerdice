@@ -2,6 +2,7 @@
 import DiceBox from "@3d-dice/dice-box";
 import Alpine from "alpinejs";
 import "./dice-roller.css";
+import { DEFAULT_THEME, THEMES } from "./config/theme";
 
 // PWA functionality
 if ("serviceWorker" in navigator) {
@@ -58,6 +59,8 @@ declare global {
     toastManager: () => ToastManagerInstance;
   }
 }
+
+// Default theme comes from a checked-in config file
 
 // Global dice box instance
 let diceBox: DiceBoxInstance | null = null;
@@ -364,15 +367,15 @@ function diceRoller() {
         if (this.rollType === "check") {
           // Check roll: Hope & Fear dice
           diceArray = [
-            { sides: 12, theme: "default", themeColor: "#4caf50" }, // Hope die (green)
-            { sides: 12, theme: "default", themeColor: "#f44336" }, // Fear die (red)
+            { sides: 12, theme: DEFAULT_THEME, themeColor: "#4caf50" }, // Hope die (green)
+            { sides: 12, theme: DEFAULT_THEME, themeColor: "#f44336" }, // Fear die (red)
           ];
 
           // Add advantage/disadvantage D6 if needed
           if (this.advantageType !== "none") {
             diceArray.push({
               sides: 6,
-              theme: "smooth",
+              theme: THEMES.smooth,
               themeColor:
                 this.advantageType === "advantage" ? "#d2ffd2" : "#ffd2d2",
             });
@@ -465,7 +468,7 @@ function diceRoller() {
           for (let i = 0; i < this.baseDiceCount; i++) {
             diceArray.push({
               sides: this.baseDiceType,
-              theme: "default",
+              theme: DEFAULT_THEME,
               themeColor: "#ff9800",
             });
           }
@@ -474,7 +477,7 @@ function diceRoller() {
           if (this.bonusDieEnabled) {
             diceArray.push({
               sides: this.bonusDieType,
-              theme: "smooth",
+              theme: THEMES.smooth,
               themeColor: "#ffd54f",
             });
           }
@@ -564,7 +567,7 @@ function diceRoller() {
           diceArray = [
             {
               sides: 20,
-              theme: "default",
+              theme: DEFAULT_THEME,
               themeColor: "#8e44ad",
             },
           ];
@@ -573,7 +576,7 @@ function diceRoller() {
           if (this.gmAdvantageType !== "none") {
             diceArray.push({
               sides: 20,
-              theme: "default",
+              theme: DEFAULT_THEME,
               themeColor:
                 this.gmAdvantageType === "advantage" ? "#9b59b6" : "#6a0dad",
             });
@@ -1443,7 +1446,7 @@ document.addEventListener("DOMContentLoaded", function () {
   diceBox = new DiceBox({
     container: "#dice-box",
     assetPath: "/assets/",
-    theme: "default",
+    theme: DEFAULT_THEME,
     themeColor: "#4caf50",
     scale: diceScale,
     gravity: 8,
