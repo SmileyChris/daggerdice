@@ -34,7 +34,7 @@
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
     "vitest": "3.1.4",
-    "wrangler": "^4.20.0"
+    "wrangler": "^4.33.1"
   },
   "dependencies": {
     "@3d-dice/dice-box": "^1.1.4",
