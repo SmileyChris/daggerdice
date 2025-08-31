@@ -3,9 +3,9 @@ main = "src/worker.ts"
 compatibility_date = "2024-01-01"
 
 # # Assets configuration for serving static files
-# [assets]
-# directory = "./dist/client"
-# binding = "ASSETS"
+[assets]
+directory = "./dist/client"
+binding = "ASSETS"
 
 # Durable Objects configuration
 [[durable_objects.bindings]]

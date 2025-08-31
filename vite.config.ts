@@ -1,6 +1,9 @@
 import { cloudflare } from "@cloudflare/vite-plugin";
 import { execSync } from "child_process";
 import { defineConfig } from "vite";
+import { readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
+import { createHash } from "node:crypto";
 
 function getVersionFromLatestCommitUTC() {
   try {
@@ -41,10 +44,56 @@ function getVersionFromLatestCommitUTC() {
 
 // https://vite.dev/config/
 export default defineConfig({
+  plugins: [
+    {
+      name: 'changelog-virtual-module',
+      resolveId(id) {
+        if (id === 'virtual:changelog') return '\0virtual:changelog';
+      },
+      load(id) {
+        if (id !== '\0virtual:changelog') return;
+        const changesPath = join(process.cwd(), 'CHANGES.md');
+        if (!existsSync(changesPath)) {
+          console.warn('[changelog] CHANGES.md not found; exposing empty CHANGELOG');
+          return `export const CHANGELOG = [];`;
+        }
+        const md = readFileSync(changesPath, 'utf8');
+        const lines = md.split(/\r?\n/);
+        const entries: Array<{ version: string; changes: string[]; sig?: string }> = [];
+        let cur: { version: string; changes: string[] } | null = null;
+        for (const raw of lines) {
+          const line = raw.trim();
+          const m = /^##\s+(.+)$/.exec(line);
+          if (m) {
+            if (cur) entries.push(cur);
+            const label = m[1].trim();
+            cur = { version: label, changes: [] };
+            continue;
+          }
+          if (!cur) continue;
+          const bm = /^-\s+(.+)$/.exec(line);
+          if (bm) cur.changes.push(bm[1]);
+        }
+        if (cur) entries.push(cur);
+        // add content signature so same-day edits/patchups are detected
+        for (const e of entries) {
+          const h = createHash('sha1');
+          h.update(String(e.version));
+          h.update('\n');
+          for (const c of e.changes) {
+            h.update(String(c));
+            h.update('\n');
+          }
+          e.sig = h.digest('hex').slice(0, 8);
+        }
+        return `export const CHANGELOG = ${JSON.stringify(entries)};`;
+      },
+    },
+    cloudflare(),
+  ],
   define: {
     __APP_VERSION__: JSON.stringify(getVersionFromLatestCommitUTC()),
   },
-  plugins: [cloudflare()],
   build: {
     target: "es2022",
     // Split large chunks to avoid Cloudflare size limits

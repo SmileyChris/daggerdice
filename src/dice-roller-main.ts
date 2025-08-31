@@ -3,6 +3,7 @@ import DiceBox from "@3d-dice/dice-box";
 import Alpine from "alpinejs";
 import "./dice-roller.css";
 import { DEFAULT_THEME, THEMES } from "./config/theme";
+import { CHANGELOG } from "virtual:changelog";
 
 // PWA functionality
 if ("serviceWorker" in navigator) {
@@ -256,8 +257,13 @@ function diceRoller() {
     streamerMode: false,
     streamerModeTemporarilyDisabled: false,
 
-    // Version display
+    // Version & changelog
     appVersion: __APP_VERSION__,
+    showChangelog: false,
+    changelogMode: 'since' as 'since' | 'all',
+    lastSeenChangeVersion: localStorage.getItem('daggerdice_last_seen_change_version') || null,
+    lastSeenChangeSig: localStorage.getItem('daggerdice_last_seen_change_sig') || null,
+    hasVisitedBefore: localStorage.getItem('daggerdice_has_visited') === 'true',
 
     // Audio state
     rollAudio: null as HTMLAudioElement | null,
@@ -275,6 +281,75 @@ function diceRoller() {
       if (type === "none") {
         this.d20Value2 = 0;
       }
+    },
+
+    // ===== CHANGELOG HELPERS =====
+    latestChangeVersion() {
+      return CHANGELOG.length > 0 ? CHANGELOG[0].version : null;
+    },
+    latestChangeSig() {
+      return CHANGELOG.length > 0 ? (CHANGELOG[0] as any).sig : null;
+    },
+    unseenChanges() {
+      if (!this.lastSeenChangeVersion) return [] as typeof CHANGELOG;
+      const out: typeof CHANGELOG = [] as any;
+      for (const entry of CHANGELOG) {
+        if (entry.version === this.lastSeenChangeVersion) {
+          // If version matches but signature differs, include just this entry
+          if (this.lastSeenChangeSig && (entry as any).sig && this.lastSeenChangeSig !== (entry as any).sig) {
+            out.push(entry);
+          }
+          break;
+        }
+        out.push(entry);
+      }
+      return out;
+    },
+    hasUnseenChanges() {
+      return this.unseenChanges().length > 0;
+    },
+    changesToShow() {
+      if (this.changelogMode === 'all') return CHANGELOG;
+      const unseen = this.unseenChanges();
+      return unseen.length > 0 ? unseen : CHANGELOG;
+    },
+    openChangelog(mode: 'since' | 'all' = 'since') {
+      this.changelogMode = mode;
+      this.showChangelog = true;
+      // Hide history if opening changelog
+      this.showHistory = false;
+    },
+    toggleChangelog(mode: 'since' | 'all' = 'since') {
+      if (this.showChangelog) {
+        this.closeChangelog();
+      } else {
+        this.openChangelog(mode);
+      }
+    },
+    closeChangelog() {
+      this.showChangelog = false;
+      const latest = this.latestChangeVersion();
+      const latestSig = this.latestChangeSig();
+      if (latest) {
+        localStorage.setItem('daggerdice_last_seen_change_version', latest);
+        this.lastSeenChangeVersion = latest;
+      }
+      if (latestSig) {
+        localStorage.setItem('daggerdice_last_seen_change_sig', latestSig);
+        this.lastSeenChangeSig = latestSig;
+      }
+    },
+
+    // Version label helpers (dim hash part)
+    versionPrefix() {
+      const v = this.appVersion || '';
+      const idx = v.indexOf('.');
+      return idx === -1 ? v : v.slice(0, idx);
+    },
+    versionSuffix() {
+      const v = this.appVersion || '';
+      const idx = v.indexOf('.');
+      return idx === -1 ? '' : v.slice(idx);
     },
 
     // Roll type methods
@@ -707,7 +782,11 @@ function diceRoller() {
     },
 
     toggleHistory() {
-      this.showHistory = !this.showHistory;
+      const next = !this.showHistory;
+      this.showHistory = next;
+      if (next) {
+        this.showChangelog = false;
+      }
     },
 
     toggleDarkMode() {
@@ -1390,6 +1469,20 @@ function diceRoller() {
             break;
         }
       });
+
+      // Record that the user has visited at least once
+      localStorage.setItem('daggerdice_has_visited', 'true');
+
+      // Notify returning users of new changes since last visit
+      const latest = this.latestChangeVersion();
+      const latestSig = this.latestChangeSig();
+      if (this.hasVisitedBefore && latest) {
+        const versionChanged = this.lastSeenChangeVersion && this.lastSeenChangeVersion !== latest;
+        const contentChanged = this.lastSeenChangeSig && latestSig && this.lastSeenChangeSig !== latestSig;
+        if (versionChanged || contentChanged) {
+          this.openChangelog('since');
+        }
+      }
 
       // Auto-join if URL contains session ID and we have a saved name
       const urlSessionId = getSessionIdFromUrl();

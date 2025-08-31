@@ -141,30 +141,27 @@
           class="header"
           :class="{ 'no-result': !result, 'has-result': result }"
         >
-        <!-- Mobile tap area for history (invisible overlay) -->
-        <div
-          class="mobile-history-tap-area"
-          @click="showHistory = !showHistory"
-        ></div>
+          <!-- Mobile tap area for history (invisible overlay) -->
+          <div class="mobile-history-tap-area" @click="toggleHistory()"></div>
 
-        <!-- Logo section - shows logo-text when no result -->
-        <div class="logo-container" x-show="!result">
-          <img
-            alt="Dagger Dice"
-            src="/src/assets/daggerdice-logo-text.png"
-            class="logo-text"
-          />
-        </div>
+          <!-- Logo section - shows logo-text when no result -->
+          <div class="logo-container" x-show="!result">
+            <img
+              alt="Dagger Dice"
+              src="/src/assets/daggerdice-logo-text.png"
+              class="logo-text"
+            />
+          </div>
 
-        <!-- Result section with inline logo -->
-        <div class="result-container" x-show="result">
-          <img
-            alt="Dagger Dice"
-            src="/src/assets/daggerdice-logo.png"
-            class="logo-only"
-          />
-          <h1 x-html="result"></h1>
-        </div>
+          <!-- Result section with inline logo -->
+          <div class="result-container" x-show="result">
+            <img
+              alt="Dagger Dice"
+              src="/src/assets/daggerdice-logo.png"
+              class="logo-only"
+            />
+            <h1 x-html="result"></h1>
+          </div>
         </div>
       </div>
 
@@ -579,7 +576,10 @@
                       <span x-show="damageModifier > 0"
                         >+<span x-text="damageModifier"></span
                       ></span>
-                      <span x-show="damageModifier < 0" x-text="damageModifier"></span>
+                      <span
+                        x-show="damageModifier < 0"
+                        x-text="damageModifier"
+                      ></span>
                       <span x-show="bonusDieEnabled"
                         >+d<span x-text="bonusDieType"></span
                       ></span>
@@ -944,8 +944,13 @@
                 @click="toggleDarkMode(); showActions = false"
                 title="Toggle Dark Mode"
               >
-                <span class="action-btn-icon" x-text="darkMode ? '☀️' : '🌙'"></span>
-                <span x-text="darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'"></span>
+                <span
+                  class="action-btn-icon"
+                  x-text="darkMode ? '☀️' : '🌙'"
+                ></span>
+                <span
+                  x-text="darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+                ></span>
               </button>
             </div>
 
@@ -953,7 +958,7 @@
             <div class="dialog-section">
               <button
                 class="action-btn"
-                @click="showHistory = true; showActions = false"
+                @click="toggleHistory(); showActions = false"
                 title="Show Roll History"
               >
                 <img
@@ -1016,7 +1021,14 @@
                   />
                 </svg>
               </a>
-              <span x-text="appVersion"></span>
+              <span
+                class="app-version"
+                @click="toggleChangelog('all')"
+                title="What's new"
+              >
+                <span x-text="versionPrefix()"></span
+                ><span class="version-hash-dim" x-text="versionSuffix()"></span>
+              </span>
             </div>
           </div>
         </div>
@@ -1217,6 +1229,63 @@
         @click="toggleSessionUI()"
       ></div>
 
+      <!-- Changelog panel -->
+      <div class="roll-history-panel" :class="{ 'visible': showChangelog }">
+        <div class="dialog-header">
+          <h3>DaggerDice Changes</h3>
+          <button @click="closeChangelog()" class="dialog-close">✕</button>
+        </div>
+        <div class="dialog-content">
+          <template x-for="entry in changesToShow()" :key="entry.version">
+            <div class="dialog-section changelog-section">
+              <h4 style="margin: 0 0 0.25rem 0">
+                <span x-text="entry.version"></span>
+              </h4>
+              <ul class="changelog-list">
+                <template x-for="(item, idx) in entry.changes" :key="idx">
+                  <li class="changelog-item" x-text="item"></li>
+                </template>
+              </ul>
+            </div>
+          </template>
+          <div
+            class="dialog-section"
+            style="
+              margin-top: 1rem;
+              display: flex;
+              flex-direction: column;
+              gap: 0.5rem;
+            "
+          >
+            <button
+              class="action-btn"
+              x-show="changelogMode === 'since'"
+              @click="closeChangelog()"
+            >
+              Let's get rolling!
+            </button>
+            <a
+              href="#"
+              x-show="changelogMode === 'since'"
+              @click.prevent="changelogMode = 'all'"
+              style="
+                color: #9ecbff;
+                text-decoration: underline;
+                align-self: flex-start;
+              "
+              >Show all changes</a
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Changelog backdrop -->
+      <div
+        class="dialog-backdrop"
+        x-show="showChangelog"
+        @click="closeChangelog()"
+      ></div>
+
       <!-- Dark mode toggle button -->
       <button
         class="dark-mode-toggle"
@@ -1225,6 +1294,18 @@
       >
         <span x-text="darkMode ? '☀️' : '🌙'"></span>
       </button>
+
+      <!-- Desktop version label at bottom-right (no pill) -->
+      <div class="desktop-version">
+        <span
+          class="app-version"
+          @click="toggleChangelog('all')"
+          title="What's new"
+        >
+          <span x-text="versionPrefix()"></span
+          ><span class="version-hash-dim" x-text="versionSuffix()"></span>
+        </span>
+      </div>
 
       <button
         class="history-toggle"
@@ -1343,8 +1424,7 @@
                           >, Modifier:
                           <span
                             x-text="(roll.damageModifier > 0 ? '+' : '') + roll.damageModifier"
-                          ></span
-                        ></span
+                          ></span></span
                         ><span x-show="roll.isCritical"
                           >, <span class="critical-text">Critical</span></span
                         ><span x-show="roll.hasResistance"
@@ -1494,11 +1574,6 @@
             />
           </svg>
         </a>
-      </div>
-
-      <!-- Desktop version display -->
-      <div class="desktop-version-display">
-        <span x-text="appVersion"></span>
       </div>
     </div>
 
