@@ -34,10 +34,10 @@ src/
 
 public/
 └── assets/              # 3D dice assets and physics engine
-    ├── ammo/           # Physics engine WASM files
-    └── themes/         # Dice visual themes
-        ├── default/    # Standard dice appearance
-        └── smooth/     # Smoother dice appearance
+    ├── ammo/             # Physics engine WASM files
+    └── themes/           # Dice visual themes (content-hashed folders)
+        ├── default-<hash>/
+        └── smooth-<hash>/
 
 docs/                   # Documentation system
 ├── index.md           # Documentation homepage
@@ -113,7 +113,6 @@ npm run test:all         # Run both frontend and Workers tests
 # Code Quality
 npm run lint             # Run ESLint
 npm run lint:fix         # Auto-fix linting issues
-npm run lint:strict      # Run ESLint with zero warnings allowed
 
 # Deployment
 npm run deploy           # Build and deploy to Cloudflare Workers
@@ -234,6 +233,47 @@ try {
 
 For detailed multiplayer architecture, see [Multiplayer Technical Documentation](multiplayer-technical.md).
 
+### Friendly Room Names (Session IDs)
+
+DaggerDice supports human‑friendly room names (for example, `brave-dragon`) alongside compact short codes (for example, `4CQ`). The two forms are bijective: each friendly name maps to exactly one 3‑character Crockford Base32 code, and vice versa.
+
+- Dual input: UI and APIs accept either format.
+- Display: The UI prefers friendly names when presenting a room identifier.
+- Encoding: Words are drawn from curated adjective/noun lists; mapping is deterministic math, not a lookup table.
+
+Key APIs (see `src/session/`):
+
+```ts
+import {
+  generateSessionId,          // Produces a new 3‑char code
+  isValidSessionId,           // Validates friendly name or code
+  normalizeSessionId,         // Normalizes input to a canonical form
+} from './session/utils';
+
+import {
+  encodeNameV1,               // (word1, word2) -> 3‑char code
+  decodeNameV1,               // code -> { word1, word2 }
+  sessionIdToFriendlyName,    // code -> 'word1-word2'
+  friendlyNameToSessionId,    // 'word1-word2' -> code
+} from './session/room-names';
+
+// Examples
+const code = generateSessionId();                  // '4CQ'
+const name = sessionIdToFriendlyName(code);       // 'brave-dragon'
+const back = friendlyNameToSessionId(name);       // '4CQ'
+
+isValidSessionId('brave-dragon');                  // true
+isValidSessionId('4CQ');                           // true
+```
+
+URL formats:
+- App: `/room/{sessionId}` where `{sessionId}` may be a friendly name or a short code.
+- WebSocket: `/api/room/{sessionId}`; the worker normalizes internally.
+
+Testing: Unit tests cover validation, encoding/decoding, and normalization in `src/test/`.
+
+Migration note: Older 6‑character IDs remain accepted for backward compatibility; new sessions use the 3‑character code + friendly name system.
+
 ## Code Style and Standards
 
 ### TypeScript Configuration
@@ -264,7 +304,7 @@ For detailed multiplayer architecture, see [Multiplayer Technical Documentation]
 Automated testing runs on all pushes and pull requests:
 
 1. **Install Dependencies**: `npm ci` for consistent builds
-2. **Lint Check**: `npm run lint:strict` with zero warnings
+2. **Lint Check**: `npm run lint`
 3. **Frontend Tests**: `npm run test:run` with coverage reporting
 4. **Worker Tests**: `npm run test:workers:run` for backend logic
 5. **Build Verification**: `npm run build` to ensure production builds succeed
@@ -352,10 +392,14 @@ Automated testing runs on all pushes and pull requests:
 ## Advanced Topics
 
 ### Custom Dice Themes
-Add new themes in `public/assets/themes/`:
-- Create theme directory with required assets
-- Add `theme.config.json` configuration
-- Update theme selection logic in main component
+Dice themes live in `public/assets/themes/` and use content-hashed folder names for cache-busting. A checked-in mapping in `src/config/theme.ts` points to the current folders.
+
+Workflow:
+- Edit assets in `public/assets/themes/<base>/` (e.g., `default`, `smooth`) or add a new base folder.
+- Run `npm run theme:bump` (or `node scripts/bump-theme.mjs`).
+  - Computes a content hash of each theme folder and renames it to `<base>-<hash>`.
+  - Regenerates `src/config/theme.ts` with the mapping used by the app.
+- Commit the updated folders and `src/config/theme.ts`.
 
 ### Message Protocol Extension
 To add new WebSocket message types:
@@ -408,5 +452,12 @@ mkdocs gh-deploy
 
 ### Automatic Deployment
 Documentation automatically deploys to GitHub Pages when changes are pushed to the main branch via the GitHub Action workflow in `.github/workflows/docs.yml`.
+
+## Recent Additions (User-Facing)
+
+- Dark mode toggle with persistence and system detection
+- Dice roll sounds (subject to browser autoplay policies)
+- Enhanced dice legibility (6/9 markers)
+- In-app "What’s New" panel, auto-shown on updates
 
 This development guide provides the foundation for contributing to DaggerDice. For specific technical details about the multiplayer system, refer to the [Multiplayer Technical Documentation](multiplayer-technical.md).
