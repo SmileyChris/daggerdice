@@ -1,186 +1,99 @@
 # Getting Started with DaggerDice
 
-DaggerDice is a web-based 3D dice rolling application designed specifically for the Daggerheart RPG system, with a focus on Hope/Fear mechanics and real-time multiplayer collaboration.
+DaggerDice is a web-based 3D dice roller for the Daggerheart RPG system. It features Hope/Fear checks, damage rolls, optional GM D20 rolls, realistic 3D physics, and real-time multiplayer.
 
 ## Quick Start (Users)
 
-### 1. Access DaggerDice
-🎲 **[Launch DaggerDice](https://daggerdice.smileychris.workers.dev)** 🎲
+### 1) Launch the app
+🎲 Visit: https://daggerdice.smileychris.workers.dev
 
-No downloads or installations required - DaggerDice runs directly in your web browser.
+No install required. Works on desktop and mobile browsers.
 
-### 2. Choose Your Mode
+### 2) Choose your mode
 
-#### Solo Play
-- Start rolling dice immediately after opening the application
-- Perfect for personal gaming or offline preparation
-- All features available except multiplayer
+- Solo play: Start rolling immediately.
+- Multiplayer: Click "🎲 Play with Friends" to create or join a room.
 
-#### Multiplayer Sessions
-- Click "🎲 Play with Friends" to access multiplayer features
-- Create a new room or join an existing one
-- Roll dice together in real-time with friends
+### 3) Roll the dice
 
-### 3. Basic Usage
+1. Select a roll type: Check, Damage, or GM.
+2. Set options: modifiers, advantage/disadvantage (where applicable), critical/resistance (Damage).
+3. Press "Roll Dice" or hit Space. Results include a clear breakdown and are added to history.
 
-#### Desktop vs Mobile Experience
+## Desktop vs Mobile
 
-**Desktop Mode:**
-- Full sidebar with all controls visible
-- Mouse and keyboard interaction
-- Roll history always visible in sidebar
-- Hover effects and desktop-optimized layout
+- Desktop: Controls are shown in a side panel with quick-access tabs.
+- Mobile: Use the bottom drawer tabs. Tap the result bar at the top to toggle roll history quickly.
 
-**Mobile Mode:**
-- Bottom drawer interface for touch-friendly navigation
-- Swipe and tap gestures optimized for mobile
-- Compact layout with collapsible sections
-- **Pro Tip**: Tap the top bar (where results are shown) to quickly show/hide your roll history
+## Keyboard Shortcuts (Desktop)
 
-#### Rolling Dice
-1. **Select Roll Type**: Choose Check, Damage, or GM rolls
-2. **Set Parameters**: Adjust modifiers, advantage/disadvantage, and other settings
-3. **Roll**: Click the "Roll" button or press Space
-4. **View Results**: See your results with full breakdown and history
+- Space: Roll dice
+- C / D / G: Switch to Check / Damage / GM
+- H: Toggle roll history
+- M: Toggle multiplayer panel
+- ?: Show keyboard help
+- Esc: Close dialogs
 
-#### Keyboard Shortcuts (Desktop)
-- **Space**: Roll dice
-- **C**: Switch to Check rolls (Hope & Fear)
-- **D**: Switch to Damage rolls
-- **G**: Switch to GM rolls
-- **H**: Toggle roll history
-- **M**: Open multiplayer menu
-- **?**: Show help dialog
+On mobile, use touch controls. The shortcuts are disabled while typing into text fields.
 
-*Note: On mobile devices, use touch gestures instead. Tap the top result bar to toggle roll history.*
+## Roll Types
+
+### Check (Hope & Fear)
+- Rolls two D12s (Hope and Fear) with optional Advantage/Disadvantage (D6).
+- Critical success is when Hope and Fear are equal (With Hope!).
+- Add a flat modifier between -20 and +20.
+
+### Damage
+- Choose base dice (count and type: d4/d6/d8/d10/d12).
+- Optional bonus die (d4–d12).
+- Options: Critical (max base + normal roll + modifier), Resistance (half total).
+
+### GM (D20)
+- Standard D20 with Advantage/Disadvantage and modifier.
+- In multiplayer, an optional "Private rolls" toggle hides results from others.
 
 ## Multiplayer Guide
 
-### Creating a Session
-1. Click "🎲 Play with Friends"
-2. Enter your player name (up to 20 characters)
-3. Click "Create New Room"
-4. Share the room code or URL with your friends
-5. Start rolling dice together!
+### Create a room
+1. Click "🎲 Play with Friends".
+2. Enter your player name (stored locally).
+3. Click "Create New Room".
+4. Share the three-character code or the copied URL/QR with friends.
 
-### Joining a Session
-1. Get a room code or URL from your friend
-2. Click "🎲 Play with Friends"
-3. Enter your player name
-4. Enter the 6-character room code or paste the URL
-5. Click "Join Room"
+### Join a room
+1. Click "🎲 Play with Friends".
+2. Enter your player name.
+3. Paste the room URL or enter the three-character room code.
+4. Click "Join Room".
 
-### Session Features
-- **Live Roll Sharing**: Everyone sees each other's rolls in real-time
-- **Shared History**: Combined roll history for all players
-- **Player List**: See who's currently connected
-- **Toast Notifications**: Get notified when others roll
-- **Easy Exit**: Return to solo mode anytime
+Notes:
+- Returning users auto-rejoin the last room from the saved code.
+- The app shows connection status; it will reconnect automatically after brief drops.
 
-## Roll Types Explained
+## Dark Mode
 
-!!! hope "Check Rolls (Hope & Fear)"
-    - **Hope Die**: <span class="dice-result hope">Green D12</span> for positive outcomes in Daggerheart
-    - **Fear Die**: <span class="dice-result fear">Red D12</span> for negative outcomes and complications
-    - **Total**: Hope + Fear + Advantage/Disadvantage + Modifier
-    - **Critical Success**: When Hope and Fear show the same value (With Hope!)
+- Toggle using the moon/sun button on desktop (bottom-right) or from the mobile Actions panel.
+- The preference is saved and follows your system setting when unset.
 
-!!! note "Damage Rolls"
-    - **Base Dice**: Choose number and type following Daggerheart's damage system (D4, D6, D8, D10, D12)
-    - **Bonus Die**: Optional extra damage die
-    - **Critical**: Manual toggle - max base dice + normal roll + modifier
-    - **Resistance**: Halve damage when applicable
+## Roll Sounds
 
-!!! abstract "GM Rolls"
-    - **D20 System**: Standard D20 mechanics for traditional RPG elements
-    - **Advantage/Disadvantage**: Roll two D20s, take higher/lower
-    - **Privacy**: Option to keep rolls hidden from players
-    - **Modifiers**: Add bonuses or penalties
+- Dice rolls include a short sound effect when supported by the browser.
+- Use your system/browser mute to silence if desired.
 
-## Tips for New Users
+## "What’s New" (Changelog)
 
-### Browser Requirements
-- **Modern Browser**: Chrome, Firefox, Safari, or Edge
-- **WebGL Support**: Required for 3D dice (most browsers support this)
-- **JavaScript Enabled**: Required for all functionality
-- **HTTPS**: Required for multiplayer in production
+- Click the version label at the bottom-right to see all changes.
+- Returning users automatically see new changes since their last visit.
 
-### Performance Tips
-- **3D Rendering**: If dice animation is slow, try the fallback mode
-- **Mobile Use**: Works great on phones and tablets
-- **Connection**: Stable internet connection recommended for multiplayer
+## Browser Requirements
 
-### Privacy Features
-- **Streamer Mode**: Hide room codes when streaming/recording
-- **Private GM Rolls**: Keep GM rolls from being shared with players
-- **No Account Required**: No personal information stored on servers
-
-## Common Use Cases
-
-### Game Night with Friends
-1. One player creates a room and shares the code
-2. Everyone joins the same session
-3. Game Master can use private GM rolls
-4. Players roll openly with shared history
-
-### Solo Gaming
-1. Open DaggerDice in your browser
-2. Use any roll type without multiplayer
-3. Review roll history for your session
-4. Perfect for character creation or planning
-
-### Content Creation
-1. Enable Streamer Mode to hide room codes
-2. Create engaging dice rolling content
-3. Share results with your audience
-4. No accidental room code reveals
+- Modern browser: Chrome, Firefox, Safari, or Edge.
+- WebGL for 3D dice; the app falls back to secure randomness if 3D rendering isn’t available.
+- WebSocket for multiplayer; HTTPS is required in production.
 
 ## Troubleshooting
 
-### Common Issues
+- No 3D dice: Ensure WebGL is enabled; the app will still function with random rolls.
+- Can’t connect to a room: Check your network and ensure HTTPS if testing outside localhost.
+- Audio not playing: Some browsers block autoplay until you interact with the page.
 
-#### 3D Dice Not Appearing
-- Check WebGL support in your browser
-- DaggerDice automatically falls back to number generation
-- Try refreshing the page or restarting your browser
-
-#### Multiplayer Connection Problems
-- Ensure stable internet connection
-- Try refreshing the page
-- Check if HTTPS is being used (required for production)
-- Connection automatically retries with exponential backoff
-
-#### Mobile Issues
-- Use landscape orientation for best experience
-- Tap targets are optimized for touch
-- Bottom drawer provides mobile-friendly navigation
-- **Quick Access**: Tap the top bar to instantly show/hide roll history
-
-### Getting Help
-- **GitHub Issues**: [Report bugs or request features](https://github.com/smileychris/daggerdice/issues)
-- **Documentation**: Browse the full documentation in this docs folder
-- **Source Code**: Review the open-source code for technical details
-
-## For Developers
-
-If you're interested in contributing to DaggerDice or running it locally:
-
-### Quick Setup
-```bash
-git clone https://github.com/smileychris/daggerdice.git
-cd daggerdice
-npm install
-npm start
-```
-
-### Full Development Guide
-See the [Development Guide](development.md) for comprehensive setup instructions, architecture details, and contribution guidelines.
-
-### Technical Documentation
-- **[Multiplayer Technical](multiplayer-technical.md)**: WebSocket architecture
-- **[Feature Documentation](features.md)**: Complete feature breakdown
-- **[Development Guide](development.md)**: Contributing and development setup
-
----
-
-Ready to roll? **[Start using DaggerDice now!](https://daggerdice.smileychris.workers.dev)** 🎲

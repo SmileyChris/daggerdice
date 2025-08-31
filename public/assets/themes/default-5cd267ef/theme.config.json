@@ -6,14 +6,14 @@
   "meshFile": "default.json",
 	"material": {
 		"type": "color",
-		"diffuseTexture": {
-			"light": "diffuse-light.png",
-			"dark": "diffuse-dark.png"
-		},
+    "diffuseTexture": {
+            "light": "diffuse-light.png",
+            "dark": "diffuse-dark.png"
+        },
 		"diffuseLevel": 1,
-		"bumpTexture": "normal.png",
+        "bumpTexture": "normal.png",
 		"bumpLevel": 0.5,
-		"specularTexture": "specular.jpg",
+        "specularTexture": "specular.jpg",
 		"specularPower": 1
 	},
 	"diceAvailable": ["d4","d6","d8","d10","d12","d20","d100"]

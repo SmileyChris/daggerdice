@@ -322,6 +322,8 @@ button:disabled {
   transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s linear 0.3s;
   opacity: 0;
   visibility: hidden;
+  display: flex; /* enable internal scrolling layout */
+  flex-direction: column; /* header + scrollable content */
 }
 
 .roll-history-panel.visible {
@@ -415,6 +417,9 @@ button:disabled {
   box-shadow: 0 2px 8px var(--shadow-color);
   text-align: center;
 }
+
+/* Unseen indicator (global) */
+/* .unseen-dot removed (mobile pill not needed) */
 
 .history-toggle:hover {
   background-color: rgba(0, 0, 0, 0.9);
@@ -1750,6 +1755,26 @@ button:disabled {
     flex: 1;
   }
 
+  /* Changelog list styling */
+  .changelog-list {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  .changelog-list .changelog-item {
+    margin: 0.375rem 0; /* space between bullets */
+    opacity: 0.9; /* slight opacity for items */
+  }
+
+  /* Changelog version card - thick left border similar to history */
+  .changelog-section {
+    border-left: 3px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.75rem 0.75rem 0.25rem 0.9rem;
+    margin: 0.5rem 0;
+    background: transparent;
+  }
+
   .empty-history {
     text-align: center;
     color: rgba(255, 255, 255, 0.7);
@@ -1814,6 +1839,13 @@ button:disabled {
     max-width: none;
   }
 
+  /* Version clickable indicator */
+  .version-info .app-version {
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  /* .unseen-dot removed for mobile too */
+
   /* Adjust header for mobile */
   .header {
     padding: 1rem; /* Reset to normal padding on mobile since buttons are hidden */
@@ -1832,6 +1864,36 @@ button:disabled {
   .desktop-dialog-close {
     display: none !important;
   }
+  .desktop-version {
+    display: none;
+  }
+}
+
+/* Desktop version label (bottom-right, no pill) */
+.desktop-version {
+  position: fixed;
+  right: 1rem;
+  bottom: 0;
+  z-index: 30;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  font-family: monospace;
+}
+
+/* Make version label clickable across viewports */
+.version-info .app-version {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Desktop version label clickable + dim hash */
+.desktop-version .app-version {
+  cursor: pointer;
+  text-decoration: underline;
+}
+.version-hash-dim {
+  opacity: 0.6;
 }
 
 /* Extra small screens */
@@ -1943,7 +2005,7 @@ button:disabled {
 
   /* Desktop: hide close button, adjust layout */
   .roll-history-panel .dialog-header {
-    padding: 0 0 1rem 0;
+    padding: 0;
     border-bottom: none;
     flex-shrink: 0;
   }
@@ -1955,7 +2017,8 @@ button:disabled {
   .roll-history-panel .dialog-content {
     padding: 0;
     flex: 1;
-    overflow: hidden;
+    overflow: auto;
+    scrollbar-width: thin;
   }
 
   .history-list {
@@ -2020,6 +2083,26 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+
+/* Global changelog styles (ensure desktop coverage) */
+.changelog-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.changelog-list .changelog-item {
+  margin: 0.375rem 0;
+  opacity: 0.9;
+  list-style: circle;
+}
+
+.changelog-section {
+  border-left: 3px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.75rem 0.75rem 0.25rem 0.9rem;
+  margin: 0.5rem 0;
+  background: transparent;
 }
 
 .toast-player {
@@ -2802,22 +2885,7 @@ button:disabled {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Version display styles */
-.desktop-version-display {
-  position: fixed;
-  bottom: 0px;
-  right: 16px;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.75rem;
-  font-family: monospace;
-  pointer-events: none;
-  z-index: 10;
-}
-
 .version-info {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -2840,10 +2908,6 @@ button:disabled {
 
 /* Hide desktop elements on mobile */
 @media (max-width: 768px) {
-  .desktop-version-display {
-    display: none;
-  }
-
   .desktop-github-link {
     display: none;
   }

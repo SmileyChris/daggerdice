@@ -69,6 +69,8 @@ For complete instructions, shortcuts, and mechanics, see the [📖 Full Document
 - **Toast Notifications**: Live notifications when other players roll
 - **Roll History**: Track recent rolls with detailed breakdown
 - **Theme Support**: Multiple dice themes including "default" and "smooth"
+- **Dark Mode**: Toggleable, with preference saved and system detection
+- **Dice Roll Sounds**: Subtle audio feedback on roll (browser-permitting)
 
 ## Documentation
 

@@ -1,11 +1,9 @@
 // Cloudflare Worker for DaggerDice API and WebSocket relay using Durable Objects
 
-import type { 
-  ClientMessage
-} from './session/types';
-import { friendlyNameToSessionId } from './session/room-names';
+import { friendlyNameToSessionId } from "./session/room-names";
+import type { ClientMessage } from "./session/types";
 
-// Environment interface  
+// Environment interface
 interface Env {
   ASSETS: Fetcher;
   SESSION_ROOMS: DurableObjectNamespace;
@@ -22,8 +20,8 @@ export class SessionDurableObject {
 
   async fetch(request: Request): Promise<Response> {
     // Check if this is a WebSocket upgrade request
-    if (request.headers.get('Upgrade') !== 'websocket') {
-      return new Response('Expected WebSocket', { status: 400 });
+    if (request.headers.get("Upgrade") !== "websocket") {
+      return new Response("Expected WebSocket", { status: 400 });
     }
 
     // Create WebSocket pair
@@ -31,26 +29,26 @@ export class SessionDurableObject {
     const [client, server] = Object.values(webSocketPair);
 
     server.accept();
-    
+
     // Add this connection to the session
     this.connections.add(server);
 
     // Handle messages by relaying them to all other connections in the same session
-    server.addEventListener('message', (event) => {
+    server.addEventListener("message", (event) => {
       try {
         const message: ClientMessage = JSON.parse(event.data as string);
         this.relayMessage(message, server);
       } catch (error) {
-        console.error('Error handling message:', error);
+        console.error("Error handling message:", error);
       }
     });
 
     // Clean up on disconnect
-    server.addEventListener('close', () => {
+    server.addEventListener("close", () => {
       this.connections.delete(server);
     });
 
-    server.addEventListener('error', () => {
+    server.addEventListener("error", () => {
       this.connections.delete(server);
     });
 
@@ -60,14 +58,14 @@ export class SessionDurableObject {
   // Relay messages to all other connections in the same session
   private relayMessage(message: ClientMessage, senderWs: WebSocket): void {
     const messageStr = JSON.stringify(message);
-    
+
     // Send to all connections in the session except the sender
     for (const ws of this.connections) {
       if (ws !== senderWs && ws.readyState === WebSocket.READY_STATE_OPEN) {
         try {
           ws.send(messageStr);
         } catch (error) {
-          console.error('Error sending message to WebSocket:', error);
+          console.error("Error sending message to WebSocket:", error);
           // Remove broken connections
           this.connections.delete(ws);
         }
@@ -78,66 +76,70 @@ export class SessionDurableObject {
 
 // Main Worker fetch handler
 export default {
-  async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
+  async fetch(
+    request: Request,
+    env: Env,
+    _ctx: ExecutionContext
+  ): Promise<Response> {
     const url = new URL(request.url);
-    
+
     // Handle WebSocket connections for multiplayer sessions
-    if (url.pathname.startsWith('/api/room/')) {
+    if (url.pathname.startsWith("/api/room/")) {
       const sessionIdMatch = url.pathname.match(/^\/api\/room\/([^/]+)$/);
-      
+
       if (!sessionIdMatch) {
-        return new Response('Invalid session URL', { status: 400 });
+        return new Response("Invalid session URL", { status: 400 });
       }
-      
+
       const sessionId = sessionIdMatch[1];
-      
+
       // Handle both friendly names and encoded codes
       let internalSessionId: string;
-      
+
       // If it's a friendly name format (word1-word2), convert to encoded code
       if (/^[a-z]+-[a-z]+$/i.test(sessionId)) {
         try {
           internalSessionId = friendlyNameToSessionId(sessionId.toLowerCase());
         } catch {
-          return new Response('Invalid friendly room name', { status: 400 });
+          return new Response("Invalid friendly room name", { status: 400 });
         }
       } else if (/^[0-9A-Z]{3}$/i.test(sessionId)) {
         // If it's a 3-character encoded code, use it directly
         internalSessionId = sessionId.toUpperCase();
       } else {
-        return new Response('Invalid session ID format', { status: 400 });
+        return new Response("Invalid session ID format", { status: 400 });
       }
-      
+
       // Get or create the Durable Object for this session using the internal ID
       const roomId = env.SESSION_ROOMS.idFromName(internalSessionId);
       const roomStub = env.SESSION_ROOMS.get(roomId);
-      
+
       // Forward the request to the Durable Object
       return roomStub.fetch(request);
     }
-    
+
     // For all other requests, serve static assets from the built application
     try {
       // Use the ASSETS binding to serve static files
       const response = await env.ASSETS.fetch(request);
-      
+
       // If the response is a 404 and the request looks like a route (not a file),
       // serve the index.html for SPA routing
-      if (response.status === 404 && !url.pathname.includes('.')) {
-        const indexRequest = new Request(new URL('/', request.url), request);
+      if (response.status === 404 && !url.pathname.includes(".")) {
+        const indexRequest = new Request(new URL("/", request.url), request);
         return await env.ASSETS.fetch(indexRequest);
       }
-      
+
       return response;
     } catch (error) {
-      console.error('Error serving assets:', error);
+      console.error("Error serving assets:", error);
       // If asset serving fails completely, return a 404
-      return new Response('File not found', { 
+      return new Response("File not found", {
         status: 404,
         headers: {
-          'Content-Type': 'text/plain'
-        }
+          "Content-Type": "text/plain",
+        },
       });
     }
-  }
+  },
 };

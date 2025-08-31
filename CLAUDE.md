@@ -149,4 +149,7 @@ The project uses GitHub Actions for automated testing, with Cloudflare Workers h
 
 ## Development Best Practices
 
-- When features are changed or fixed, make sure the documentation in docs/ matches
+- Keep docs current: when features change, update the relevant guides in `docs/` (user and developer).
+- Update the changelog: whenever you make user‑facing improvements or fixes, add an entry to `CHANGES.md`.
+  - The website’s “What’s New” page (`docs/whats-new.md`) includes `CHANGES.md` directly, so users see these notes.
+- Run `npm run test:all` and `npm run lint` before opening a PR.

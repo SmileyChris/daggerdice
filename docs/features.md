@@ -35,6 +35,7 @@
 - **Physics Engine**: Powered by @3d-dice/dice-box with WASM-based physics
 - **Realistic Rolling**: Gravity, friction, collision detection, and bounce effects
 - **Visual Themes**: Multiple dice appearances (default and smooth themes)
+- **Enhanced Legibility**: Distinct 6/9 markers for clearer face reading
 - **Robust Fallback System**: Automatic random number generation if 3D rendering fails (WebGL unavailable, network issues, device limitations, etc.)
 - **Seamless Gameplay**: All game mechanics work identically whether using 3D dice or random fallback
 - **Error Handling**: Transparent fallback with console logging for debugging
@@ -77,6 +78,10 @@
 - **Context-Aware**: Different behaviors based on current screen/mode
 - **Input Protection**: Disabled when typing in text fields
 
+### Appearance & Audio
+- **Dark Mode**: One-click toggle with saved preference and system theme detection
+- **Roll Sounds**: Subtle audio feedback on roll (browser-permitting)
+
 ### Roll History & Analytics
 - **Detailed History**: View last 10-20 rolls with complete breakdown
 - **Player Attribution**: See who rolled what in multiplayer sessions
@@ -118,6 +123,10 @@
 - **Asset Optimization**: Optimized 3D assets and textures
 - **Code Splitting**: Minimal initial bundle size
 - **Caching Strategy**: Aggressive caching for repeat visits
+
+### Release Notes
+- **What’s New Panel**: Built-in changelog, auto-shown to returning users when there are updates
+- **All Changes**: Click the version label to view the full history
 
 ## Configuration & Customization
 
